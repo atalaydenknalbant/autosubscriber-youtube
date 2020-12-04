@@ -1194,7 +1194,7 @@ def driver_7func(req_dict):
                      ):
         current_remaining_time = 0
         current_remaining = ""
-        for i in range(0, 10000000000):
+        for i in range(0, 10000):
             logging.info("Loop Started")
             window_before = driver_7.window_handles[0]
             driver_7.switch_to_window(window_before)
@@ -1241,23 +1241,23 @@ def driver_7func(req_dict):
                 except NoSuchElementException:
                     sign_in_button.click()
                 time.sleep(3)
-                driver_7.save_screenshot("screenshot.png")
-                # email_area = driver.find_element_by_css_selector("#Email")
-                email_area = driver_7.find_element_by_id("identifierId")
+                driver.save_screenshot("screenshot.png")
+                email_area = driver.find_element_by_css_selector("#Email")
+                # email_area = driver.find_element_by_id("identifierId")
                 email_area.send_keys(req_dict['yt_email'])
-                # driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-                driver_7.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
+                driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
+                # driver.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
                 time.sleep(3)
-                # pw_area = driver.find_element_by_css_selector("#Passwd")
-                pw_area = driver_7.find_element_by_css_selector("#password > div.aCsJod.oJeWuf >"
-                                                                " div > div.Xb9hP > input")
+                driver.save_screenshot("screenshot.png")
+                pw_area = driver.find_element_by_css_selector("#password")
+                # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
                 pw_area.send_keys(req_dict['yt_pw'])
+                time.sleep(3)
+                driver.save_screenshot("screenshot.png")
+                driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
+                # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
                 time.sleep(2)
-                driver_7.save_screenshot("screenshot.png")
-                # driver.find_element_by_css_selector("#signIn").send_keys(Keys.ENTER)
-                driver_7.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
-                time.sleep(2)
-                driver_7.save_screenshot("screenshot.png")
+                driver.save_screenshot("screenshot.png")
                 logging.info("login completed")
                 if len(driver_7.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
                         and driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
