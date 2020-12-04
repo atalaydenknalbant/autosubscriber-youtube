@@ -1,3 +1,4 @@
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 # autosubber_youtube
 Selenium-based automated subscribing functions for youtube sub4sub websites
 
