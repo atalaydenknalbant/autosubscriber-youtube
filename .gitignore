@@ -1,2 +1,9 @@
-
 *.ini
+/.idea/autosubber.iml
+/.idea/aws.xml
+/.idea/shelf/Default_Changelist.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
