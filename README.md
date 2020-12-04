@@ -1,5 +1,5 @@
 # autosubber_youtube
-Selenium-based automated subscribing functions for sub4sub websites
+Selenium-based automated subscribing functions for youtube sub4sub websites
 
 ## Usage
 change config.ini file to match with your accounts.
