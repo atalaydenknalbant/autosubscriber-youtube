@@ -734,7 +734,7 @@ def driver_5func(req_dict):
     """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)"""
     driver = set_driver_opt()
     driver.minimize_window()
-    driver.set_window_size(1900, 1050)
+    driver.set_window_size(1800, 900)
     driver.implicitly_wait(12)
     driver.get("https://www.submenow.com/")  # Type_2
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
@@ -758,7 +758,6 @@ def driver_5func(req_dict):
     try:
         driver.save_screenshot("screenshot.png")
     except UnexpectedAlertPresentException:
-        logging.info("Driver Couldn't able to screenshot ")
         pass
     if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
         driver.quit()
