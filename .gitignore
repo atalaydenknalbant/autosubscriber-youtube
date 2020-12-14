@@ -1,5 +1,4 @@
 *.ini
-/.idea/autosubber.iml
 /.idea/aws.xml
 /.idea/shelf/Default_Changelist.xml
 /.idea/misc.xml
@@ -12,3 +11,5 @@
 /debug.log
 /screenshot.png
 /screenshot_proof.png
+/.idea/.name
+/.idea/autosubscriber.iml

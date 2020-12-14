@@ -590,6 +590,7 @@ def driver_4func(req_dict):
     else:
         driver.switch_to.default_content()
         window_before = driver.window_handles[0]
+        driver.save_screenshot("screenshot4_1.png")
         driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
         window_after = driver.window_handles[1]
         driver.switch_to.default_content()
@@ -698,9 +699,10 @@ def driver_4func(req_dict):
                             ActionChains(driver).move_to_element(button_4).click(button_4).perform()
                     else:
                         driver.switch_to.window(window_before_4)
-                        driver.switch_to.frame(0)
+                        driver.switch_to.default_content()
                         time.sleep(5)
-                        driver.find_element_by_xpath("//*[@id='btnSkip']").click()
+                        driver.save_screenshot("screenshot_driver4.png")
+                        driver.find_element_by_id("btnSkip").click()
                         continue
                     driver.switch_to.window(window_before_4)
                     time.sleep(14)
@@ -737,6 +739,7 @@ def driver_5func(req_dict):
     driver.set_window_size(1800, 900)
     driver.implicitly_wait(12)
     driver.get("https://www.submenow.com/")  # Type_2
+    driver.save_screenshot("screenshot5_1.png")
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
     driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_submenow'])
     driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
@@ -821,11 +824,11 @@ def driver_5func(req_dict):
 
     def for_loop():
         try:
+            logging.info("loop started")
             for _ in range(1, 1000000000):
                 if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
                 else:
-                    logging.info("loop started")
                     window_before_5 = driver.window_handles[0]
                     time.sleep(5)
                     try:
@@ -1242,19 +1245,15 @@ def driver_7func(req_dict):
                 time.sleep(3)
                 driver.save_screenshot("screenshot.png")
                 email_area = driver.find_element_by_css_selector("#Email")
-                # email_area = driver.find_element_by_id("identifierId")
                 email_area.send_keys(req_dict['yt_email'])
                 driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-                # driver.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
                 time.sleep(3)
                 driver.save_screenshot("screenshot.png")
                 pw_area = driver.find_element_by_css_selector("#password")
-                # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
                 pw_area.send_keys(req_dict['yt_pw'])
                 time.sleep(3)
                 driver.save_screenshot("screenshot.png")
                 driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-                # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
                 time.sleep(2)
                 driver.save_screenshot("screenshot.png")
                 logging.info("login completed")
