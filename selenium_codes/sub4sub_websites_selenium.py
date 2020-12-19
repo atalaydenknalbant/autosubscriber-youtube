@@ -740,6 +740,17 @@ def driver_5func(req_dict):
     driver.implicitly_wait(12)
     driver.get("https://www.submenow.com/")  # Type_2
     driver.save_screenshot("screenshots/screenshot5_1.png")
+    try:
+        if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
+            logging.info("driver_5 Website Temporarily Unavailable, closing driver")
+            driver.quit()
+            return
+        else:
+            pass
+    except NoSuchElementException:
+        logging.info(str(NoSuchElementException))
+        driver.quit()
+        return
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
     driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_submenow'])
     driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
@@ -752,6 +763,11 @@ def driver_5func(req_dict):
     else:
         pass
     if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
+        driver.save_screenshot("screenshots/screenshot5_1.png")
+        try:
+            driver.find_element_by_css_selector("#reviewDialog > div.headerPlan > div > a > img").click()
+        except (NoSuchElementException, StaleElementReferenceException):
+            pass
         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
     else:
         logging.info("Driver 5 Button Passed")
