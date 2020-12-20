@@ -2,7 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-      UnexpectedAlertPresentException
+    UnexpectedAlertPresentException, ElementNotInteractableException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -766,7 +766,7 @@ def driver_5func(req_dict):
         driver.save_screenshot("screenshots/screenshot5_1.png")
         try:
             driver.find_element_by_css_selector("#reviewDialog > div.headerPlan > div > a > img").click()
-        except (NoSuchElementException, StaleElementReferenceException):
+        except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             pass
         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
     else:
