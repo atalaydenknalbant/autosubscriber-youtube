@@ -544,6 +544,17 @@ def driver_4func(req_dict):
     driver.get("https://www.subscribers.video/")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
+    try:
+        if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
+            logging.info("driver_4 Website Temporarily Unavailable, closing driver")
+            driver.quit()
+            return
+        else:
+            pass
+    except NoSuchElementException as ex:
+        logging.info(str(ex))
+        driver.quit()
+        return
     driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[3]/button").click()
     driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_subscribersvideo'])
     driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
@@ -564,10 +575,14 @@ def driver_4func(req_dict):
         pass
     if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
         try:
+            driver.save_screenshot("screenshots/screenshot4_1.png")
+            driver.find_element_by_css_selector("#reviewDialog > div.greenHeader > div > a > i").click()
+        except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
+            pass
+        try:
             driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
             logging.info("Driver 4 Button Passed")
-
     time.sleep(5)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
@@ -747,8 +762,8 @@ def driver_5func(req_dict):
             return
         else:
             pass
-    except NoSuchElementException:
-        logging.info(str(NoSuchElementException))
+    except NoSuchElementException as ex:
+        logging.info(str(ex))
         driver.quit()
         return
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
