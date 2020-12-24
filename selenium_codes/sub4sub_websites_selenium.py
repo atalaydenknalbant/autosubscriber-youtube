@@ -424,7 +424,7 @@ def driver_1func(req_dict):
             .send_keys(Keys.ENTER)
         time.sleep(3)
     except NoSuchElementException:
-        logging.info("activate button passed ")
+        logging.info("subpals activate button passed 1")
         pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
@@ -435,7 +435,7 @@ def driver_1func(req_dict):
         activate_btn.click()
 
     except NoSuchElementException:
-        logging.info("activate button passed 2")
+        logging.info("subpals activate button passed 2")
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
@@ -466,7 +466,7 @@ def driver_3func(req_dict):
             .send_keys(Keys.ENTER)
         time.sleep(3)
     except NoSuchElementException:
-        logging.info("activate button passed")
+        logging.info("ytpals activate button passed 1")
         pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
@@ -477,7 +477,7 @@ def driver_3func(req_dict):
         activate_btn.click()
 
     except NoSuchElementException:
-        logging.info("activate button passed 2")
+        logging.info("ytpals activate button passed 2")
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
@@ -517,7 +517,7 @@ def driver_2func(req_dict):
                                      "div[1]/div/div[2]/div[2]/form/a").click()
         time.sleep(3)
     except NoSuchElementException:
-        logging.info("activate button passed ")
+        logging.info("sonuker activate button passed 1")
         pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
@@ -527,7 +527,7 @@ def driver_2func(req_dict):
         ActionChains(driver).move_to_element(activate_btn).perform()
         activate_btn.click()
     except NoSuchElementException:
-        logging.info("activate button passed ")
+        logging.info("sonuker activate button passed 2")
         pass
     driver.switch_to.default_content()
     time.sleep(2)
