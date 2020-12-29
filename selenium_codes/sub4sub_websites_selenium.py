@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -984,8 +985,13 @@ def driver_6func(req_dict):
             if yt_channel_name in liked_channels:
                 logging.info("Already liked channel:" + yt_channel_name)
                 try:
-                    driver_6.find_element_by_css_selector(skip_btn).click()
+                    element = WebDriverWait(driver, 300).until(
+                        ec.element_to_be_clickable((By.CSS_SELECTOR, skip_btn)))
+                    time.sleep(2)
+                    element.click()
+
                 except Exception as ex:
+                    driver_6.save_screenshot("screenshots/screenshot.png")
                     logging.info("couldn't pressed skip button Exception: " + str(ex))
 
                 time.sleep(2)
@@ -996,6 +1002,13 @@ def driver_6func(req_dict):
 
                 i += 1
                 time.sleep(2)
+                try:
+                    driver_6.save_screenshot("screenshots/screenshot.png")
+                    driver_6.find_element_by_css_selector("#intercom-container > div > div > div > div >"
+                                                          " div.intercom-tour-step-header > span").click()
+                    logging.info("closed notification")
+                except NoSuchElementException:
+                    pass
                 try:
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.find_element_by_css_selector(like_btn).click()
