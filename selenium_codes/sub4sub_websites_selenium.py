@@ -2,7 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-    UnexpectedAlertPresentException, ElementNotInteractableException
+    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,7 +25,7 @@ def clear_cache(driver, timeout=60):
     wait.until_not(get_clear_browsing_button)
 
 
-def set_driver_opt(headless=True):
+def set_driver_opt(headless=True, view_grip=False):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
@@ -36,29 +36,19 @@ def set_driver_opt(headless=True):
         chrome_options.add_argument('--headless')
     else:
         pass
-    # chrome_options.add_argument('--disable-web-security')
-    # chrome_options.add_argument('--allow-running-insecure-content')
-    # chrome_options.add_argument("--incognito")
+    if view_grip:
+        chrome_options.add_extension('extensions/ViewGripExtension.crx')
+    else:
+        chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--proxy-server='direct://'")
     chrome_options.add_argument("--proxy-bypass-list=*")
-    chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument("--window-size=1920x1080")
-    # chrome_options.add_argument('start-maximized')
     chrome_options.add_argument("--enable-automation")
     driver = webdriver.Chrome(options=chrome_options)
-
-    # # Firefox
-    # options = webdriver.FirefoxOptions()
-    # options.headless = headless
-    # profile = webdriver.FirefoxProfile()
-    # profile.set_preference("media.volume_scale", "0.0")
-    #
-    # driver = webdriver.Firefox(options=options, firefox_profile=profile)
-    #
     return driver
 
 
@@ -226,7 +216,7 @@ def for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
             # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
             time.sleep(2)
             driver.save_screenshot("screenshots/screenshot.png")
-            logging.info("login completed")
+            logging.info("youtube login completed")
             if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
                     and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
                     and len(driver.find_elements_by_xpath(
@@ -607,7 +597,12 @@ def driver_4func(req_dict):
         driver.switch_to.default_content()
         window_before = driver.window_handles[0]
         driver.save_screenshot("screenshots/screenshot4_1.png")
-        driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
+        try:
+            driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
+        except NoSuchElementException:
+            logging.info("Couldn't find subscribersVideo website button, exiting ")
+            driver.quit()
+            return
         window_after = driver.window_handles[1]
         driver.switch_to.default_content()
         driver.switch_to.window(window_after)
@@ -942,7 +937,7 @@ def driver_6func(req_dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver = set_driver_opt()
     driver.implicitly_wait(15)
-    driver.get("https://www.ytmonster.net/login")  # Type_3
+    driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
     driver.find_element_by_css_selector("#formLogin > button").send_keys(Keys.ENTER)
@@ -990,9 +985,8 @@ def driver_6func(req_dict):
                     time.sleep(2)
                     element.click()
 
-                except Exception as ex:
+                except ElementClickInterceptedException as ex:
                     driver_6.save_screenshot("screenshots/screenshot.png")
-                    logging.info("couldn't pressed skip button Exception: " + str(ex))
 
                 time.sleep(2)
                 continue
@@ -1217,7 +1211,7 @@ def driver_7func(req_dict):
     """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan"""
     driver = set_driver_opt()
     driver.implicitly_wait(25)
-    driver.get("https://ytbpals.com/")  # Type_4
+    driver.get("https://ytbpals.com/")  # Type_None
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
     time.sleep(2)
     driver.find_element_by_id('email').send_keys(req_dict['email_ytbpals'])
@@ -1425,3 +1419,78 @@ def driver_7func(req_dict):
                         logging.info("couldn't find confirm button")
                         continue
     for_loop_sub(driver)
+
+
+def driver_8func(req_dict):
+    """ViewGrip login and then call inner like loop function(for_loop_like)"""
+    driver = set_driver_opt(False, True)
+    driver.implicitly_wait(5)
+    driver.get("https://www.viewgrip.net")  # Type_None
+    driver.find_element_by_css_selector("body > div.landing-page > div.main-container >"
+                                        " nav > div > ul > li:nth-child(5) > a") \
+        .click()
+    driver.find_element_by_id("login").send_keys(req_dict['viewGrip_email'])
+    driver.find_element_by_id("pass").send_keys(req_dict['viewGrip_pw'])
+    driver.find_element_by_css_selector("#sign_in > button").click()
+    time.sleep(3)
+    driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
+                                        " div > ul > li:nth-child(3) > a") \
+        .click()
+    time.sleep(3)
+    driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition >"
+                                        " div > ul:nth-child(3) > li:nth-child(1) > a")\
+        .click()
+    driver.switch_to.window(driver.window_handles[1])
+
+    def for_loop_like(driver_8,
+                      like_btn="LikeButton",
+                      skip_btn="SkipLike",
+                      ):
+        liked_video_list = []
+        for i in range(25):
+            if i == 0:
+                driver_8.find_element_by_id(like_btn).click()
+                driver_8.switch_to.window(driver_8.window_handles[2])
+                sign_in_button = driver_8.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
+                ActionChains(driver_8).move_to_element(sign_in_button).perform()
+                try:
+                    sign_in_button.send_keys(Keys.RETURN)
+                except NoSuchElementException:
+                    sign_in_button.click()
+                email_area = driver_8.find_element_by_id("identifierId")
+                email_area.send_keys(req_dict['yt_email'])
+                driver_8.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
+                time.sleep(1)
+                pw_area = driver_8.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
+                                                                " div.Xb9hP > input")
+                pw_area.send_keys(req_dict['yt_pw'])
+                driver_8.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
+                time.sleep(1)
+            while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
+                time.sleep(2)
+            if len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
+                    and driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
+                    and len(driver_8.find_elements_by_xpath(
+                    "//*[@id='top-level-buttons']/"
+                    "ytd-toggle-button-renderer[1]/a")) > 0:
+                current_video = driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
+                if current_video in liked_video_list or\
+                        len(driver_8.find_elements_by_css_selector("#top-level-buttons >"
+                                                                   " ytd-toggle-button-renderer.style-scope."
+                                                                   "ytd-menu-renderer.force-icon-button"
+                                                                   ".style-default-active")) > 0:
+                    pass
+                else:
+                    liked_video_list.append(current_video)
+                    time.sleep(2)
+                    driver_8.switch_to_default_content()
+                    button = driver_8.find_element_by_xpath(
+                                                            "//*[@id='top-level-buttons']"
+                                                            "/ytd-toggle-button-renderer[1]/a")
+                    ActionChains(driver_8).move_to_element(button).click(button).perform()
+                while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
+                    time.sleep(2)
+    for_loop_like(driver)
+    driver.quit()
+
+
