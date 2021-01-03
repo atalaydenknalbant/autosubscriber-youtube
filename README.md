@@ -2,7 +2,9 @@
 Selenium-based automated subscribing functions for youtube sub4sub websites
 
 ## Pre-requisites
-[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)  [![Chromedriver](https://lh3.googleusercontent.com/proxy/ZApH-NARJnGywTXj1L69jwoThX3zpSC_pfIFYHtZpkTbRYfCGNVqSmSJokWNyaQarcWzWaqrSosJbCb_5ibiRf6PMwjEaGZYM3c0FbxlsglJd72-VQ7D0xhdVQ)](https://chromedriver.chromium.org/)
+[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) <a href="https://chromedriver.chromium.org/">
+<img src="https://lh3.googleusercontent.com/proxy/ZApH-NARJnGywTXj1L69jwoThX3zpSC_pfIFYHtZpkTbRYfCGNVqSmSJokWNyaQarcWzWaqrSosJbCb_5ibiRf6PMwjEaGZYM3c0FbxlsglJd72-VQ7D0xhdVQ" hrefwidth="100" height="100">
+</a> 
 
 ## Usage
 1. Try to use a newly created youtube account to avoid security questions and make that account simple.
