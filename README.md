@@ -1,4 +1,4 @@
-# autosubber_youtube
+# autosubscriber_youtube
 Selenium-based automated subscribing functions for youtube sub4sub websites
 
 ## Pre-requisites
