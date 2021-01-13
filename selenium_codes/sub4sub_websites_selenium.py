@@ -629,31 +629,31 @@ def driver_4func(req_dict):
 
         driver.save_screenshot("screenshots/screenshot.png")
         email_area = driver.find_element_by_css_selector("#Email")
-        # email_area = driver.find_element_by_id("identifierId")
         email_area.send_keys(req_dict['yt_email'])
         driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-        # driver.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
         time.sleep(3)
-        # print(driver.execute_script("return document.documentElement.innerHTML"))
         driver.save_screenshot("screenshots/screenshot.png")
         pw_area = driver.find_element_by_css_selector("#password")
-        # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
         pw_area.send_keys(req_dict['yt_pw'])
         time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-        # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
         time.sleep(2)
         driver.save_screenshot("screenshots/screenshot.png")
         logging.info("login completed")
         time.sleep(5)
         driver.save_screenshot("screenshots/screenshot.png")
         if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")) > 0:
+            if len(driver.find_elements_by_css_selector("#top-level-buttons >" " ytd-toggle-button-renderer."
+                                                        "style-scope." "ytd-menu-renderer.force-icon-button"
+                                                        ".style-default-active")) > 0:
+                pass
+            else:
+                button = driver.find_element_by_xpath(
+                                                      "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                ActionChains(driver).move_to_element(button).click(button).perform()
             button = driver.find_element_by_xpath(
-                "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-            ActionChains(driver).move_to_element(button).click(button).perform()
-            button = driver.find_element_by_xpath(
-                "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
+            "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
             ActionChains(driver).move_to_element(button).click(button).perform()
             time.sleep(2)
             driver.switch_to.window(window_before)
@@ -701,9 +701,15 @@ def driver_4func(req_dict):
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")) > 0:
                         if driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
-                            button_4 = driver.find_element_by_xpath(
-                                "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-                            ActionChains(driver).move_to_element(button_4).click(button_4).perform()
+                            if len(driver.find_elements_by_css_selector(
+                                    "#top-level-buttons >" " ytd-toggle-button-renderer."
+                                    "style-scope." "ytd-menu-renderer.force-icon-button"
+                                    ".style-default-active")) > 0:
+                                pass
+                            else:
+                                button_4 = driver.find_element_by_xpath(
+                                    "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                                ActionChains(driver).move_to_element(button_4).click(button_4).perform()
                             driver.save_screenshot("screenshots/screenshot.png")
                             button_4 = driver.find_element_by_xpath(
                                 "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
@@ -813,19 +819,15 @@ def driver_5func(req_dict):
         time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         email_area = driver.find_element_by_css_selector("#Email")
-        # email_area = driver.find_element_by_id("identifierId")
         email_area.send_keys(req_dict['yt_email'])
         driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-        # driver.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
         time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         pw_area = driver.find_element_by_css_selector("#password")
-        # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
         pw_area.send_keys(req_dict['yt_pw'])
         time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-        # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
         time.sleep(2)
         driver.save_screenshot("screenshots/screenshot.png")
         logging.info("login completed")
@@ -833,11 +835,15 @@ def driver_5func(req_dict):
         driver.execute_script("window.scrollTo(0, 300)")
         driver.save_screenshot("screenshots/screenshot.png")
         if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")) > 0:
-            button = driver.find_element_by_xpath(
-                "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-            ActionChains(driver).move_to_element(button).click(button).perform()
-            button = driver.find_element_by_xpath(
-                "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
+            if len(driver.find_elements_by_css_selector(
+                    "#top-level-buttons >" " ytd-toggle-button-renderer."
+                    "style-scope." "ytd-menu-renderer.force-icon-button"
+                    ".style-default-active")) > 0:
+                pass
+            else:
+                button = driver.find_element_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                ActionChains(driver).move_to_element(button).click(button).perform()
+            button = driver.find_element_by_xpath("//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
             ActionChains(driver).move_to_element(button).click(button).perform()
             logging.info("done sub & like")
             driver.switch_to.window(window_before)
@@ -885,11 +891,17 @@ def driver_5func(req_dict):
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")) > 0:
                         if driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
-                            button_5 = driver.find_element_by_xpath(
-                                "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-                            ActionChains(driver).move_to_element(button_5).click(button_5).perform()
-                            button_5 = driver.find_element_by_xpath(
-                                "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
+                            if len(driver.find_elements_by_css_selector(
+                                    "#top-level-buttons >" " ytd-toggle-button-renderer."
+                                    "style-scope." "ytd-menu-renderer.force-icon-button"
+                                    ".style-default-active")) > 0:
+                                pass
+                            else:
+                                button_5 = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
+                                                                        "/ytd-toggle-button-renderer[1]/a")
+                                ActionChains(driver).move_to_element(button_5).click(button_5).perform()
+                            button_5 = driver.find_element_by_xpath("//*[@id='subscribe-button']"
+                                                                    "/ytd-subscribe-button-renderer")
                             ActionChains(driver).move_to_element(button_5).click(button_5).perform()
                             driver.save_screenshot("screenshots/screenshot_proof.png")
 
@@ -898,7 +910,6 @@ def driver_5func(req_dict):
                         time.sleep(5)
                         driver.find_element_by_id("btnSkip").send_keys(Keys.ENTER)
                         continue
-                    # video_name = driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
                     driver.switch_to.window(window_before_5)
                     time.sleep(8)
                     driver.find_element_by_xpath("//*[@id='btnSubVerify']").send_keys(Keys.ENTER)
@@ -935,7 +946,7 @@ def driver_5func(req_dict):
 
 def driver_6func(req_dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
-    driver = set_driver_opt()
+    driver = set_driver_opt(False)
     driver.implicitly_wait(15)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
@@ -955,7 +966,7 @@ def driver_6func(req_dict):
         """ Loop for liking videos"""
         liked_channels = []
         driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(50):
+        for i in range(30):
             logging.info("Loop Started")
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
@@ -1063,9 +1074,15 @@ def driver_6func(req_dict):
                     time.sleep(2)
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
-                    button = driver_6.find_element_by_xpath(
-                        "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-                    ActionChains(driver_6).move_to_element(button).click(button).perform()
+                    if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
+                                                                  " ytd-toggle-button-renderer.style-scope."
+                                                                  "ytd-menu-renderer.force-icon-button"
+                                                                  ".style-default-active")) > 0:
+                        pass
+                    else:
+                        button = driver_6.find_element_by_xpath(
+                            "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                        ActionChains(driver_6).move_to_element(button).click(button).perform()
 
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_6.switch_to.window(window_before)
@@ -1156,9 +1173,15 @@ def driver_6func(req_dict):
                     time.sleep(2)
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
-                    button = driver_6.find_element_by_xpath(
-                        "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
-                    ActionChains(driver_6).move_to_element(button).click(button).perform()
+                    if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
+                                                                  " ytd-toggle-button-renderer.style-scope."
+                                                                  "ytd-menu-renderer.force-icon-button"
+                                                                  ".style-default-active")) > 0:
+                        pass
+                    else:
+                        button = driver_6.find_element_by_xpath(
+                            "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                        ActionChains(driver_6).move_to_element(button).click(button).perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_6.switch_to.window(window_before)
                     driver_6.switch_to_default_content()
@@ -1204,7 +1227,7 @@ def driver_6func(req_dict):
                         logging.info("couldn't find confirm button")
                         continue
 
-    for_loop_sub(driver, 0)
+    for_loop_sub(driver, 1)
 
 
 def driver_7func(req_dict):
@@ -1491,6 +1514,7 @@ def driver_8func(req_dict):
                 while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
                     time.sleep(2)
     for_loop_like(driver)
+    logging.info("Channels liked successfully, quitting driver")
     driver.quit()
 
 
