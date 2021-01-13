@@ -993,7 +993,7 @@ def driver_6func(req_dict):
                 try:
                     element = WebDriverWait(driver, 300).until(
                         ec.element_to_be_clickable((By.CSS_SELECTOR, skip_btn)))
-                    time.sleep(2)
+                    time.sleep(1.25)
                     element.click()
 
                 except ElementClickInterceptedException as ex:
@@ -1028,7 +1028,6 @@ def driver_6func(req_dict):
                 sign_in_button = driver_6.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
                 time.sleep(3)
                 ActionChains(driver_6).move_to_element(sign_in_button).perform()
-                time.sleep(3)
 
                 try:
                     sign_in_button.send_keys(Keys.RETURN)
@@ -1043,12 +1042,10 @@ def driver_6func(req_dict):
                     email_area = driver_6.find_element_by_id("identifierId")
                     email_area.send_keys(req_dict['yt_email'])
                 driver_6.save_screenshot("screenshots/screenshot.png")
-                time.sleep(3)
                 if yt_login_options == 0:
                     driver_6.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
                 if yt_login_options == 1:
                     driver_6.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
-                time.sleep(3)
                 if yt_login_options == 0:
                     pw_area = driver_6.find_element_by_css_selector("#password")
                     pw_area.send_keys(req_dict['yt_pw'])
@@ -1056,13 +1053,11 @@ def driver_6func(req_dict):
                 if yt_login_options == 1:
                     pw_area = driver_6.find_element_by_css_selector("#password>div.aCsJod.oJeWuf>div>div.Xb9hP>input")
                     pw_area.send_keys(req_dict['yt_pw'])
-                time.sleep(3)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 if yt_login_options == 0:
                     driver_6.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
                 if yt_login_options == 1:
                     driver_6.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
-                time.sleep(2)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
                 if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
@@ -1070,8 +1065,7 @@ def driver_6func(req_dict):
                         and len(driver_6.find_elements_by_xpath(
                                                               "//*[@id='top-level-buttons']"
                                                               "/ytd-toggle-button-renderer[1]/a")) > 0:
-                    driver_6.execute_script("window.scrollTo(0, 500);")
-                    time.sleep(2)
+                    driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
                     if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
@@ -1092,12 +1086,12 @@ def driver_6func(req_dict):
                     for _ in range(50000):
                         if len(driver_6.find_elements_by_partial_link_text("Waiting")) > 0:
                             logging.info("Waiting confirm button to be clickable")
-                            time.sleep(10)
+                            time.sleep(3)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(2)
+                        time.sleep(1.25)
                         button1 = driver_6.find_element_by_css_selector(confirm_btn)
                         ActionChains(driver_6).move_to_element(button1).click(button1).perform()
 
@@ -1111,7 +1105,7 @@ def driver_6func(req_dict):
                                                                                        " div.col-md-10.campaignData "
                                                                                        "> b")\
                                 .text:
-                            time.sleep(10)
+                            time.sleep(3)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
@@ -1122,7 +1116,7 @@ def driver_6func(req_dict):
                             continue
                         continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        time.sleep(1.25)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
@@ -1142,7 +1136,7 @@ def driver_6func(req_dict):
                                                                                    " div > div > div:nth-child(4) >"
                                                                                    " div.col-md-10.campaignData > b") \
                             .text:
-                        time.sleep(10)
+                        time.sleep(3)
                         if driver_6.find_element_by_id("error").text == \
                                 "We failed to verify your like as we did not find an increase in the number of likes." \
                                 " Try verifying again, or skip the video.":
@@ -1155,13 +1149,13 @@ def driver_6func(req_dict):
             else:
                 driver_6.switch_to_window(window_before)
                 driver_6.switch_to_default_content()
-                time.sleep(2)
+                time.sleep(1.25)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
                     driver_6.find_element_by_css_selector(like_btn).click()
                 except NoSuchElementException:
                     break
-                time.sleep(3)
+                time.sleep(1.25)
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
                 if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
@@ -1169,8 +1163,8 @@ def driver_6func(req_dict):
                         and len(driver_6.find_elements_by_xpath(
                                                               "//*[@id='top-level-buttons']/"
                                                               "ytd-toggle-button-renderer[1]/a")) > 0:
-                    driver_6.execute_script("window.scrollTo(0, 500);")
-                    time.sleep(2)
+                    driver_6.execute_script("window.scrollTo(0, 300);")
+                    time.sleep(1.25)
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
                     if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
@@ -1191,12 +1185,12 @@ def driver_6func(req_dict):
                     for _ in range(500000):
                         if len(driver_6.find_elements_by_partial_link_text("Waiting")) > 0:
                             logging.info("Waiting confirm button to be clickable")
-                            time.sleep(15)
+                            time.sleep(1.25)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(2)
+                        time.sleep(1.25)
                         button1 = driver_6.find_element_by_css_selector(confirm_btn)
                         ActionChains(driver_6).move_to_element(button1).click(button1).perform()
 
@@ -1208,7 +1202,7 @@ def driver_6func(req_dict):
                                                                                        " div.col-md-10.campaignData "
                                                                                        "> b")\
                                 .text:
-                            time.sleep(5)
+                            time.sleep(3)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
@@ -1219,7 +1213,7 @@ def driver_6func(req_dict):
                             continue
                         continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        time.sleep(1.25)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
