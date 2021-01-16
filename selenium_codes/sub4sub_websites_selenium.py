@@ -947,7 +947,7 @@ def submenow_functions(req_dict):
 def ytmonster_functions(req_dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver = set_driver_opt(False)
-    driver.implicitly_wait(8)
+    driver.implicitly_wait(10)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
@@ -972,7 +972,7 @@ def ytmonster_functions(req_dict):
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
             logging.info("Liked Channels:" + str(len(liked_channels)))
-            time.sleep(3)
+            time.sleep(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
                                                         " div.mainContent >"
@@ -1088,7 +1088,7 @@ def ytmonster_functions(req_dict):
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1.25)
+                        time.sleep(2)
                         button1 = driver_6.find_element_by_css_selector(confirm_btn)
                         ActionChains(driver_6).move_to_element(button1).click(button1).perform()
 
@@ -1133,7 +1133,7 @@ def ytmonster_functions(req_dict):
                                                                                    " div > div > div:nth-child(4) >"
                                                                                    " div.col-md-10.campaignData > b") \
                             .text:
-                        time.sleep(1.25)
+                        time.sleep(2)
                         if driver_6.find_element_by_id("error").text == \
                                 "We failed to verify your like as we did not find an increase in the number of likes." \
                                 " Try verifying again, or skip the video.":
@@ -1152,7 +1152,6 @@ def ytmonster_functions(req_dict):
                     driver_6.find_element_by_css_selector(like_btn).click()
                 except NoSuchElementException:
                     break
-                time.sleep(1.25)
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
                 if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
@@ -1161,7 +1160,6 @@ def ytmonster_functions(req_dict):
                                                               "//*[@id='top-level-buttons']/"
                                                               "ytd-toggle-button-renderer[1]")) > 0:
                     driver_6.execute_script("window.scrollTo(0, 300);")
-                    time.sleep(1.25)
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
                     if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
@@ -1182,12 +1180,12 @@ def ytmonster_functions(req_dict):
                     for _ in range(500000):
                         if len(driver_6.find_elements_by_partial_link_text("Waiting")) > 0:
                             logging.info("Waiting confirm button to be clickable")
-                            time.sleep(1.25)
+                            time.sleep(2)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1.25)
+                        time.sleep(2)
                         button1 = driver_6.find_element_by_css_selector(confirm_btn)
                         ActionChains(driver_6).move_to_element(button1).click(button1).perform()
 
@@ -1199,7 +1197,7 @@ def ytmonster_functions(req_dict):
                                                                                        " div.col-md-10.campaignData "
                                                                                        "> b")\
                                 .text:
-                            time.sleep(1.25)
+                            time.sleep(2)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
@@ -1210,7 +1208,7 @@ def ytmonster_functions(req_dict):
                             continue
                         continue
                     except NoSuchElementException:
-                        time.sleep(1.25)
+                        time.sleep(2)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
