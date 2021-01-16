@@ -1082,7 +1082,6 @@ def ytmonster_functions(req_dict):
                     driver_6.switch_to_default_content()
                     for _ in range(50000):
                         if len(driver_6.find_elements_by_partial_link_text("Waiting")) > 0:
-                            logging.info("Waiting confirm button to be clickable")
                             time.sleep(1.25)
                         else:
                             logging.info("confirm button is clickable")
