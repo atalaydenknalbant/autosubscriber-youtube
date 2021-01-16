@@ -964,14 +964,12 @@ def ytmonster_functions(req_dict):
                                  " div > div:nth-child(7) > div > div > div",
                      ):
         """ Loop for liking videos"""
-        liked_channels = []
         driver_6.save_screenshot("screenshots/screenshot.png")
         for i in range(30):
             logging.info("Loop Started")
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
-            logging.info("Liked Channels:" + str(len(liked_channels)))
             time.sleep(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
@@ -988,21 +986,6 @@ def ytmonster_functions(req_dict):
                                                                     " div:nth-child(4)"
                                                                     " > div.col-md-10.campaignData > b") \
                 .text
-            if yt_channel_name in liked_channels:
-                logging.info("Already liked channel:" + yt_channel_name)
-                try:
-                    element = WebDriverWait(driver, 300).until(
-                        ec.element_to_be_clickable((By.CSS_SELECTOR, skip_btn)))
-                    time.sleep(1.25)
-                    element.click()
-
-                except ElementClickInterceptedException as ex:
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-
-                time.sleep(2)
-                continue
-            else:
-                liked_channels.append(yt_channel_name)
             if i == 0:
 
                 i += 1
