@@ -14,6 +14,6 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_2func(required_dict)
-    sws.driver_4func(required_dict)
+    sws.sonuker_functions(required_dict)
+    sws.subscribersvideo_functions(required_dict)
 

@@ -13,5 +13,5 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_3func(required_dict)
+    sws.ytpals_functions(required_dict)
     # sws.test1(required_dict)

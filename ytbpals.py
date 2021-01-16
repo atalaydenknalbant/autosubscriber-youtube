@@ -14,4 +14,4 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_7func(required_dict)
+    sws.ytbpals_functions(required_dict)

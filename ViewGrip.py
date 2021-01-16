@@ -13,4 +13,4 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_8func(required_dict)
+    sws.viewgrip_functions(required_dict)

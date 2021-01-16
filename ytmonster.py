@@ -14,4 +14,4 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_6func(required_dict)
+    sws.ytmonster_functions(required_dict)

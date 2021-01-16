@@ -14,7 +14,7 @@ required_dict = {
 }
 
 if __name__ == "__main__":
-    sws.driver_1func(required_dict)
-    sws.driver_5func(required_dict)
+    sws.subpals_functions(required_dict)
+    sws.submenow_functions(required_dict)
 
 
