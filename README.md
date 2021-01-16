@@ -12,7 +12,12 @@ Selenium-based automated subscribing functions for youtube sub4sub websites
 1. Edit config.ini file to match with your accounts.
 
 ## Included sub4sub Websites
-[![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/)   [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/)   [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/)   [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/)   [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/) [![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![ViewGrip](https://i.imgur.com/89LP1ci.png)](https://www.viewgrip.net/) 
+### Type 1 Websites 
+[![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
+### Type 2 Websites 
+[![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
+### Undefined Type Websites 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![ViewGrip](https://i.imgur.com/89LP1ci.png)](https://www.viewgrip.net/) 
 
 ## License
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
