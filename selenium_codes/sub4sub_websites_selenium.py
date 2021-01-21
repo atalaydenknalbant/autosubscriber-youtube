@@ -81,7 +81,7 @@ def google_login(req_dict):
 
 def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
-                                 subscribe_btn="likeSub2",
+                                 subscribe_btn="#likeSub2 > i",
                                  stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                                  skip_btn="#\31  > a:nth-child(5) > img"
                                  ):
@@ -153,18 +153,19 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
 
             try:
                 driver.save_screenshot("screenshots/screenshot.png")
-                button_subscribe = driver.find_element_by_id(subscribe_btn)
-                button_subscribe.send_keys(Keys.ENTER)
+                button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
+                time.sleep(3)
+                button_subscribe.click()
                 logging.info("clicked subscribe btn")
             except NoSuchElementException:
                 logging.debug("No such Element Exception")
                 driver.quit()
                 break
-            time.sleep(2)
+            time.sleep(1.25)
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
 
-            time.sleep(4)
+            time.sleep(1.25)
             if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) == 0:
                 driver.switch_to.window(window_before)
                 if special_condition == 0:
@@ -238,14 +239,14 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                     driver.switch_to.frame(iframes[1])
                 logging.info("before count loop")
                 try:
-                    time.sleep(3)
+                    time.sleep(1.25)
                     button_confirm = driver.find_element_by_css_selector(confirm_btn)
                     button_confirm.send_keys(Keys.ENTER)
                     logging.info("confirm button was clicked")
                     i += 1
                     continue
                 except NoSuchElementException:
-                    time.sleep(2)
+                    time.sleep(1.25)
                     window_after = driver.window_handles[1]
                     driver.switch_to.window(window_after)
                     driver.close()
@@ -270,7 +271,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                     iframes = driver.find_elements_by_tag_name("iframe")
                     driver.switch_to.frame(iframes[1])
 
-                time.sleep(10)
+                time.sleep(5)
 
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
@@ -293,17 +294,17 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                 driver.switch_to.frame(iframes[0])
 
             if special_condition == 2:
-                time.sleep(1.5)
+                time.sleep(1.25)
                 iframes = driver.find_elements_by_tag_name("iframe")
                 driver.switch_to.frame(iframes[1])
             driver.save_screenshot("screenshots/screenshot.png")
             try:
-                button_subscribe = driver.find_element_by_id(subscribe_btn)
-                button_subscribe.send_keys(Keys.ENTER)
+                button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
+                button_subscribe.click()
             except NoSuchElementException:
                 logging.info("Couldn't find subscribe_btn")
                 break
-            time.sleep(2)
+            time.sleep(1.25)
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
             if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
@@ -332,13 +333,13 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                     driver.switch_to.frame(iframes[0])
 
                 if special_condition == 2:
-                    time.sleep(1.5)
+                    time.sleep(1.25)
                     iframes = driver.find_elements_by_tag_name("iframe")
                     driver.switch_to.frame(iframes[1])
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
 
-                time.sleep(3)
+                time.sleep(1.25)
                 button_confirm = driver.find_element_by_css_selector(confirm_btn)
                 button_confirm.send_keys(Keys.ENTER)
 
@@ -364,12 +365,12 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
             continue
 
         try:
-            time.sleep(4)
+            time.sleep(1.25)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             logging.info("confirm button was clicked")
         except NoSuchElementException:
-            time.sleep(2)
+            time.sleep(1.25)
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
             driver.close()
@@ -417,9 +418,8 @@ def subpals_functions(req_dict):
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    time.sleep(2)
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "1", req_dict)
+    type_1_for_loop_like_and_sub(driver, "0", req_dict)
     driver.quit()
 
 
