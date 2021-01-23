@@ -731,7 +731,7 @@ def submenow_functions(req_dict):
     driver = set_driver_opt()
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(12)
+    driver.implicitly_wait(15)
     driver.get("https://www.submenow.com/")  # Type_2
     driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
@@ -779,57 +779,11 @@ def submenow_functions(req_dict):
         logging.info("found error dialog")
         driver.quit()
         return
-    else:
-        driver.switch_to.default_content()
-        window_before = driver.window_handles[0]
-        driver.save_screenshot("screenshots/screenshot.png")
-        driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
-        window_after = driver.window_handles[1]
-        driver.switch_to.default_content()
-        driver.switch_to.window(window_after)
-        time.sleep(5)
-        sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
-        time.sleep(5)
-        ActionChains(driver).move_to_element(sign_in_button).perform()
-        sign_in_button.click()
-        driver.save_screenshot("screenshots/screenshot.png")
-        email_area = driver.find_element_by_css_selector("#Email")
-        email_area.send_keys(req_dict['yt_email'])
-        driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-        driver.save_screenshot("screenshots/screenshot.png")
-        pw_area = driver.find_element_by_css_selector("#password")
-        pw_area.send_keys(req_dict['yt_pw'])
-        driver.save_screenshot("screenshots/screenshot.png")
-        driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-        driver.save_screenshot("screenshots/screenshot.png")
-        logging.info("login completed")
-        driver.execute_script("window.scrollTo(0, 300)")
-        driver.save_screenshot("screenshots/screenshot.png")
-        if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
-            if len(driver.find_elements_by_css_selector(
-                    "#top-level-buttons >" " ytd-toggle-button-renderer."
-                    "style-scope." "ytd-menu-renderer.force-icon-button"
-                    ".style-default-active")) > 0:
-                pass
-            else:
-                button = driver.find_element_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")
-                ActionChains(driver).move_to_element(button).click(button).perform()
-            button = driver.find_element_by_xpath("//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
-            ActionChains(driver).move_to_element(button).click(button).perform()
-            logging.info("done sub & like")
-            driver.switch_to.window(window_before)
-            time.sleep(12)
-            driver.find_element_by_xpath("//*[@id='btnSubVerify']").send_keys(Keys.ENTER)
-        else:
-            driver.close()
-            driver.switch_to.window(window_before)
-            driver.find_element_by_xpath("//*[@id='btnSkip']").send_keys(Keys.ENTER)
-            time.sleep(6)
 
     def for_loop():
         try:
             logging.info("loop started")
-            for _ in range(1, 1000000000):
+            for z in range(1, 1000000000):
                 if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
                 else:
@@ -862,6 +816,22 @@ def submenow_functions(req_dict):
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
                         if driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                            if z == 1:
+                                sign_in_button = driver.find_element_by_css_selector(
+                                    "#buttons > ytd-button-renderer > a")
+                                ActionChains(driver).move_to_element(sign_in_button).perform()
+                                sign_in_button.click()
+                                driver.save_screenshot("screenshots/screenshot.png")
+                                email_area = driver.find_element_by_css_selector("#Email")
+                                email_area.send_keys(req_dict['yt_email'])
+                                driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
+                                driver.save_screenshot("screenshots/screenshot.png")
+                                pw_area = driver.find_element_by_css_selector("#password")
+                                pw_area.send_keys(req_dict['yt_pw'])
+                                driver.save_screenshot("screenshots/screenshot.png")
+                                driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
+                                driver.save_screenshot("screenshots/screenshot.png")
+                                logging.info("login completed")
                             if len(driver.find_elements_by_css_selector(
                                     "#top-level-buttons >" " ytd-toggle-button-renderer."
                                     "style-scope." "ytd-menu-renderer.force-icon-button"
@@ -880,12 +850,17 @@ def submenow_functions(req_dict):
                         driver.switch_to.window(window_before_5)
                         time.sleep(1.25)
                         driver.find_element_by_id("btnSkip").send_keys(Keys.ENTER)
+                        z -= 1
                         continue
                     driver.switch_to.window(window_before_5)
                     time.sleep(1.25)
                     try:
-                        driver.find_element_by_xpath("//*[@id='btnSubVerify']").send_keys(Keys.ENTER)
+                        wait_verify_button = WebDriverWait(driver, 10)
+                        wait_verify_button.until(ec.visibility_of((By.XPATH, "//*[@id='btnSubVerify']")))
+                        wait_verify_button.until(ec.element_to_be_clickable((By.XPATH, "//*[@id='btnSubVerify']")))
+                        driver.find_element_by_xpath("//*[@id='btnSubVerify']").click()
                     except ElementNotInteractableException:
+                        driver.save_screenshot("screenshots/screenshot.png")
                         logging.info("Found Element Not Interact able Exception, Quitting")
                         driver.quit()
                         return
