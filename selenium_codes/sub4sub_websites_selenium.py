@@ -731,7 +731,7 @@ def submenow_functions(req_dict):
     driver = set_driver_opt()
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(15)
+    driver.implicitly_wait(12)
     driver.get("https://www.submenow.com/")  # Type_2
     driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
@@ -806,13 +806,9 @@ def submenow_functions(req_dict):
                     window_after_5 = driver.window_handles[1]
                     driver.switch_to.window(window_after_5)
                     driver.switch_to.default_content()
-                    time.sleep(1.25)
-
                     window_after_5 = driver.window_handles[1]
                     driver.switch_to.window(window_after_5)
                     driver.execute_script("window.scrollTo(0, 300)")
-                    time.sleep(1.25)
-
                     driver.save_screenshot("screenshots/screenshot.png")
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
@@ -854,12 +850,11 @@ def submenow_functions(req_dict):
                         driver.find_element_by_id("btnSkip").send_keys(Keys.ENTER)
                         continue
                     driver.switch_to.window(window_before_5)
-                    time.sleep(1.25)
                     try:
-                        wait_verify_button = WebDriverWait(driver, 10)
-                        wait_verify_button.until(ec.visibility_of_element_located((By.ID, "btnSubVerify")))
-                        wait_verify_button.until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
-                        driver.find_element_by_id("btnSubVerify").click()
+                        driver.save_screenshot("screenshots/screenshot.png")
+                        while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
+                            time.sleep(1.25)
+                        driver.find_element_by_id("btnSubVerify").send_keys(Keys.ENTER)
                     except ElementNotInteractableException:
                         driver.save_screenshot("screenshots/screenshot.png")
                         logging.info("Found Element Not Interact able Exception, Quitting")
@@ -873,10 +868,9 @@ def submenow_functions(req_dict):
                     return
         except UnexpectedAlertPresentException:
             try:
-                WebDriverWait(driver, 4).until(ec.alert_is_present())
+                WebDriverWait(driver, 2).until(ec.alert_is_present())
                 alert_2 = driver.switch_to.alert
                 alert_2.accept()
-                time.sleep(1.25)
                 if len(driver.find_elements_by_xpath("//*[@id='buttonPlan8']")) > 0:
                     try:
                         driver.find_element_by_xpath("//*[@id='buttonPlan8']").click()
@@ -884,9 +878,7 @@ def submenow_functions(req_dict):
                         logging.info("Alert Skipped Exception: " + str(ex))
                         driver.close()
                         return
-                time.sleep(1.25)
                 driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
-                time.sleep(1.25)
                 for_loop()
 
             except TimeoutException:
