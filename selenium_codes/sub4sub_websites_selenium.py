@@ -635,11 +635,11 @@ def subscribersvideo_functions(req_dict):
             time.sleep(2)
             driver.switch_to.window(window_before)
             time.sleep(12)
-            driver.find_element_by_xpath("//*[@id='btnSubVerify']").click()
+            driver.find_element_by_id("btnSubVerify").click()
         else:
             driver.close()
             driver.switch_to.window(window_before)
-            driver.find_element_by_xpath("//*[@id='btnSkip']").click()
+            driver.find_element_by_id("btnSkip").click()
             time.sleep(8)
 
     def for_loop():
@@ -662,7 +662,7 @@ def subscribersvideo_functions(req_dict):
                         logging.info("found Please come later text, closing")
                         break
                     try:
-                        driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").click()
+                        driver.find_element_by_id("btnWatchLikeAndSubscribe").click()
                     except NoSuchElementException:
                         logging.info("couldn't find watch and subscribe button, closing")
                         driver.quit()
@@ -700,7 +700,7 @@ def subscribersvideo_functions(req_dict):
                         continue
                     driver.switch_to.window(window_before_4)
                     time.sleep(5)
-                    driver.find_element_by_xpath("//*[@id='btnSubVerify']").click()
+                    driver.find_element_by_id("btnSubVerify").click()
                     logging.info("done sub & like")
 
         except UnexpectedAlertPresentException:
@@ -781,27 +781,28 @@ def submenow_functions(req_dict):
         return
 
     def for_loop():
+        i = 0
         try:
             logging.info("loop started")
-            for z in range(1, 1000000000):
+            for _ in range(1, 1000000000):
                 if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
                     time.sleep(1.25)
                     try:
-                        driver.find_element_by_xpath("//*[@id='btnReload']").send_keys(Keys.ENTER)
+                        driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
                     except Exception as ex:
                         logging.info("couldn't find reload button exiting Exception: " + str(ex))
                         break
                     time.sleep(1.25)
-                    if len(driver.find_elements_by_xpath("//*[@id='buttonPlan1']")) > 0:
+                    if len(driver.find_elements_by_id("buttonPlan1")) > 0:
                         break
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
                     driver.save_screenshot("screenshots/screenshot.png")
-                    driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
+                    driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
                     driver.switch_to.window(window_after_5)
                     driver.switch_to.default_content()
@@ -816,7 +817,7 @@ def submenow_functions(req_dict):
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
                         if driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
-                            if z == 1:
+                            if i == 0:
                                 sign_in_button = driver.find_element_by_css_selector(
                                     "#buttons > ytd-button-renderer > a")
                                 ActionChains(driver).move_to_element(sign_in_button).perform()
@@ -832,6 +833,7 @@ def submenow_functions(req_dict):
                                 driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
                                 driver.save_screenshot("screenshots/screenshot.png")
                                 logging.info("login completed")
+                                i += 1
                             if len(driver.find_elements_by_css_selector(
                                     "#top-level-buttons >" " ytd-toggle-button-renderer."
                                     "style-scope." "ytd-menu-renderer.force-icon-button"
@@ -850,15 +852,14 @@ def submenow_functions(req_dict):
                         driver.switch_to.window(window_before_5)
                         time.sleep(1.25)
                         driver.find_element_by_id("btnSkip").send_keys(Keys.ENTER)
-                        z -= 1
                         continue
                     driver.switch_to.window(window_before_5)
                     time.sleep(1.25)
                     try:
                         wait_verify_button = WebDriverWait(driver, 10)
-                        wait_verify_button.until(ec.visibility_of((By.XPATH, "//*[@id='btnSubVerify']")))
-                        wait_verify_button.until(ec.element_to_be_clickable((By.XPATH, "//*[@id='btnSubVerify']")))
-                        driver.find_element_by_xpath("//*[@id='btnSubVerify']").click()
+                        wait_verify_button.until(ec.visibility_of_element_located((By.ID, "btnSubVerify")))
+                        wait_verify_button.until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                        driver.find_element_by_id("btnSubVerify").click()
                     except ElementNotInteractableException:
                         driver.save_screenshot("screenshots/screenshot.png")
                         logging.info("Found Element Not Interact able Exception, Quitting")
@@ -884,7 +885,7 @@ def submenow_functions(req_dict):
                         driver.close()
                         return
                 time.sleep(1.25)
-                driver.find_element_by_xpath("//*[@id='btnReload']").send_keys(Keys.ENTER)
+                driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
                 time.sleep(1.25)
                 for_loop()
 
