@@ -64,17 +64,14 @@ def google_login(req_dict):
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
     # driver.find_element_by_id("identifierNext").send_keys(Keys.ENTER)
-    time.sleep(3)
     # print(driver.execute_script("return document.documentElement.innerHTML"))
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password")
     # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
-    time.sleep(3)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
     # driver.find_element_by_id("passwordNext").send_keys(Keys.ENTER)
-    time.sleep(2)
     driver.save_screenshot("screenshots/screenshot.png")
     logging.info("login completed")
 
@@ -113,7 +110,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                 continue
         except (StaleElementReferenceException, NoSuchElementException):
             try:
-                time.sleep(3)
+                time.sleep(1.25)
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
             except NoSuchElementException:
@@ -154,18 +151,14 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
             try:
                 driver.save_screenshot("screenshots/screenshot.png")
                 button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
-                time.sleep(3)
                 button_subscribe.click()
                 logging.info("clicked subscribe btn")
             except NoSuchElementException:
                 logging.debug("No such Element Exception")
                 driver.quit()
                 break
-            time.sleep(1.25)
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
-
-            time.sleep(1.25)
             if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) == 0:
                 driver.switch_to.window(window_before)
                 if special_condition == 0:
@@ -234,7 +227,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                     iframes = driver.find_elements_by_tag_name("iframe")
                     driver.switch_to.frame(iframes[0])
                 if special_condition == 2:
-                    time.sleep(1.5)
+                    time.sleep(1.25)
                     iframes = driver.find_elements_by_tag_name("iframe")
                     driver.switch_to.frame(iframes[1])
                 logging.info("before count loop")
@@ -271,7 +264,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                     iframes = driver.find_elements_by_tag_name("iframe")
                     driver.switch_to.frame(iframes[1])
 
-                time.sleep(5)
+                time.sleep(1.25)
 
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
@@ -789,13 +782,11 @@ def submenow_functions(req_dict):
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
-                    time.sleep(1.25)
                     try:
                         driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
                     except Exception as ex:
                         logging.info("couldn't find reload button exiting Exception: " + str(ex))
                         break
-                    time.sleep(1.25)
                     if len(driver.find_elements_by_id("buttonPlan1")) > 0:
                         break
                     if len(driver.find_elements_by_xpath(
