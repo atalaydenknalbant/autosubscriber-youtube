@@ -394,7 +394,7 @@ def subpals_functions(req_dict):
                                      " div.userContent_pricing > div:nth-child(2) >" 
                                      " div:nth-child(1) > div > div.panel-body > div.btn-holder > form > a") \
             .send_keys(Keys.ENTER)
-        time.sleep(3)
+        time.sleep(1.25)
     except NoSuchElementException:
         logging.info("subpals activate button passed 1")
         pass
@@ -516,11 +516,11 @@ def subscribersvideo_functions(req_dict):
         logging.info(str(ex))
         driver.quit()
         return
-    driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[3]/button").click()
-    driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_subscribersvideo'])
-    driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
-    driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
-    time.sleep(3)
+    driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[4]/button").click()
+    driver.find_element_by_id("inputEmail").send_keys(req_dict['email_subscribersvideo'])
+    driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
+    driver.find_element_by_id("buttonSignIn").click()
+    time.sleep(1.25)
     try:
         WebDriverWait(driver, 10).until(ec.alert_is_present())
         alert = driver.switch_to.alert
@@ -534,14 +534,14 @@ def subscribersvideo_functions(req_dict):
         return
     else:
         pass
-    if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
+    if len(driver.find_elements_by_id("buttonPlan6")) > 0:
         try:
             driver.save_screenshot("screenshots/screenshot4_1.png")
             driver.find_element_by_css_selector("#reviewDialog > div.greenHeader > div > a > i").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             pass
         try:
-            driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
+            driver.find_element_by_id("buttonPlan6").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
             logging.info("Driver 4 Button Passed")
     time.sleep(3)
@@ -557,7 +557,7 @@ def subscribersvideo_functions(req_dict):
     else:
         pass
 
-    time.sleep(5)
+    time.sleep(1.25)
     if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0 \
             or len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[12]/div/div[3]/button")) > 0:
         logging.info("found gray button")
@@ -588,30 +588,22 @@ def subscribersvideo_functions(req_dict):
             driver.switch_to.default_content()
             driver.switch_to.window(window_after)
             driver.switch_to.default_content()
-            time.sleep(7)
+            time.sleep(1.25)
 
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
-        time.sleep(3)
         ActionChains(driver).move_to_element(sign_in_button).perform()
-        time.sleep(3)
         sign_in_button.click()
-        time.sleep(3)
-
         driver.save_screenshot("screenshots/screenshot.png")
         email_area = driver.find_element_by_css_selector("#Email")
         email_area.send_keys(req_dict['yt_email'])
         driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-        time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         pw_area = driver.find_element_by_css_selector("#password")
         pw_area.send_keys(req_dict['yt_pw'])
-        time.sleep(3)
         driver.save_screenshot("screenshots/screenshot.png")
         driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-        time.sleep(2)
         driver.save_screenshot("screenshots/screenshot.png")
         logging.info("login completed")
-        time.sleep(5)
         driver.save_screenshot("screenshots/screenshot.png")
         if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
             if len(driver.find_elements_by_css_selector("#top-level-buttons >" " ytd-toggle-button-renderer."
@@ -625,15 +617,12 @@ def subscribersvideo_functions(req_dict):
             button = driver.find_element_by_xpath(
             "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
             ActionChains(driver).move_to_element(button).click(button).perform()
-            time.sleep(2)
             driver.switch_to.window(window_before)
-            time.sleep(12)
             driver.find_element_by_id("btnSubVerify").click()
         else:
             driver.close()
             driver.switch_to.window(window_before)
             driver.find_element_by_id("btnSkip").click()
-            time.sleep(8)
 
     def for_loop():
         try:
