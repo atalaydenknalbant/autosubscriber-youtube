@@ -6,7 +6,6 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -633,7 +632,6 @@ def subscribersvideo_functions(req_dict):
                     break
                 else:
                     window_before_4 = driver.window_handles[0]
-                    time.sleep(1.25)
                     driver.save_screenshot("screenshots/screenshot.png")
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
@@ -649,14 +647,11 @@ def subscribersvideo_functions(req_dict):
                         logging.info("couldn't find watch and subscribe button, closing")
                         driver.quit()
                         break
-                    time.sleep(1.25)
                     window_after_4 = driver.window_handles[1]
                     driver.switch_to.window(window_after_4)
                     driver.switch_to.default_content()
-                    time.sleep(1.25)
                     window_after_4 = driver.window_handles[1]
                     driver.switch_to.window(window_after_4)
-                    time.sleep(1.25)
                     if len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
                         if driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
@@ -681,13 +676,14 @@ def subscribersvideo_functions(req_dict):
                         driver.find_element_by_id("btnSkip").click()
                         continue
                     driver.switch_to.window(window_before_4)
-                    time.sleep(5)
+                    while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
+                        time.sleep(1.25)
                     driver.find_element_by_id("btnSubVerify").click()
                     logging.info("done sub & like")
 
         except UnexpectedAlertPresentException:
             try:
-                WebDriverWait(driver, 5).until(ec.alert_is_present())
+                WebDriverWait(driver, 2).until(ec.alert_is_present())
                 alert_4 = driver.switch_to.alert
                 alert_4.accept()
                 time.sleep(1.25)
@@ -731,7 +727,7 @@ def submenow_functions(req_dict):
     driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_submenow'])
     driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
     driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
-    time.sleep(5)
+    time.sleep(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
         logging.info("Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
@@ -749,7 +745,7 @@ def submenow_functions(req_dict):
         logging.info("Driver 5 Button Passed")
         driver.quit()
         return
-    time.sleep(4)
+    time.sleep(1.25)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
@@ -811,7 +807,7 @@ def submenow_functions(req_dict):
                                 logging.info("login completed")
                                 i += 1
                             if len(driver.find_elements_by_css_selector(
-                                    "#top-level-buttons >" " ytd-toggle-button-renderer."
+                                    "#top-level-buttons > ytd-toggle-button-renderer."
                                     "style-scope." "ytd-menu-renderer.force-icon-button"
                                     ".style-default-active")) > 0:
                                 pass
@@ -826,7 +822,6 @@ def submenow_functions(req_dict):
 
                     else:
                         driver.switch_to.window(window_before_5)
-                        time.sleep(1.25)
                         driver.find_element_by_id("btnSkip").send_keys(Keys.ENTER)
                         continue
                     driver.switch_to.window(window_before_5)
@@ -905,10 +900,10 @@ def ytmonster_functions(req_dict):
                 continue
             time.sleep(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
-            yt_channel_name = driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main > "
-                                                                    "div.mainContent > div > div > div >"
-                                                                    " div:nth-child(4)"
-                                                                    " > div.col-md-10.campaignData > b") \
+            yt_channel_name = driver_6.find_element_by_css_selector("""body > div.container-fluid > div > div.main > 
+                                                                    div.mainContent > div > div > div >
+                                                                    div:nth-child(4)
+                                                                    > div.col-md-10.campaignData > b""") \
                 .text
             if i == 0:
 
@@ -1011,8 +1006,8 @@ def ytmonster_functions(req_dict):
                                 .text:
                             time.sleep(1.25)
                             if driver_6.find_element_by_id("error").text == \
-                               "We failed to verify your like as we did not find an increase in the number of likes." \
-                               " Try verifying again, or skip the video.":
+                               """We failed to verify your like as we did not find an increase in the number of likes. 
+                                  Try verifying again, or skip the video.""":
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
 
