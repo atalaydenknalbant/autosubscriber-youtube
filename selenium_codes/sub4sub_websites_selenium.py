@@ -84,25 +84,32 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
     """Loop for like and sub, includes google login"""
     current_remaining_time = 0
     current_remaining = ""
+
+    def sc_0():
+        return driver.switch_to_frame(0)
+
+    def sc_1():
+        return driver.switch_to.default_content()
+
+    def sc_2():
+        return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+
+    def sc_3():
+        return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
+
+    sc = {
+        0: sc_0,
+        1: sc_1,
+        2: sc_2,
+        3: sc_3
+    }
+
     for i in range(0, 100000000):
         logging.info("Loop Started")
         window_before = driver.window_handles[0]
         driver.switch_to_window(window_before)
         driver.switch_to_default_content()
-
-        if special_condition == 0:
-            driver.switch_to_frame(0)
-
-        if special_condition == 1:
-            driver.switch_to.default_content()
-
-        if special_condition == 3:
-            iframes = driver.find_elements_by_tag_name("iframe")
-            driver.switch_to.frame(iframes[0])
-
-        if special_condition == 2:
-            iframes = driver.find_elements_by_tag_name("iframe")
-            driver.switch_to.frame(iframes[1])
+        sc[special_condition]()
 
         try:
             while driver.find_element_by_id("seconds").text == "0":
@@ -160,21 +167,8 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
             driver.switch_to.window(window_after)
             if len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) == 0:
                 driver.switch_to.window(window_before)
-                if special_condition == 0:
-                    driver.switch_to_frame(0)
-
-                if special_condition == 1:
-                    driver.switch_to.default_content()
-
-                if special_condition == 3:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[0])
-
-                if special_condition == 2:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[1])
-
-                time.sleep(4)
+                sc[special_condition]()
+                time.sleep(1.25)
                 while driver.find_element_by_id("seconds").text != "0":
                     continue
                 driver.find_element_by_css_selector(confirm_btn).send_keys(Keys.ENTER)
@@ -216,19 +210,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                 driver.switch_to_default_content()
                 logging.info("video liked & subbed")
                 driver.save_screenshot("screenshots/screenshot_proof.png")
-                if special_condition == 0:
-                    driver.switch_to_frame(0)
-
-                if special_condition == 1:
-                    driver.switch_to.default_content()
-
-                if special_condition == 3:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[0])
-                if special_condition == 2:
-                    time.sleep(1.25)
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[1])
+                sc[special_condition]()
                 logging.info("before count loop")
                 try:
                     time.sleep(1.25)
@@ -249,20 +231,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
 
             else:
                 driver.switch_to.window(window_before)
-                if special_condition == 0:
-                    driver.switch_to_frame(0)
-
-                if special_condition == 1:
-                    driver.switch_to.default_content()
-
-                if special_condition == 3:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[0])
-
-                if special_condition == 2:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[1])
-
+                sc[special_condition]()
                 time.sleep(1.25)
 
                 while driver.find_element_by_id("seconds").text == "0":
@@ -275,20 +244,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
 
         else:
             driver.switch_to_window(window_before)
-            if special_condition == 0:
-                driver.switch_to_frame(0)
-
-            if special_condition == 1:
-                driver.switch_to.default_content()
-
-            if special_condition == 3:
-                iframes = driver.find_elements_by_tag_name("iframe")
-                driver.switch_to.frame(iframes[0])
-
-            if special_condition == 2:
-                time.sleep(1.25)
-                iframes = driver.find_elements_by_tag_name("iframe")
-                driver.switch_to.frame(iframes[1])
+            sc[special_condition]()
             driver.save_screenshot("screenshots/screenshot.png")
             try:
                 button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
@@ -314,20 +270,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
-                if special_condition == 0:
-                    driver.switch_to_frame(0)
-
-                if special_condition == 1:
-                    driver.switch_to.default_content()
-
-                if special_condition == 3:
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[0])
-
-                if special_condition == 2:
-                    time.sleep(1.25)
-                    iframes = driver.find_elements_by_tag_name("iframe")
-                    driver.switch_to.frame(iframes[1])
+                sc[special_condition]()
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
 
@@ -339,19 +282,7 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
 
         driver.switch_to.window(window_before)
         driver.switch_to_default_content()
-        if special_condition == 0:
-            driver.switch_to_frame(0)
-
-        if special_condition == 1:
-            driver.switch_to.default_content()
-
-        if special_condition == 3:
-            iframes = driver.find_elements_by_tag_name("iframe")
-            driver.switch_to.frame(iframes[0])
-
-        if special_condition == 2:
-            iframes = driver.find_elements_by_tag_name("iframe")
-            driver.switch_to.frame(iframes[1])
+        sc[special_condition]()
         logging.info("before count loop")
         while driver.find_element_by_id("seconds").text != "0":
             continue
@@ -1212,7 +1143,7 @@ def ytbpals_functions(req_dict):
                 if len(driver_7.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
                         and driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
                         and len(driver_7.find_elements_by_xpath(
-                                                                "//*[@id='top-level-buttons']"
+                                                                "//*[@id='top-level-buttons']/"
                                                                 "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
@@ -1304,8 +1235,8 @@ def ytbpals_functions(req_dict):
                 if len(driver_7.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
                         and driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
                         and len(driver_7.find_elements_by_xpath(
-                                                              "//*[@id='top-level-buttons']"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                                                                "//*[@id='top-level-buttons']/"
+                                                                "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
