@@ -10,12 +10,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
-def get_clear_browsing_button(driver):
+def get_clear_browsing_button(driver: webdriver):
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page."""
     return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
 
 
-def clear_cache(driver, timeout=60):
+def clear_cache(driver: webdriver, timeout=60):
     """Clear the cookies and cache for the ChromeDriver instance."""
     driver.get('chrome://settings/clearBrowserData')
     wait = WebDriverWait(driver, timeout)
@@ -51,9 +51,9 @@ def set_driver_opt(headless=True, view_grip=False):
     return driver
 
 
-def google_login(req_dict):
+def google_login(req_dict: dict):
     """Test for google login"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
 
     driver.get("https://accounts.google.com/signin/v2/identifier?flowName=GlifWebSignIn&flowEntry=ServiceLogin")
     driver.implicitly_wait(10)
@@ -75,7 +75,7 @@ def google_login(req_dict):
     logging.info("login completed")
 
 
-def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
+def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i",
                                  stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
@@ -96,7 +96,6 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
 
     def sc_3():
         return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
-
     sc = {
         0: sc_0,
         1: sc_1,
@@ -302,9 +301,9 @@ def type_1_for_loop_like_and_sub(driver, d, req_dict, special_condition=1,
             continue
 
 
-def subpals_functions(req_dict):
+def subpals_functions(req_dict: dict):
     """subpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
@@ -346,9 +345,9 @@ def subpals_functions(req_dict):
     driver.quit()
 
 
-def ytpals_functions(req_dict):
+def ytpals_functions(req_dict: dict):
     """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
@@ -383,9 +382,9 @@ def ytpals_functions(req_dict):
     driver.quit()
 
 
-def sonuker_functions(req_dict):
+def sonuker_functions(req_dict: dict):
     """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
@@ -428,9 +427,9 @@ def sonuker_functions(req_dict):
     driver.quit()
 
 
-def subscribersvideo_functions(req_dict):
+def subscribersvideo_functions(req_dict: dict):
     """subscriber.video login and activate Free All-In-One plan then call inner subscribe loop function(for_loop)"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.implicitly_wait(10)
     driver.get("https://www.subscribers.video/")  # Type_2
     driver.minimize_window()
@@ -635,9 +634,9 @@ def subscribersvideo_functions(req_dict):
     driver.quit()
 
 
-def submenow_functions(req_dict):
+def submenow_functions(req_dict: dict):
     """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.minimize_window()
     driver.set_window_size(1800, 900)
     driver.implicitly_wait(12)
@@ -794,9 +793,9 @@ def submenow_functions(req_dict):
     driver.quit()
 
 
-def ytmonster_functions(req_dict):
+def ytmonster_functions(req_dict: dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
-    driver = set_driver_opt(False)
+    driver: webdriver = set_driver_opt(False)
     driver.implicitly_wait(6)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
@@ -1053,9 +1052,9 @@ def ytmonster_functions(req_dict):
     for_loop_sub(driver, 1)
 
 
-def ytbpals_functions(req_dict):
+def ytbpals_functions(req_dict: dict):
     """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan"""
-    driver = set_driver_opt()
+    driver: webdriver = set_driver_opt()
     driver.implicitly_wait(10)
     driver.get("https://ytbpals.com/")  # Type_None
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
@@ -1266,9 +1265,9 @@ def ytbpals_functions(req_dict):
     for_loop_sub(driver)
 
 
-def viewgrip_functions(req_dict):
+def viewgrip_functions(req_dict: dict):
     """ViewGrip login and then call inner like loop function(for_loop_like)"""
-    driver = set_driver_opt(False, True)
+    driver: webdriver = set_driver_opt(False, True)
     driver.implicitly_wait(6)
     driver.get("https://www.viewgrip.net")  # Type_None
     driver.find_element_by_css_selector("body > div.landing-page > div.main-container >"
