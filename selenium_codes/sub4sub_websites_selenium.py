@@ -199,9 +199,15 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                     and len(driver.find_elements_by_xpath(
                                                           "//*[@id='top-level-buttons']/"
                                                           "ytd-toggle-button-renderer[1]")) > 0:
-                button_like = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
-                                                           "/ytd-toggle-button-renderer[1]")
-                ActionChains(driver).move_to_element(button_like).click(button_like).perform()
+                if len(driver.find_elements_by_css_selector(
+                        "#top-level-buttons > ytd-toggle-button-renderer."
+                        "style-scope." "ytd-menu-renderer.force-icon-button"
+                        ".style-default-active")) > 0:
+                    pass
+                else:
+                    button_like = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
+                                                               "/ytd-toggle-button-renderer[1]")
+                    ActionChains(driver).move_to_element(button_like).click(button_like).perform()
                 button_subscribe_yt = driver.find_element_by_xpath(
                     "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
                 ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
@@ -258,10 +264,15 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                     and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
                     and len(driver.find_elements_by_xpath(
                             "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")) > 0:
-                button_like = driver.find_element_by_xpath(
-                                                           "//*[@id='top-level-buttons']"
-                                                           "/ytd-toggle-button-renderer[1]")
-                ActionChains(driver).move_to_element(button_like).click(button_like).perform()
+                if len(driver.find_elements_by_css_selector(
+                        "#top-level-buttons > ytd-toggle-button-renderer."
+                        "style-scope." "ytd-menu-renderer.force-icon-button"
+                        ".style-default-active")) > 0:
+                    pass
+                else:
+                    button_like = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
+                                                               "/ytd-toggle-button-renderer[1]")
+                    ActionChains(driver).move_to_element(button_like).click(button_like).perform()
                 button_subscribe_yt = driver.find_element_by_xpath(
                     "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
                 ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
@@ -697,16 +708,16 @@ def submenow_functions(req_dict: dict):
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
-                    try:
-                        driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
-                    except Exception as ex:
-                        logging.info("couldn't find reload button exiting Exception: " + str(ex))
-                        break
-                    if len(driver.find_elements_by_id("buttonPlan1")) > 0:
-                        break
-                    if len(driver.find_elements_by_xpath(
+                    # try:
+                    #     driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
+                    # except Exception as ex:
+                    #     logging.info("couldn't find reload button exiting Exception: " + str(ex))
+                    #     break
+                    if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
+                    while driver.find_element_by_xpath("//*[@id='marketStatus']/text()[1]") != " Please click ":
+                        time.sleep(1)
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
@@ -758,7 +769,7 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                            time.sleep(1.25)
+                            time.sleep(1)
                         driver.find_element_by_id("btnSubVerify").send_keys(Keys.ENTER)
                     except ElementNotInteractableException:
                         driver.save_screenshot("screenshots/screenshot.png")
@@ -776,9 +787,9 @@ def submenow_functions(req_dict: dict):
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
                 alert_2 = driver.switch_to.alert
                 alert_2.accept()
-                if len(driver.find_elements_by_xpath("//*[@id='buttonPlan8']")) > 0:
+                if len(driver.find_elements_by_id("buttonPlan8")) > 0:
                     try:
-                        driver.find_element_by_xpath("//*[@id='buttonPlan8']").click()
+                        driver.find_element_by_id("buttonPlan8").click()
                     except Exception as ex:
                         logging.info("Alert Skipped Exception: " + str(ex))
                         driver.close()
