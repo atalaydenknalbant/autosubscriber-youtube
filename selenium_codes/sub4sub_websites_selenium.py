@@ -7,7 +7,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 
 def get_clear_browsing_button(driver: webdriver):
@@ -57,17 +58,14 @@ def google_login(driver: webdriver, req_dict: dict):
         "#buttons > ytd-button-renderer > a")
     ActionChains(driver).move_to_element(sign_in_button).perform()
     sign_in_button.click()
-    driver.save_screenshot("screenshots/screenshot.png")
     email_area = driver.find_element_by_css_selector("#Email")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password")
     pw_area.send_keys(req_dict['yt_pw'])
-    driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
     driver.save_screenshot("screenshots/screenshot.png")
-    logging.info("login completed")
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
@@ -164,8 +162,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
                 and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
             if i == 0:
-                google_login(driver, req_dict)
                 i += 1
+                google_login(driver, req_dict)
             if len(driver.find_elements_by_css_selector(
                     "#top-level-buttons > ytd-toggle-button-renderer."
                     "style-scope." "ytd-menu-renderer.force-icon-button"
@@ -183,11 +181,11 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             driver.switch_to.window(window_before)
             sc[special_condition]()
             while driver.find_element_by_id("seconds").text == "0":
-                continue
+                time.sleep(1.25)
 
-            time.sleep(1.25)
+            time.sleep(2)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            button_confirm.click()
+            button_confirm.send_keys(Keys.ENTER)
             continue
 
         driver.switch_to.window(window_before)
