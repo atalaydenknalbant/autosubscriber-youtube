@@ -154,13 +154,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             break
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        # if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-        #         and driver_6.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
-        #         and len(driver_6.find_elements_by_xpath(
-        #                                               "//*[@id='top-level-buttons']/"
-        #                                               "ytd-toggle-button-renderer[1]")) > 0:
-        if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+        driver.save_screenshot("screenshots/screenshot.png")
+        if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                      "ytd-toggle-button-renderer[1]")) > 0:
             if i == 0:
                 i += 1
                 google_login(driver, req_dict)
@@ -180,10 +177,11 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         else:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            while driver.find_element_by_id("seconds").text == "0":
+            logging.info("Video Not Found")
+            while driver.find_element_by_xpath("/html/body/div[1]/section/div/div/div/div/div/div[2]/div[2]/"
+                                               "div[2]/div/div[2]/div[4]/a/span").text == "0":
                 time.sleep(1.25)
-
-            time.sleep(2)
+            # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             continue
@@ -191,11 +189,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         driver.switch_to.window(window_before)
         driver.switch_to_default_content()
         sc[special_condition]()
-        while driver.find_element_by_id("seconds").text != "0":
-            continue
+        while driver.find_element_by_xpath("/html/body/div[1]/section/div/div/div/div/div/div[2]/div[2]/"
+                                           "div[2]/div/div[2]/div[4]/a/span").text == "0":
+            time.sleep(1.25)
 
         try:
-            time.sleep(1.25)
+            # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             continue
