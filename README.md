@@ -1,3 +1,4 @@
+![last-commit](https://img.shields.io/github/last-commit/atalaydenknalbant/autosubscriber-youtube)
 # autosubscriber-youtube
 Python Selenium-based automated subscribing functions for youtube sub4sub websites.
 
@@ -20,4 +21,4 @@ Python Selenium-based automated subscribing functions for youtube sub4sub websit
 [![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![ViewGrip](https://i.imgur.com/89LP1ci.png)](https://www.viewgrip.net/) 
 
 ## License
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/github/license/atalaydenknalbant/autosubscriber-youtube)](https://www.gnu.org/licenses/gpl-3.0)
