@@ -68,7 +68,7 @@ def google_login(driver: webdriver, req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
 
 
-def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
+def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i",
                                  stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
@@ -125,13 +125,13 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                 if current_remaining_time > 3:
                     logging.info("same remaining videos 4 times in a row, resetting to begin function")
                     driver.quit()
-                    if d == "1":
+                    if d == 1:
                         subpals_functions(req_dict)
                         break
-                    if d == "2":
+                    if d == 2:
                         sonuker_functions(req_dict)
                         break
-                    if d == "3":
+                    if d == 3:
                         ytpals_functions(req_dict)
                         break
                     break
@@ -178,8 +178,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             driver.switch_to.window(window_before)
             sc[special_condition]()
             logging.info("Video Not Found")
-            while driver.find_element_by_xpath("/html/body/div[1]/section/div/div/div/div/div/div[2]/div[2]/"
-                                               "div[2]/div/div[2]/div[4]/a/span").text == "0":
+            while driver.find_elements_by_id("seconds")[1].text == "0":
                 time.sleep(1.25)
             # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
@@ -189,10 +188,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         driver.switch_to.window(window_before)
         driver.switch_to_default_content()
         sc[special_condition]()
-        while driver.find_element_by_xpath("/html/body/div[1]/section/div/div/div/div/div/div[2]/div[2]/"
-                                           "div[2]/div/div[2]/div[4]/a/span").text == "0":
+        driver.save_screenshot("screenshots/screenshot.png")
+        while driver.find_elements_by_id("seconds")[1].text == "0":
             time.sleep(1.25)
-
         try:
             # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
@@ -247,7 +245,7 @@ def subpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "0", req_dict)
+    type_1_for_loop_like_and_sub(driver, 1, req_dict)
     driver.quit()
 
 
@@ -284,7 +282,7 @@ def ytpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "3", req_dict)
+    type_1_for_loop_like_and_sub(driver, 2, req_dict)
     driver.quit()
 
 
@@ -329,7 +327,7 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.execute_script("window.scrollTo(0, 500);")
-    type_1_for_loop_like_and_sub(driver, "2", req_dict)
+    type_1_for_loop_like_and_sub(driver, 3, req_dict)
     driver.quit()
 
 
@@ -400,7 +398,6 @@ def subscribersvideo_functions(req_dict: dict):
         return
     else:
         driver.switch_to.default_content()
-        window_before = driver.window_handles[0]
         driver.save_screenshot("screenshots/screenshot4_1.png")
         try:
             driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
@@ -503,7 +500,7 @@ def submenow_functions(req_dict: dict):
     driver: webdriver = set_driver_opt()
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(12)
+    driver.implicitly_wait(10)
     driver.get("https://www.submenow.com/")  # Type_2
     driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
@@ -561,11 +558,6 @@ def submenow_functions(req_dict: dict):
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
-                    # try:
-                    #     driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
-                    # except Exception as ex:
-                    #     logging.info("couldn't find reload button exiting Exception: " + str(ex))
-                    #     break
                     if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
