@@ -2,7 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-    UnexpectedAlertPresentException, ElementNotInteractableException
+    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -68,16 +68,17 @@ def google_login(driver: webdriver, req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
 
 
-def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, special_condition=1,
+def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i",
                                  stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                                  skip_btn="#\31  > a:nth-child(5) > img"
                                  ):
     """Loop for like and sub, includes google login"""
-    current_remaining_time = 0
-    current_remaining = ""
-    i = 0
+    cdef int current_remaining_time = 0
+    cdef unicode current_remaining = ""
+    cdef int i = 0
+
 
     def sc_0():
         return driver.switch_to_frame(0)
@@ -249,7 +250,7 @@ def subpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, 1, req_dict)
+    type_1_for_loop_like_and_sub(driver, "0", req_dict)
     driver.quit()
 
 
@@ -286,7 +287,7 @@ def ytpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, 2, req_dict)
+    type_1_for_loop_like_and_sub(driver, "3", req_dict)
     driver.quit()
 
 
@@ -331,7 +332,7 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.execute_script("window.scrollTo(0, 500);")
-    type_1_for_loop_like_and_sub(driver, 3, req_dict)
+    type_1_for_loop_like_and_sub(driver, "2", req_dict)
     driver.quit()
 
 
@@ -485,8 +486,8 @@ def subscribersvideo_functions(req_dict: dict):
                 if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
                     try:
                         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
-                    except Exception as ex_4:
-                        logging.info("Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
+                    except Exception as ex:
+                        logging.info("Couldn't able to click buttonPlan6 Exception: " + str(ex))
                         driver.close()
                         return
                 time.sleep(1.25)
@@ -734,9 +735,8 @@ def ytmonster_functions(req_dict: dict):
                     driver_6.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
+                        and driver_6.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
                     driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
@@ -829,9 +829,8 @@ def ytmonster_functions(req_dict: dict):
                     break
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
+                        and driver_6.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
                     driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
@@ -976,9 +975,8 @@ def ytbpals_functions(req_dict: dict):
                 time.sleep(2)
                 driver.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                if len(driver_7.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
+                        and driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
@@ -1066,9 +1064,9 @@ def ytbpals_functions(req_dict: dict):
                 time.sleep(3)
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                if driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
+                        and len(driver_7.find_elements_by_css_selector(
+                                "#top-level-buttons > ytd-toggle-button-renderer:nth-child(1)")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
@@ -1143,9 +1141,8 @@ def viewgrip_functions(req_dict: dict):
                 driver_8.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
             while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
                 time.sleep(1.25)
-            if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                    and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                          "ytd-toggle-button-renderer[1]")) > 0:
+            if len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
+                    and driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
                 current_video = driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
                 if current_video in liked_video_list or\
                         len(driver_8.find_elements_by_css_selector("#top-level-buttons >"
