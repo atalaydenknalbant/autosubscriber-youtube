@@ -403,16 +403,6 @@ def subscribersvideo_functions(req_dict: dict):
     else:
         driver.switch_to.default_content()
         driver.save_screenshot("screenshots/screenshot4_1.png")
-        try:
-            driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
-        except NoSuchElementException:
-            logging.info("Couldn't find subscribersVideo website button, exiting ")
-            driver.quit()
-            return
-        window_after = driver.window_handles[1]
-        driver.switch_to.default_content()
-        driver.switch_to.window(window_after)
-        driver.switch_to.default_content()
 
     def for_loop():
         try:
@@ -434,7 +424,7 @@ def subscribersvideo_functions(req_dict: dict):
                         logging.info("found Please come later text, closing")
                         break
                     try:
-                        driver.find_element_by_id("btnWatchLikeAndSubscribe").click()
+                        driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     except NoSuchElementException:
                         logging.info("couldn't find watch and subscribe button, closing")
                         driver.quit()
@@ -444,8 +434,9 @@ def subscribersvideo_functions(req_dict: dict):
                     driver.switch_to.default_content()
                     window_after_4 = driver.window_handles[1]
                     driver.switch_to.window(window_after_4)
-                    if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                            and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                    if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                            and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                                  "ytd-toggle-button-renderer[1]")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
                             i += 1
@@ -565,6 +556,7 @@ def submenow_functions(req_dict: dict):
                     if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
+                    driver.save_screenshot("screenshots/screenshot5_1.png")
                     while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
                         time.sleep(1)
                     driver.save_screenshot("screenshots/screenshot.png")
@@ -659,7 +651,7 @@ def ytmonster_functions(req_dict: dict):
                      ):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(30):
+        for i in range(40):
             logging.info("Loop Started")
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
