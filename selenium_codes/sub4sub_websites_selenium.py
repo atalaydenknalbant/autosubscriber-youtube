@@ -568,8 +568,9 @@ def submenow_functions(req_dict: dict):
                     driver.switch_to.window(window_after_5)
                     driver.execute_script("window.scrollTo(0, 300)")
                     driver.save_screenshot("screenshots/screenshot.png")
-                    if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                            and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                    if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                            and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                                  "ytd-toggle-button-renderer[1]")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
                             i += 1
@@ -595,7 +596,7 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                            time.sleep(1)
+                            time.sleep(1.25)
                         driver.find_element_by_id("btnSubVerify").send_keys(Keys.ENTER)
                     except ElementNotInteractableException:
                         driver.save_screenshot("screenshots/screenshot.png")
@@ -624,7 +625,6 @@ def submenow_functions(req_dict: dict):
                 for_loop()
 
             except TimeoutException:
-                logging.info("Couldn't find alert")
                 for_loop()
     for_loop()
     driver.quit()
