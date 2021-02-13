@@ -154,6 +154,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, spec
         except NoSuchElementException:
             logging.info("Couldn't find subscribe_btn")
             break
+        if driver.find_element_by_id("remainingHint").text != "-":
+            logging.info("Website doesn't working properly, closing driver")
+            driver.quit()
+            return
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         driver.save_screenshot("screenshots/screenshot.png")
