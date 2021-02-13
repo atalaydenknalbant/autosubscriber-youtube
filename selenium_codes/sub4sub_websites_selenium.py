@@ -558,7 +558,7 @@ def submenow_functions(req_dict: dict):
                         break
                     driver.save_screenshot("screenshots/screenshot5_1.png")
                     while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
-                        time.sleep(1)
+                        time.sleep(1.25)
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
