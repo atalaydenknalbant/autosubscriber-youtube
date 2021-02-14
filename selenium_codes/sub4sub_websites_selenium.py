@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 import logging
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -602,7 +603,9 @@ def submenow_functions(req_dict: dict):
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
                             time.sleep(1.5)
                         driver.save_screenshot("screenshots/screenshot.png")
-                        driver.find_element_by_id("btnSubVerify").click()
+                        el = \
+                            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify"))).click()
+                        el.click()
                     except ElementNotInteractableException:
                         logging.info("Found Element Not Interact able Exception, Quitting")
                         driver.quit()
