@@ -600,10 +600,10 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                            time.sleep(1.25)
-                        driver.find_element_by_id("btnSubVerify").send_keys(Keys.ENTER)
-                    except ElementNotInteractableException:
+                            time.sleep(1.5)
                         driver.save_screenshot("screenshots/screenshot.png")
+                        driver.find_element_by_id("btnSubVerify").click()
+                    except ElementNotInteractableException:
                         logging.info("Found Element Not Interact able Exception, Quitting")
                         driver.quit()
                         return
