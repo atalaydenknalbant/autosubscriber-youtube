@@ -468,8 +468,9 @@ def subscribersvideo_functions(req_dict: dict):
                         continue
                     driver.switch_to.window(window_before_4)
                     while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                        time.sleep(1.25)
-                    driver.find_element_by_id("btnSubVerify").click()
+                        time.sleep(1.5)
+                    el = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                    el.click()
                     logging.info("done sub & like")
 
         except UnexpectedAlertPresentException:
@@ -604,7 +605,7 @@ def submenow_functions(req_dict: dict):
                             time.sleep(1.5)
                         driver.save_screenshot("screenshots/screenshot.png")
                         el = \
-                            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify"))).click()
+                            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                         el.click()
                     except ElementNotInteractableException:
                         logging.info("Found Element Not Interact able Exception, Quitting")
