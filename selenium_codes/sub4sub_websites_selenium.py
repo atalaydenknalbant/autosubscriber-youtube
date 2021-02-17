@@ -2,7 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-    UnexpectedAlertPresentException, ElementNotInteractableException
+    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -1113,7 +1113,11 @@ def viewgrip_functions(req_dict: dict):
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
                                         " div > ul > li:nth-child(3) > a") \
         .click()
-    time.sleep(2)
+    time.sleep(3)
+    try:
+        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
+    except (ElementNotInteractableException, NoSuchElementException):
+        pass
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition >"
                                         " div > ul:nth-child(3) > li:nth-child(1) > a")\
         .click()
