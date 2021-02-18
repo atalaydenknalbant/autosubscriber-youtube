@@ -681,7 +681,6 @@ def ytmonster_functions(req_dict: dict):
                                                                     > div.col-md-10.campaignData > b""") \
                 .text
             if i == 0:
-
                 i += 1
                 time.sleep(1.25)
                 try:
@@ -779,12 +778,11 @@ def ytmonster_functions(req_dict: dict):
                                 .text:
                             time.sleep(1.25)
                             if driver_6.find_element_by_id("error").text == \
-                               """We failed to verify your like as we did not find an increase in the number of likes. 
-                                  Try verifying again, or skip the video.""":
+                               "We failed to verify your like as we did not find an increase in the number" \
+                               " of likes. Try verifying again, or skip the video.":
+
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
-
-                            driver_6.save_screenshot("screenshots/screenshot.png")
                             continue
                         continue
                     except NoSuchElementException:
