@@ -650,7 +650,7 @@ def ytmonster_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(driver_6, yt_login_options=0, special_condition=0,
-                     like_btn="#likeText",
+                     like_btn="likeText",
                      stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                      skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
                               " div > div:nth-child(7) > div > a.likeSkip > div",
@@ -660,7 +660,6 @@ def ytmonster_functions(req_dict: dict):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
         for i in range(40):
-            logging.info("Loop Started")
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
@@ -692,10 +691,10 @@ def ytmonster_functions(req_dict: dict):
                     pass
                 try:
                     driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.find_element_by_css_selector(like_btn).click()
+                    driver_6.find_element_by_id(like_btn).click()
                     logging.info("clicked like btn")
                 except NoSuchElementException:
-                    logging.info("No such Element Exception")
+                    logging.info("Couldn't Find Like button")
                     driver_6.quit()
                     break
                 window_after = driver_6.window_handles[1]
@@ -822,7 +821,7 @@ def ytmonster_functions(req_dict: dict):
                 time.sleep(1.25)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
-                    driver_6.find_element_by_css_selector(like_btn).click()
+                    driver_6.find_element_by_id(like_btn).click()
                 except NoSuchElementException:
                     break
                 window_after = driver_6.window_handles[1]
@@ -847,40 +846,29 @@ def ytmonster_functions(req_dict: dict):
                     driver_6.switch_to_default_content()
                     logging.info("Liked Channel")
                     driver_6.switch_to_default_content()
-                    logging.info("before count loop")
                     for _ in range(500000):
                         if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
                                                                  " div.mainContent > div > div.col-md-9 > div >"
                                                                  " div:nth-child(7) > div > div > div") \
                                 .text != "Verify Like":
-                            time.sleep(1)
+                            time.sleep(1.25)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1)
+                        time.sleep(1.25)
                         driver_6.find_element_by_css_selector(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
-                        while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid >"
-                                                                                       " div > div.main >"
-                                                                                       " div.mainContent > div > div >"
-                                                                                       " div > div:nth-child(4) >"
-                                                                                       " div.col-md-10.campaignData "
-                                                                                       "> b")\
-                                .text:
-                            time.sleep(2)
+                        while yt_channel_name == driver_6.find_element_by_class_name("yt-name").text:
+                            time.sleep(1.25)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
-
-                            driver_6.save_screenshot("screenshots/screenshot.png")
-                            continue
-                        continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        time.sleep(3)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
