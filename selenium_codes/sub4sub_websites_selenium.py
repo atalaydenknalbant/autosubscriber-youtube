@@ -69,7 +69,7 @@ def google_login(driver: webdriver, req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
 
 
-def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, special_condition=1,
+def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i",
                                  stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
@@ -120,19 +120,19 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, spec
                     pass
         try:
             remaining_videos = driver.find_element_by_id("remainingHint").text
-            logging.info("Remaining Videos: " + remaining_videos)
+            logging.info(d+" Remaining Videos: " + remaining_videos)
             if driver.find_element_by_id("remainingHint").text == current_remaining:
                 current_remaining_time += 1
                 if current_remaining_time > 3:
-                    logging.info("same remaining videos 4 times in a row, resetting to begin function")
+                    logging.info(d+" same remaining videos 4 times in a row, resetting to begin function")
                     driver.quit()
-                    if d == 1:
+                    if d == "subpals":
                         subpals_functions(req_dict)
                         break
-                    if d == 2:
+                    if d == "sonuker":
                         sonuker_functions(req_dict)
                         break
-                    if d == 3:
+                    if d == "ytpals":
                         ytpals_functions(req_dict)
                         break
                     break
@@ -153,10 +153,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, spec
             button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
             button_subscribe.click()
         except NoSuchElementException:
-            logging.info("Couldn't find subscribe_btn")
+            logging.info(d+" Couldn't find subscribe_btn")
             break
         if driver.find_element_by_id("remainingHint").text == "-":
-            logging.info("Website doesn't working properly, closing driver")
+            logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
         window_after = driver.window_handles[1]
@@ -184,7 +184,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: int, req_dict: dict, spec
         else:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            logging.info("Video Not Found")
+            logging.info(d+" Video Not Found")
             # while driver.find_elements_by_id("seconds")[1].text == "0":
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
@@ -254,7 +254,7 @@ def subpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, 1, req_dict)
+    type_1_for_loop_like_and_sub(driver, "subpals", req_dict)
     driver.quit()
 
 
@@ -291,7 +291,7 @@ def ytpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, 2, req_dict)
+    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
     driver.quit()
 
 
@@ -336,7 +336,7 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.execute_script("window.scrollTo(0, 500);")
-    type_1_for_loop_like_and_sub(driver, 3, req_dict)
+    type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
     driver.quit()
 
 
@@ -349,13 +349,13 @@ def subscribersvideo_functions(req_dict: dict):
     driver.set_window_size(1900, 1050)
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
-            logging.info("driver_4 Website Temporarily Unavailable, closing driver")
+            logging.info("subscribersvideo Website Temporarily Unavailable, closing driver")
             driver.quit()
             return
         else:
             pass
     except NoSuchElementException as ex:
-        logging.info(str(ex))
+        logging.info("subscribersvideo"+str(ex))
         driver.quit()
         return
     driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[4]/button").click()
@@ -371,7 +371,7 @@ def subscribersvideo_functions(req_dict: dict):
     except TimeoutException:
         pass
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging.info("subscribersvideo Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -385,14 +385,14 @@ def subscribersvideo_functions(req_dict: dict):
         try:
             driver.find_element_by_id("buttonPlan6").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
-            logging.info("Driver 4 Button Passed")
+            logging.info("subscribersvideo Button Passed")
     time.sleep(3)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
         pass
     if len(driver.find_elements_by_partial_link_text("Please come later")) > 0:
-        logging.info("FOUND PLEASE COME LATER TEXT, EXITING")
+        logging.info("subscribersvideo FOUND PLEASE COME LATER TEXT, EXITING")
         driver.quit()
         return
 
@@ -402,7 +402,7 @@ def subscribersvideo_functions(req_dict: dict):
     time.sleep(1.25)
     if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0 \
             or len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[12]/div/div[3]/button")) > 0:
-        logging.info("found gray button")
+        logging.info("subscribersvideo found gray button")
         driver.quit()
         return
     else:
@@ -411,7 +411,7 @@ def subscribersvideo_functions(req_dict: dict):
 
     def for_loop():
         try:
-            logging.info("loop started")
+            logging.info("subscribersvideo loop started")
             i = 0
             for _ in range(1, 10000000000):
                 if len(driver.find_elements_by_xpath(
@@ -426,12 +426,12 @@ def subscribersvideo_functions(req_dict: dict):
                         break
                     if len(driver.find_elements_by_partial_link_text("Please come later")) > 0:
                         driver.quit()
-                        logging.info("found Please come later text, closing")
+                        logging.info("subscribersvideo found Please come later text, closing")
                         break
                     try:
                         driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     except NoSuchElementException:
-                        logging.info("couldn't find watch and subscribe button, closing")
+                        logging.info("subscribersvideo couldn't find watch and subscribe button, closing")
                         driver.quit()
                         break
                     window_after_4 = driver.window_handles[1]
@@ -471,7 +471,7 @@ def subscribersvideo_functions(req_dict: dict):
                         time.sleep(1.5)
                     el = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                     el.click()
-                    logging.info("done sub & like")
+                    logging.info("subscribersvideo done sub & like")
 
         except UnexpectedAlertPresentException:
             try:
@@ -483,13 +483,13 @@ def subscribersvideo_functions(req_dict: dict):
                     try:
                         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
                     except Exception as ex_4:
-                        logging.info("Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
+                        logging.info("subscribersvideo Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
                         driver.close()
                         return
                 time.sleep(1.25)
                 for_loop()
             except TimeoutException:
-                logging.info("outer timeout exception")
+                logging.info("subscribersvideo outer timeout exception")
                 for_loop()
 
     for_loop()
@@ -506,13 +506,13 @@ def submenow_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
-            logging.info("driver_5 Website Temporarily Unavailable, closing driver")
+            logging.info("submenow Website Temporarily Unavailable, closing driver")
             driver.quit()
             return
         else:
             pass
     except NoSuchElementException as ex:
-        logging.info(str(ex))
+        logging.info("submenow" + str(ex))
         driver.quit()
         return
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
@@ -521,7 +521,7 @@ def submenow_functions(req_dict: dict):
     driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
     time.sleep(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging.info("submenow Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -534,7 +534,7 @@ def submenow_functions(req_dict: dict):
             pass
         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
     else:
-        logging.info("Driver 5 Button Passed")
+        logging.info("submenow active Button Passed")
         driver.quit()
         return
     time.sleep(1.25)
@@ -546,14 +546,14 @@ def submenow_functions(req_dict: dict):
         driver.quit()
         return
     if len(driver.find_elements_by_css_selector("#errorAjax > i")) > 0:
-        logging.info("found error dialog")
+        logging.info("submenow found error dialog")
         driver.quit()
         return
 
     def for_loop():
         i = 0
         try:
-            logging.info("loop started")
+            logging.info("submenow loop started")
             for _ in range(1, 1000000000):
                 if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
@@ -608,13 +608,13 @@ def submenow_functions(req_dict: dict):
                             WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                         el.click()
                     except ElementNotInteractableException:
-                        logging.info("Found Element Not Interact able Exception, Quitting")
+                        logging.info("submenow Found Element Not Interact able Exception, Quitting")
                         driver.quit()
                         return
-                    logging.info("done sub & like")
+                    logging.info("submenow done sub & like")
                     driver.save_screenshot("screenshots/screenshot.png")
                 if len(driver.find_elements_by_xpath("//*[@id='dialog2']/div[3]/button")) > 0:
-                    logging.info("Found end dialog")
+                    logging.info("submenow Found end dialog")
                     driver.quit()
                     return
         except UnexpectedAlertPresentException:
@@ -626,7 +626,7 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.find_element_by_id("buttonPlan8").click()
                     except Exception as ex:
-                        logging.info("Alert Skipped Exception: " + str(ex))
+                        logging.info("submenow Alert Skipped Exception: " + str(ex))
                         driver.close()
                         return
                 driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
