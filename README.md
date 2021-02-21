@@ -1,3 +1,5 @@
+[![version](https://img.shields.io/github/v/release/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/releases/latest)
+
 [![last-release](https://img.shields.io/github/release-date/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/releases) [![last-commit](https://img.shields.io/github/last-commit/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/graphs/commit-activity) [![issues](https://img.shields.io/github/issues/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/issues) [![pullrequests](https://img.shields.io/github/issues-pr/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/pulls) [![License: GPL v3](https://img.shields.io/github/license/atalaydenknalbant/autosubscriber-youtube)](https://www.gnu.org/licenses/gpl-3.0) 
 # autosubscriber-youtube 
 Python Selenium-based automated subscribing functions for youtube sub4sub websites.
