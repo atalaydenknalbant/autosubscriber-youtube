@@ -1096,6 +1096,10 @@ def viewgrip_functions(req_dict: dict):
     driver.find_element_by_id("pass").send_keys(req_dict['viewGrip_pw'])
     driver.find_element_by_css_selector("#sign_in > button").click()
     time.sleep(2)
+    try:
+        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
+    except (ElementNotInteractableException, NoSuchElementException):
+        pass
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
                                         " div > ul > li:nth-child(3) > a") \
         .click()
@@ -1107,6 +1111,8 @@ def viewgrip_functions(req_dict: dict):
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition >"
                                         " div > ul:nth-child(3) > li:nth-child(1) > a")\
         .click()
+    driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) > div >"
+                                        " div.top-right-button-container > a").click()
     driver.switch_to.window(driver.window_handles[1])
 
     def for_loop_like(driver_8,
