@@ -1,6 +1,6 @@
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
-from threading import *
+from threading import Thread
 
 config_object = ConfigParser()
 config_object.read("config.ini")

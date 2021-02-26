@@ -1,5 +1,6 @@
 import time
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException
@@ -75,10 +76,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                                  skip_btn="#\31  > a:nth-child(5) > img"
                                  ):
     """Loop for like and sub, includes google login"""
-    cdef int current_remaining_time = 0
-    cdef unicode current_remaining = ""
-    cdef int i = 0
-
+    current_remaining_time = 0
+    current_remaining = ""
+    i = 0
 
     def sc_0():
         return driver.switch_to_frame(0)
@@ -120,19 +120,19 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                     pass
         try:
             remaining_videos = driver.find_element_by_id("remainingHint").text
-            logging.info("Remaining Videos: " + remaining_videos)
+            logging.info(d+" Remaining Videos: " + remaining_videos)
             if driver.find_element_by_id("remainingHint").text == current_remaining:
                 current_remaining_time += 1
                 if current_remaining_time > 3:
-                    logging.info("same remaining videos 4 times in a row, resetting to begin function")
+                    logging.info(d+" same remaining videos 4 times in a row, resetting to begin function")
                     driver.quit()
-                    if d == 1:
+                    if d == "subpals":
                         subpals_functions(req_dict)
                         break
-                    if d == 2:
+                    if d == "sonuker":
                         sonuker_functions(req_dict)
                         break
-                    if d == 3:
+                    if d == "ytpals":
                         ytpals_functions(req_dict)
                         break
                     break
@@ -153,8 +153,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
             button_subscribe.click()
         except NoSuchElementException:
-            logging.info("Couldn't find subscribe_btn")
+            logging.info(d+" Couldn't find subscribe_btn")
             break
+        if driver.find_element_by_id("remainingHint").text == "-":
+            logging.info(d+" Website is not working properly, closing driver")
+            driver.quit()
+            return
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         driver.save_screenshot("screenshots/screenshot.png")
@@ -180,7 +184,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         else:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            logging.info("Video Not Found")
+            logging.info(d+" Video Not Found")
             # while driver.find_elements_by_id("seconds")[1].text == "0":
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
@@ -250,7 +254,7 @@ def subpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "0", req_dict)
+    type_1_for_loop_like_and_sub(driver, "subpals", req_dict)
     driver.quit()
 
 
@@ -287,7 +291,7 @@ def ytpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "3", req_dict)
+    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
     driver.quit()
 
 
@@ -332,7 +336,7 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.execute_script("window.scrollTo(0, 500);")
-    type_1_for_loop_like_and_sub(driver, "2", req_dict)
+    type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
     driver.quit()
 
 
@@ -345,13 +349,13 @@ def subscribersvideo_functions(req_dict: dict):
     driver.set_window_size(1900, 1050)
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
-            logging.info("driver_4 Website Temporarily Unavailable, closing driver")
+            logging.info("subscribersvideo Website Temporarily Unavailable, closing driver")
             driver.quit()
             return
         else:
             pass
     except NoSuchElementException as ex:
-        logging.info(str(ex))
+        logging.info("subscribersvideo"+str(ex))
         driver.quit()
         return
     driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[4]/button").click()
@@ -367,7 +371,7 @@ def subscribersvideo_functions(req_dict: dict):
     except TimeoutException:
         pass
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging.info("subscribersvideo Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -381,14 +385,14 @@ def subscribersvideo_functions(req_dict: dict):
         try:
             driver.find_element_by_id("buttonPlan6").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
-            logging.info("Driver 4 Button Passed")
+            logging.info("subscribersvideo Button Passed")
     time.sleep(3)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
         pass
     if len(driver.find_elements_by_partial_link_text("Please come later")) > 0:
-        logging.info("FOUND PLEASE COME LATER TEXT, EXITING")
+        logging.info("subscribersvideo FOUND PLEASE COME LATER TEXT, EXITING")
         driver.quit()
         return
 
@@ -398,26 +402,16 @@ def subscribersvideo_functions(req_dict: dict):
     time.sleep(1.25)
     if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0 \
             or len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[12]/div/div[3]/button")) > 0:
-        logging.info("found gray button")
+        logging.info("subscribersvideo found gray button")
         driver.quit()
         return
     else:
         driver.switch_to.default_content()
         driver.save_screenshot("screenshots/screenshot4_1.png")
-        try:
-            driver.find_element_by_xpath("//*[@id='btnWatchLikeAndSubscribe']").send_keys(Keys.ENTER)
-        except NoSuchElementException:
-            logging.info("Couldn't find subscribersVideo website button, exiting ")
-            driver.quit()
-            return
-        window_after = driver.window_handles[1]
-        driver.switch_to.default_content()
-        driver.switch_to.window(window_after)
-        driver.switch_to.default_content()
 
     def for_loop():
         try:
-            logging.info("loop started")
+            logging.info("subscribersvideo loop started")
             i = 0
             for _ in range(1, 10000000000):
                 if len(driver.find_elements_by_xpath(
@@ -432,12 +426,12 @@ def subscribersvideo_functions(req_dict: dict):
                         break
                     if len(driver.find_elements_by_partial_link_text("Please come later")) > 0:
                         driver.quit()
-                        logging.info("found Please come later text, closing")
+                        logging.info("subscribersvideo found Please come later text, closing")
                         break
                     try:
-                        driver.find_element_by_id("btnWatchLikeAndSubscribe").click()
+                        driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     except NoSuchElementException:
-                        logging.info("couldn't find watch and subscribe button, closing")
+                        logging.info("subscribersvideo couldn't find watch and subscribe button, closing")
                         driver.quit()
                         break
                     window_after_4 = driver.window_handles[1]
@@ -445,8 +439,9 @@ def subscribersvideo_functions(req_dict: dict):
                     driver.switch_to.default_content()
                     window_after_4 = driver.window_handles[1]
                     driver.switch_to.window(window_after_4)
-                    if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                            and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                    if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                            and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                                  "ytd-toggle-button-renderer[1]")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
                             i += 1
@@ -473,9 +468,10 @@ def subscribersvideo_functions(req_dict: dict):
                         continue
                     driver.switch_to.window(window_before_4)
                     while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                        time.sleep(1.25)
-                    driver.find_element_by_id("btnSubVerify").click()
-                    logging.info("done sub & like")
+                        time.sleep(1.5)
+                    el = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                    el.click()
+                    logging.info("subscribersvideo done sub & like")
 
         except UnexpectedAlertPresentException:
             try:
@@ -486,14 +482,14 @@ def subscribersvideo_functions(req_dict: dict):
                 if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
                     try:
                         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
-                    except Exception as ex:
-                        logging.info("Couldn't able to click buttonPlan6 Exception: " + str(ex))
+                    except Exception as ex_4:
+                        logging.info("subscribersvideo Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
                         driver.close()
                         return
                 time.sleep(1.25)
                 for_loop()
             except TimeoutException:
-                logging.info("outer timeout exception")
+                logging.info("subscribersvideo outer timeout exception")
                 for_loop()
 
     for_loop()
@@ -510,13 +506,13 @@ def submenow_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
-            logging.info("driver_5 Website Temporarily Unavailable, closing driver")
+            logging.info("submenow Website Temporarily Unavailable, closing driver")
             driver.quit()
             return
         else:
             pass
     except NoSuchElementException as ex:
-        logging.info(str(ex))
+        logging.info("submenow" + str(ex))
         driver.quit()
         return
     driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
@@ -525,7 +521,7 @@ def submenow_functions(req_dict: dict):
     driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
     time.sleep(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging.info("submenow Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -538,7 +534,7 @@ def submenow_functions(req_dict: dict):
             pass
         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
     else:
-        logging.info("Driver 5 Button Passed")
+        logging.info("submenow active Button Passed")
         driver.quit()
         return
     time.sleep(1.25)
@@ -550,14 +546,14 @@ def submenow_functions(req_dict: dict):
         driver.quit()
         return
     if len(driver.find_elements_by_css_selector("#errorAjax > i")) > 0:
-        logging.info("found error dialog")
+        logging.info("submenow found error dialog")
         driver.quit()
         return
 
     def for_loop():
         i = 0
         try:
-            logging.info("loop started")
+            logging.info("submenow loop started")
             for _ in range(1, 1000000000):
                 if len(driver.find_elements_by_xpath("//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
@@ -566,8 +562,9 @@ def submenow_functions(req_dict: dict):
                     if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
+                    driver.save_screenshot("screenshots/screenshot5_1.png")
                     while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
-                        time.sleep(1)
+                        time.sleep(1.25)
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
@@ -577,8 +574,9 @@ def submenow_functions(req_dict: dict):
                     driver.switch_to.window(window_after_5)
                     driver.execute_script("window.scrollTo(0, 300)")
                     driver.save_screenshot("screenshots/screenshot.png")
-                    if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                            and driver.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                    if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                            and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                                  "ytd-toggle-button-renderer[1]")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
                             i += 1
@@ -604,17 +602,19 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                            time.sleep(1)
-                        driver.find_element_by_id("btnSubVerify").send_keys(Keys.ENTER)
-                    except ElementNotInteractableException:
+                            time.sleep(1.5)
                         driver.save_screenshot("screenshots/screenshot.png")
-                        logging.info("Found Element Not Interact able Exception, Quitting")
+                        el = \
+                            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                        el.click()
+                    except ElementNotInteractableException:
+                        logging.info("submenow Found Element Not Interact able Exception, Quitting")
                         driver.quit()
                         return
-                    logging.info("done sub & like")
+                    logging.info("submenow done sub & like")
                     driver.save_screenshot("screenshots/screenshot.png")
                 if len(driver.find_elements_by_xpath("//*[@id='dialog2']/div[3]/button")) > 0:
-                    logging.info("Found end dialog")
+                    logging.info("submenow Found end dialog")
                     driver.quit()
                     return
         except UnexpectedAlertPresentException:
@@ -626,14 +626,13 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.find_element_by_id("buttonPlan8").click()
                     except Exception as ex:
-                        logging.info("Alert Skipped Exception: " + str(ex))
+                        logging.info("submenow Alert Skipped Exception: " + str(ex))
                         driver.close()
                         return
                 driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
                 for_loop()
 
             except TimeoutException:
-                logging.info("Couldn't find alert")
                 for_loop()
     for_loop()
     driver.quit()
@@ -651,7 +650,7 @@ def ytmonster_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(driver_6, yt_login_options=0, special_condition=0,
-                     like_btn="#likeText",
+                     like_btn="likeText",
                      stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                      skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
                               " div > div:nth-child(7) > div > a.likeSkip > div",
@@ -660,8 +659,7 @@ def ytmonster_functions(req_dict: dict):
                      ):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(30):
-            logging.info("Loop Started")
+        for i in range(40):
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
@@ -682,7 +680,6 @@ def ytmonster_functions(req_dict: dict):
                                                                     > div.col-md-10.campaignData > b""") \
                 .text
             if i == 0:
-
                 i += 1
                 time.sleep(1.25)
                 try:
@@ -694,10 +691,10 @@ def ytmonster_functions(req_dict: dict):
                     pass
                 try:
                     driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.find_element_by_css_selector(like_btn).click()
+                    driver_6.find_element_by_id(like_btn).click()
                     logging.info("clicked like btn")
                 except NoSuchElementException:
-                    logging.info("No such Element Exception")
+                    logging.info("Couldn't Find Like button")
                     driver_6.quit()
                     break
                 window_after = driver_6.window_handles[1]
@@ -735,8 +732,9 @@ def ytmonster_functions(req_dict: dict):
                     driver_6.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
-                if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                        and driver_6.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                              "ytd-toggle-button-renderer[1]")) > 0:
                     driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
@@ -779,12 +777,11 @@ def ytmonster_functions(req_dict: dict):
                                 .text:
                             time.sleep(1.25)
                             if driver_6.find_element_by_id("error").text == \
-                               """We failed to verify your like as we did not find an increase in the number of likes. 
-                                  Try verifying again, or skip the video.""":
+                               "We failed to verify your like as we did not find an increase in the number" \
+                               " of likes. Try verifying again, or skip the video.":
+
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
-
-                            driver_6.save_screenshot("screenshots/screenshot.png")
                             continue
                         continue
                     except NoSuchElementException:
@@ -824,13 +821,14 @@ def ytmonster_functions(req_dict: dict):
                 time.sleep(1.25)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
-                    driver_6.find_element_by_css_selector(like_btn).click()
+                    driver_6.find_element_by_id(like_btn).click()
                 except NoSuchElementException:
                     break
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
-                if len(driver_6.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                        and driver_6.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                              "ytd-toggle-button-renderer[1]")) > 0:
                     driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
@@ -848,40 +846,29 @@ def ytmonster_functions(req_dict: dict):
                     driver_6.switch_to_default_content()
                     logging.info("Liked Channel")
                     driver_6.switch_to_default_content()
-                    logging.info("before count loop")
                     for _ in range(500000):
                         if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
                                                                  " div.mainContent > div > div.col-md-9 > div >"
                                                                  " div:nth-child(7) > div > div > div") \
                                 .text != "Verify Like":
-                            time.sleep(1)
+                            time.sleep(1.25)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1)
+                        time.sleep(1.25)
                         driver_6.find_element_by_css_selector(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
-                        while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid >"
-                                                                                       " div > div.main >"
-                                                                                       " div.mainContent > div > div >"
-                                                                                       " div > div:nth-child(4) >"
-                                                                                       " div.col-md-10.campaignData "
-                                                                                       "> b")\
-                                .text:
-                            time.sleep(2)
+                        while yt_channel_name == driver_6.find_element_by_class_name("yt-name").text:
+                            time.sleep(1.25)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
-
-                            driver_6.save_screenshot("screenshots/screenshot.png")
-                            continue
-                        continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        time.sleep(3)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
@@ -975,8 +962,9 @@ def ytbpals_functions(req_dict: dict):
                 time.sleep(2)
                 driver.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
-                if len(driver_7.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                        and driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                              "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
@@ -1064,9 +1052,9 @@ def ytbpals_functions(req_dict: dict):
                 time.sleep(3)
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
-                if driver_7.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "" \
-                        and len(driver_7.find_elements_by_css_selector(
-                                "#top-level-buttons > ytd-toggle-button-renderer:nth-child(1)")) > 0:
+                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                              "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
@@ -1108,13 +1096,23 @@ def viewgrip_functions(req_dict: dict):
     driver.find_element_by_id("pass").send_keys(req_dict['viewGrip_pw'])
     driver.find_element_by_css_selector("#sign_in > button").click()
     time.sleep(2)
+    try:
+        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
+    except (ElementNotInteractableException, NoSuchElementException):
+        pass
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
                                         " div > ul > li:nth-child(3) > a") \
         .click()
-    time.sleep(2)
+    time.sleep(3)
+    try:
+        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
+    except (ElementNotInteractableException, NoSuchElementException):
+        pass
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition >"
                                         " div > ul:nth-child(3) > li:nth-child(1) > a")\
         .click()
+    driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) > div >"
+                                        " div.top-right-button-container > a").click()
     driver.switch_to.window(driver.window_handles[1])
 
     def for_loop_like(driver_8,
@@ -1141,8 +1139,9 @@ def viewgrip_functions(req_dict: dict):
                 driver_8.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
             while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
                 time.sleep(1.25)
-            if len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0 \
-                    and driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text != "":
+            if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                    and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                          "ytd-toggle-button-renderer[1]")) > 0:
                 current_video = driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
                 if current_video in liked_video_list or\
                         len(driver_8.find_elements_by_css_selector("#top-level-buttons >"
