@@ -1138,7 +1138,7 @@ def viewgrip_functions(req_dict: dict):
                 pw_area.send_keys(req_dict['yt_pw'])
                 driver_8.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
             while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
-                time.sleep(1.25)
+                time.sleep(1)
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                     and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                           "ytd-toggle-button-renderer[1]")) > 0:
@@ -1151,13 +1151,13 @@ def viewgrip_functions(req_dict: dict):
                     pass
                 else:
                     liked_video_list.append(current_video)
-                    time.sleep(1.25)
+                    time.sleep(1)
                     driver_8.switch_to_default_content()
                     button = driver_8.find_element_by_xpath("//*[@id='top-level-buttons']/"
                                                             "ytd-toggle-button-renderer[1]")
                     ActionChains(driver_8).move_to_element(button).click(button).perform()
                 while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
-                    time.sleep(1.25)
+                    time.sleep(1)
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
     driver.quit()
