@@ -659,7 +659,7 @@ def ytmonster_functions(req_dict: dict):
                      ):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(1):
+        for i in range(40):
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
