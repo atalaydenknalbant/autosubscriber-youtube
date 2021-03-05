@@ -1090,6 +1090,15 @@ def viewgrip_functions(req_dict: dict):
     """ViewGrip login and then call inner like loop function(for_loop_like)"""
     driver: webdriver = set_driver_opt(False, True)
     driver.implicitly_wait(6)
+    driver.get("https://accounts.google.com/signin/v2")
+    email_area = driver.find_element_by_id("identifierId")
+    email_area.send_keys(req_dict['yt_email'])
+    driver.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
+    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
+                                                  " div.Xb9hP > input")
+    pw_area.send_keys(req_dict['yt_pw'])
+    driver.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
+    time.sleep(3)
     driver.get("https://www.viewgrip.net")  # Type_None
     driver.find_element_by_css_selector("body > div.landing-page > div.main-container >"
                                         " nav > div > ul > li:nth-child(5) > a") \
@@ -1105,40 +1114,25 @@ def viewgrip_functions(req_dict: dict):
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
                                         " div > ul > li:nth-child(3) > a") \
         .click()
-    time.sleep(3)
     try:
         driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
     except (ElementNotInteractableException, NoSuchElementException):
         pass
-    driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition >"
-                                        " div > ul:nth-child(3) > li:nth-child(1) > a")\
+    driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition > div >"
+                                        " ul:nth-child(3) > li:nth-child(1) > a").click()
+    driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) >"
+                                        " div > div.top-right-button-container > a")\
         .click()
-    driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) > div >"
-                                        " div.top-right-button-container > a").click()
-    driver.switch_to.window(driver.window_handles[1])
 
+    driver.switch_to.window(driver.window_handles[1])
+    driver.find_element_by_id("LikeButton").click()
+    driver.switch_to.window(driver.window_handles[2])
     def for_loop_like(driver_8,
                       like_btn="LikeButton",
                       skip_btn="SkipLike",
                       ):
         liked_video_list = []
         for i in range(25):
-            if i == 0:
-                driver_8.find_element_by_id(like_btn).click()
-                driver_8.switch_to.window(driver_8.window_handles[2])
-                sign_in_button = driver_8.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
-                ActionChains(driver_8).move_to_element(sign_in_button).perform()
-                try:
-                    sign_in_button.send_keys(Keys.RETURN)
-                except NoSuchElementException:
-                    sign_in_button.click()
-                email_area = driver_8.find_element_by_id("identifierId")
-                email_area.send_keys(req_dict['yt_email'])
-                driver_8.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
-                pw_area = driver_8.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
-                                                                " div.Xb9hP > input")
-                pw_area.send_keys(req_dict['yt_pw'])
-                driver_8.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
             while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
                 time.sleep(1)
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
