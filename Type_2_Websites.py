@@ -11,7 +11,8 @@ required_dict = {
     "yt_email": userinfo["youtube_email"],
     "yt_channel_id": userinfo["youtube_channel_id"],
     "email_submenow": userinfo["submenow_com_email"],
-    "email_subscribersvideo": userinfo["subscribers_video_email"]
+    "email_subscribersvideo": userinfo["subscribers_video_email"],
+    "yt_useragent": userinfo["youtube_useragent"]
 }
 
 if __name__ == "__main__":

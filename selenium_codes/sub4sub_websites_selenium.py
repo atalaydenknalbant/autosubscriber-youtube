@@ -26,7 +26,7 @@ def clear_cache(driver: webdriver, timeout=60):
     wait.until_not(get_clear_browsing_button)
 
 
-def set_driver_opt(headless=True, view_grip=False):
+def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
@@ -37,6 +37,7 @@ def set_driver_opt(headless=True, view_grip=False):
         chrome_options.add_argument('--headless')
     else:
         pass
+    chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
     if view_grip:
         chrome_options.add_extension('extensions/ViewGripExtension.crx')
     else:
@@ -48,24 +49,33 @@ def set_driver_opt(headless=True, view_grip=False):
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.add_argument("--enable-automation")
+    # chrome_options.add_argument("--enable-automation")
     driver = webdriver.Chrome(options=chrome_options)
     return driver
 
 
-def google_login(driver: webdriver, req_dict: dict):
+def google_login(driver: webdriver, req_dict: dict, headless=True, sign_in_btn=True):
     """google login"""
-    sign_in_button = driver.find_element_by_css_selector(
-        "#buttons > ytd-button-renderer > a")
-    ActionChains(driver).move_to_element(sign_in_button).perform()
-    sign_in_button.click()
-    email_area = driver.find_element_by_css_selector("#Email")
+    if sign_in_btn:
+        sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
+        ActionChains(driver).move_to_element(sign_in_button).perform()
+        sign_in_button.click()
+    # if headless:
+    #     email_area = driver.find_element_by_css_selector("#Email")
+    #     email_area.send_keys(req_dict['yt_email'])
+    #     driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
+    #     driver.save_screenshot("screenshots/screenshot.png")
+    #     pw_area = driver.find_element_by_css_selector("#password")
+    #     pw_area.send_keys(req_dict['yt_pw'])
+    #     driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
+    # else:
+    email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
-    driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-    driver.save_screenshot("screenshots/screenshot.png")
-    pw_area = driver.find_element_by_css_selector("#password")
+    driver.find_element_by_css_selector("#identifierNext > div > button").click()
+    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
+                                                  " div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
-    driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
+    driver.find_element_by_css_selector("#passwordNext > div > button").click()
     driver.save_screenshot("screenshots/screenshot.png")
 
 
@@ -216,7 +226,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
 
 def subpals_functions(req_dict: dict):
     """subpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
@@ -260,7 +270,7 @@ def subpals_functions(req_dict: dict):
 
 def ytpals_functions(req_dict: dict):
     """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
@@ -297,7 +307,7 @@ def ytpals_functions(req_dict: dict):
 
 def sonuker_functions(req_dict: dict):
     """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
@@ -342,7 +352,7 @@ def sonuker_functions(req_dict: dict):
 
 def subscribersvideo_functions(req_dict: dict):
     """subscriber.video login and activate Free All-In-One plan then call inner subscribe loop function(for_loop)"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(10)
     driver.get("https://www.subscribers.video/")  # Type_2
     driver.minimize_window()
@@ -371,7 +381,8 @@ def subscribersvideo_functions(req_dict: dict):
     except TimeoutException:
         pass
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("subscribersvideo Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging.info("subscribersvideo Your channel doesn't have any public video"
+                     " Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -498,7 +509,7 @@ def subscribersvideo_functions(req_dict: dict):
 
 def submenow_functions(req_dict: dict):
     """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
     driver.implicitly_wait(10)
@@ -586,6 +597,7 @@ def submenow_functions(req_dict: dict):
                                 ".style-default-active")) > 0:
                             pass
                         else:
+                            driver.save_screenshot("screenshots/screenshot.png")
                             button_5 = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
                                                                     "/ytd-toggle-button-renderer[1]")
                             ActionChains(driver).move_to_element(button_5).click(button_5).perform()
@@ -640,7 +652,7 @@ def submenow_functions(req_dict: dict):
 
 def ytmonster_functions(req_dict: dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
-    driver: webdriver = set_driver_opt(False)
+    driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(6)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
@@ -699,37 +711,7 @@ def ytmonster_functions(req_dict: dict):
                     break
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
-                sign_in_button = driver_6.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
-                ActionChains(driver_6).move_to_element(sign_in_button).perform()
-
-                try:
-                    sign_in_button.send_keys(Keys.RETURN)
-                except NoSuchElementException:
-                    sign_in_button.click()
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                if yt_login_options == 0:
-                    email_area = driver_6.find_element_by_css_selector("#Email")
-                    email_area.send_keys(req_dict['yt_email'])
-                if yt_login_options == 1:
-                    email_area = driver_6.find_element_by_id("identifierId")
-                    email_area.send_keys(req_dict['yt_email'])
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                if yt_login_options == 0:
-                    driver_6.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-                if yt_login_options == 1:
-                    driver_6.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
-                if yt_login_options == 0:
-                    pw_area = driver_6.find_element_by_css_selector("#password")
-                    pw_area.send_keys(req_dict['yt_pw'])
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                if yt_login_options == 1:
-                    pw_area = driver_6.find_element_by_css_selector("#password>div.aCsJod.oJeWuf>div>div.Xb9hP>input")
-                    pw_area.send_keys(req_dict['yt_pw'])
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                if yt_login_options == 0:
-                    driver_6.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-                if yt_login_options == 1:
-                    driver_6.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
+                google_login(driver_6, req_dict, headless=False)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
                 if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
@@ -883,7 +865,7 @@ def ytmonster_functions(req_dict: dict):
 
 def ytbpals_functions(req_dict: dict):
     """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan"""
-    driver: webdriver = set_driver_opt()
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(10)
     driver.get("https://ytbpals.com/")  # Type_None
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
@@ -941,32 +923,11 @@ def ytbpals_functions(req_dict: dict):
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
                 time.sleep(5)
-                sign_in_button = driver_7.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
-                time.sleep(3)
-                ActionChains(driver_7).move_to_element(sign_in_button).perform()
-                time.sleep(3)
-                try:
-                    sign_in_button.send_keys(Keys.RETURN)
-                except NoSuchElementException:
-                    sign_in_button.click()
-                time.sleep(3)
-                driver.save_screenshot("screenshots/screenshot.png")
-                email_area = driver.find_element_by_css_selector("#Email")
-                email_area.send_keys(req_dict['yt_email'])
-                driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-                time.sleep(3)
-                driver.save_screenshot("screenshots/screenshot.png")
-                pw_area = driver.find_element_by_css_selector("#password")
-                pw_area.send_keys(req_dict['yt_pw'])
-                time.sleep(3)
-                driver.save_screenshot("screenshots/screenshot.png")
-                driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-                time.sleep(2)
-                driver.save_screenshot("screenshots/screenshot.png")
+                google_login(driver_7, req_dict)
                 logging.info("login completed")
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                        and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                              "ytd-toggle-button-renderer[1]")) > 0:
+                if len(driver_7.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                        and len(driver_7.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                                "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
@@ -1088,17 +1049,13 @@ def ytbpals_functions(req_dict: dict):
 
 def viewgrip_functions(req_dict: dict):
     """ViewGrip login and then call inner like loop function(for_loop_like)"""
-    driver: webdriver = set_driver_opt(False, True)
+    driver: webdriver = set_driver_opt(req_dict, False, True)
     driver.implicitly_wait(6)
-    driver.get("https://accounts.google.com/signin/v2")
-    email_area = driver.find_element_by_id("identifierId")
-    email_area.send_keys(req_dict['yt_email'])
-    driver.find_element_by_css_selector("#identifierNext > div > button").send_keys(Keys.ENTER)
-    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
-                                                  " div.Xb9hP > input")
-    pw_area.send_keys(req_dict['yt_pw'])
-    driver.find_element_by_css_selector("#passwordNext > div > button").send_keys(Keys.ENTER)
+    driver.get("https://accounts.google.com/signin/v2/identifier")
+    google_login(driver, req_dict, headless=False, sign_in_btn=False)
+    logging.info("youtube login completed")
     time.sleep(3)
+    driver.save_screenshot("screenshots/screenshot.png")
     driver.get("https://www.viewgrip.net")  # Type_None
     driver.find_element_by_css_selector("body > div.landing-page > div.main-container >"
                                         " nav > div > ul > li:nth-child(5) > a") \
@@ -1127,6 +1084,7 @@ def viewgrip_functions(req_dict: dict):
     driver.switch_to.window(driver.window_handles[1])
     driver.find_element_by_id("LikeButton").click()
     driver.switch_to.window(driver.window_handles[2])
+
     def for_loop_like(driver_8,
                       like_btn="LikeButton",
                       skip_btn="SkipLike",
@@ -1154,6 +1112,71 @@ def viewgrip_functions(req_dict: dict):
                     ActionChains(driver_8).move_to_element(button).click(button).perform()
                 while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
                     time.sleep(1)
+    for_loop_like(driver)
+    logging.info("Channels liked successfully, quitting driver")
+    driver.quit()
+
+
+def goviral_functions(req_dict: dict):
+    """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
+    driver: webdriver = set_driver_opt(req_dict, False)
+    driver.implicitly_wait(10)
+    driver.get("https://members.goviral.ai/")  # Type_None
+    driver.find_element_by_name("email").send_keys(req_dict['email_goviral'])
+    driver.find_element_by_name("password").send_keys(req_dict['pw_goviral'])
+    driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around >"
+                                        " button").click()
+
+    driver.find_element_by_css_selector("#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
+
+    def for_loop_like(driver_9,
+                      like_btn="#kt_content > div > div.col-md-8 > div > form > div > "
+                               "div.disabled-area.position-relative > section.earn-likes.earning-box.position-"
+                               "relative.disabled > div.row > div.col-4.text-right.mt-1.position-relative > button",
+                      skip_btn="btn btn-primary next-video mr-3",
+                      subscribe_btn=""
+                      ):
+        like, subscribe = False, False
+        for i in range(25):
+            while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
+                time.sleep(1)
+
+            if len(driver_9.find_elements_by_css_selector(like_btn)) > 0:
+                like = True
+            while len(driver_9.window_handles) == 1:
+                time.sleep(1)
+            driver_9.switch_to.window(driver_9.window_handles[1])
+            if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                    and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                          "ytd-toggle-button-renderer[1]")) > 0:
+                current_video = driver_9.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
+                if i == 0:
+                    google_login(driver, req_dict, headless=False)
+                    logging.info("login completed")
+                if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
+                                                              " ytd-toggle-button-renderer.style-scope."
+                                                              "ytd-menu-renderer.force-icon-button"
+                                                              ".style-default-active")) > 0:
+                    pass
+                else:
+                    if like:
+                        button_like = driver_9.find_element_by_xpath("//*[@id='top-level-buttons']/"
+                                                                     "ytd-toggle-button-renderer[1]")
+                        ActionChains(driver_9).move_to_element(button_like).click(button_like).perform()
+                if subscribe:
+                    button_subscribe_yt = driver.find_element_by_css_selector(
+                        "#subscribe-button > ytd-subscribe-button-renderer")
+                    ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
+                like, subscribe = False, False
+                driver.save_screenshot("screenshots/screenshot_proof.png")
+                driver_9.switch_to.window(driver_9.window_handles[0])
+            while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
+                time.sleep(1)
+            else:
+                driver_9.switch_to.window(driver_9.window_handles[0])
+                driver_9.find_element_by_class_name(skip_btn).click()
+                driver_9.switch_to.window(driver_9.window_handles[1])
+
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
     driver.quit()

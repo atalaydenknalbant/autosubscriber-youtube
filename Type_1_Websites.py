@@ -13,6 +13,7 @@ required_dict = {
     "yt_pw": userinfo["youtube_password"],
     "yt_email": userinfo["youtube_email"],
     "yt_channel_id": userinfo["youtube_channel_id"],
+    "yt_useragent": userinfo["youtube_useragent"]
 }
 if __name__ == "__main__":
     subpals_thread = Thread(target=sws.subpals_functions, args=[required_dict]).start()

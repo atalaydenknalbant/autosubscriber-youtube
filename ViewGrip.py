@@ -9,7 +9,8 @@ required_dict = {
     "viewGrip_pw": userinfo["viewgrip_password"],
     "viewGrip_email": userinfo["viewgrip_email"],
     "yt_pw": userinfo["youtube_password"],
-    "yt_email": userinfo["youtube_email"]
+    "yt_email": userinfo["youtube_email"],
+    "yt_useragent": userinfo["youtube_useragent"]
 }
 
 if __name__ == "__main__":
