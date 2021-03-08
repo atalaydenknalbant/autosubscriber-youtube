@@ -184,8 +184,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
                     ".style-default-active")) > 0:
                 pass
             else:
-                button_like = driver.find_element_by_css_selector(
-                    "#top-level-buttons > ytd-toggle-button-renderer:nth-child(1) > a")
+                button_like = driver.find_element_by_xpath(
+                    "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
                 ActionChains(driver).move_to_element(button_like).click(button_like).perform()
             button_subscribe_yt = driver.find_element_by_css_selector(
                 "#subscribe-button > ytd-subscribe-button-renderer")
@@ -1176,6 +1176,7 @@ def goviral_functions(req_dict: dict):
                 driver_9.switch_to.window(driver_9.window_handles[0])
                 driver_9.find_element_by_class_name(skip_btn).click()
                 driver_9.switch_to.window(driver_9.window_handles[1])
+                i -= 1
 
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
