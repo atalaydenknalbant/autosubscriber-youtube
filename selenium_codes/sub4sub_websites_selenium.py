@@ -131,25 +131,25 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         try:
             remaining_videos = driver.find_element_by_id("remainingHint").text
             logging.info(d+" Remaining Videos: " + remaining_videos)
-            if driver.find_element_by_id("remainingHint").text == current_remaining:
-                current_remaining_time += 1
-                if current_remaining_time > 3:
-                    logging.info(d+" same remaining videos 4 times in a row, resetting to begin function")
-                    driver.quit()
-                    if d == "subpals":
-                        subpals_functions(req_dict)
-                        break
-                    if d == "sonuker":
-                        sonuker_functions(req_dict)
-                        break
-                    if d == "ytpals":
-                        ytpals_functions(req_dict)
-                        break
-                    break
-            else:
-                if driver.find_element_by_id("remainingHint").text != "-":
-                    current_remaining = driver.find_element_by_id("remainingHint").text
-                    current_remaining_time = 0
+            # if driver.find_element_by_id("remainingHint").text == current_remaining:
+            #     current_remaining_time += 1
+            #     if current_remaining_time > 3:
+            #         logging.info(d+" same remaining videos 4 times in a row, resetting to begin function")
+            #         driver.quit()
+            #         if d == "subpals":
+            #             subpals_functions(req_dict)
+            #             break
+            #         if d == "sonuker":
+            #             sonuker_functions(req_dict)
+            #             break
+            #         if d == "ytpals":
+            #             ytpals_functions(req_dict)
+            #             break
+            #         break
+            # else:
+            #     if driver.find_element_by_id("remainingHint").text != "-":
+            #         current_remaining = driver.find_element_by_id("remainingHint").text
+            #         current_remaining_time = 0
         except NoSuchElementException:
             driver.save_screenshot("screenshots/screenshot.png")
             driver.quit()
@@ -171,7 +171,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             return
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        driver.save_screenshot("screenshots/screenshot.png")
         if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                 and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                       "ytd-toggle-button-renderer[1]")) > 0:
@@ -195,10 +194,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
             driver.switch_to.window(window_before)
             sc[special_condition]()
             logging.info(d+" Video Not Found")
-            # while driver.find_elements_by_id("seconds")[1].text == "0":
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
-            # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             continue
@@ -207,11 +204,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         driver.switch_to_default_content()
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
-        # while driver.find_elements_by_id("seconds")[1].text == "0":
         while confirm_seconds == "0":
             time.sleep(1.25)
         try:
-            # driver.save_screenshot("screenshots/screenshot_confirm_btn.png")
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             continue
