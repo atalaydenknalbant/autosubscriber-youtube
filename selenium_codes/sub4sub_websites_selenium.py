@@ -193,7 +193,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         else:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            logging.info(d+" Video Not Found")
+            # logging.info(d+" Video Not Found")
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
