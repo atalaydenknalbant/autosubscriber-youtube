@@ -569,8 +569,12 @@ def submenow_functions(req_dict: dict):
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
                     driver.save_screenshot("screenshots/screenshot5_1.png")
-                    while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
-                        time.sleep(1.25)
+                    try:
+                        while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
+                            time.sleep(1.25)
+                    except StaleElementReferenceException:
+                        logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
+                        driver.quit()
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
