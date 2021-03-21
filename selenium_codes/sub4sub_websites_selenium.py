@@ -1158,6 +1158,8 @@ def goviral_functions(req_dict: dict):
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
                 time.sleep(1.25)
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
+                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 11:
+                    time.sleep(1.25)
                 driver_9.find_element_by_css_selector(like_btn).click()
                 driver_9.switch_to.window(driver_9.window_handles[1])
                 if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
