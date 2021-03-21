@@ -1119,7 +1119,7 @@ def viewgrip_functions(req_dict: dict):
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict, False)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, headless=False, sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1148,49 +1148,57 @@ def goviral_functions(req_dict: dict):
                       subscribe_btn="#kt_content > div > div.col-md-8 > div > form > div >"
                                     " div.disabled-area.position-relative >"
                                     " section.earn-subscribes.earning-box.position-relative >"
-                                    " div.row > div.col-4.text-right.mt-1.position-relative > button"
+                                    " div.row > div.col-4.text-right.mt-1.position-relative > button",
+                      next_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
+                               " button.btn.btn-primary.next-video.mr-3"
                       ):
         for i in range(25):
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
-                time.sleep(1.25)
+                time.sleep(1)
             while len(driver_9.window_handles) == 1:
-                time.sleep(1.25)
+                time.sleep(1)
             driver.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                time.sleep(1.25)
+                pass
             driver.save_screenshot("screenshots/screenshot.png")
-            if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
-                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 13:
-                    time.sleep(1.25)
-                driver_9.find_element_by_css_selector(like_btn).click()
-                driver_9.switch_to.window(driver_9.window_handles[1])
-                if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
-                                                              " ytd-toggle-button-renderer.style-scope."
-                                                              "ytd-menu-renderer.force-icon-button"
-                                                              ".style-default-active")) > 0:
-                    pass
-                else:
-                    button_like = driver_9.find_element_by_xpath("//*[@id='top-level-buttons']/"
-                                                                 "ytd-toggle-button-renderer[1]")
-                    ActionChains(driver_9).move_to_element(button_like).click(button_like).perform()
-                driver_9.switch_to.window(driver_9.window_handles[0])
-                while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                    time.sleep(1)
-                driver.save_screenshot("screenshots/screenshot.png")
-                continue
+            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 16:
+                pass
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
-                driver_9.find_element_by_css_selector(subscribe_btn).click()
-                driver_9.switch_to.window(driver_9.window_handles[1])
-                button_subscribe_yt = driver_9.find_element_by_css_selector(
-                    "#subscribe-button > ytd-subscribe-button-renderer")
-                ActionChains(driver_9).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
-                driver_9.switch_to.window(driver_9.window_handles[0])
-                while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                    time.sleep(1)
-                driver.save_screenshot("screenshots/screenshot.png")
-                continue
-            driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
-            i -= 1
+                try:
+                    driver_9.find_element_by_css_selector(subscribe_btn).click()
+                    driver_9.switch_to.window(driver_9.window_handles[1])
+                    button_subscribe_yt = driver_9.find_element_by_css_selector(
+                        "#subscribe-button > ytd-subscribe-button-renderer")
+                    ActionChains(driver_9).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
+                    driver_9.switch_to.window(driver_9.window_handles[0])
+                    driver.save_screenshot("screenshots/screenshot.png")
+                except ElementClickInterceptedException:
+                    pass
+            if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
+                try:
+                    driver_9.find_element_by_css_selector(like_btn).click()
+                    driver_9.switch_to.window(driver_9.window_handles[1])
+                    if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
+                                                                  " ytd-toggle-button-renderer.style-scope."
+                                                                  "ytd-menu-renderer.force-icon-button"
+                                                                  ".style-default-active")) > 0:
+                        pass
+                    else:
+                        button_like = driver_9.find_element_by_xpath("//*[@id='top-level-buttons']/"
+                                                                     "ytd-toggle-button-renderer[1]")
+                        ActionChains(driver_9).move_to_element(button_like).click(button_like).perform()
+                    driver_9.switch_to.window(driver_9.window_handles[0])
+                    driver.save_screenshot("screenshots/screenshot.png")
+                except ElementClickInterceptedException:
+                    pass
+            while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
+                time.sleep(1)
+            c = 0
+            while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
+                time.sleep(1)
+                c += 1
+                if c == 30:
+                    driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
 
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
