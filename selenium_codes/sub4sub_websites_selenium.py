@@ -1155,10 +1155,12 @@ def goviral_functions(req_dict: dict):
                 time.sleep(1.25)
             while len(driver_9.window_handles) == 1:
                 time.sleep(1.25)
+            driver.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
                 time.sleep(1.25)
+            driver.save_screenshot("screenshots/screenshot.png")
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
-                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 11:
+                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 13:
                     time.sleep(1.25)
                 driver_9.find_element_by_css_selector(like_btn).click()
                 driver_9.switch_to.window(driver_9.window_handles[1])
@@ -1174,6 +1176,7 @@ def goviral_functions(req_dict: dict):
                 driver_9.switch_to.window(driver_9.window_handles[0])
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     time.sleep(1)
+                driver.save_screenshot("screenshots/screenshot.png")
                 continue
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 driver_9.find_element_by_css_selector(subscribe_btn).click()
@@ -1184,6 +1187,7 @@ def goviral_functions(req_dict: dict):
                 driver_9.switch_to.window(driver_9.window_handles[0])
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     time.sleep(1)
+                driver.save_screenshot("screenshots/screenshot.png")
                 continue
             driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
             i -= 1
