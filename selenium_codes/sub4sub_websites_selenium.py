@@ -30,9 +30,6 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    prefs = {"profile.managed_default_content_settings.images": 2, "disk-cache-size": 4096}
-    chrome_options.add_experimental_option('prefs', prefs)
-    chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
     if headless:
         chrome_options.add_argument('--headless')
     else:
@@ -42,6 +39,9 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
         chrome_options.add_extension('extensions/ViewGripExtension.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
+        prefs = {"profile.managed_default_content_settings.images": 2, "disk-cache-size": 4096}
+        chrome_options.add_experimental_option('prefs', prefs)
+        chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
@@ -1081,7 +1081,14 @@ def viewgrip_functions(req_dict: dict):
         .click()
 
     driver.switch_to.window(driver.window_handles[1])
-    driver.find_element_by_id("LikeButton").click()
+    # driver.find_element_by_css_selector("#add-ons > span:nth-child(2)").click()
+    # time.sleep(2)
+    # ActionChains(driver).click_and_hold(driver.find_element_by_css_selector("#collapseTwo > div > div > div > span >"
+    #                                                                         " span.irs-handle.single"))\
+    #     .move_by_offset(250, 0).release().perform()
+    time.sleep(2)
+    driver.find_element_by_id("surfButton").click()
+    time.sleep(2)
     driver.switch_to.window(driver.window_handles[2])
 
     def for_loop_like(driver_8,
@@ -1095,6 +1102,9 @@ def viewgrip_functions(req_dict: dict):
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                     and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                           "ytd-toggle-button-renderer[1]")) > 0:
+                # if i == 0:
+                #     google_login(driver, req_dict, headless=False, sign_in_btn=False)
+                #     logging.info("youtube login completed")
                 current_video = driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
                 if current_video in liked_video_list or\
                         len(driver_8.find_elements_by_css_selector("#top-level-buttons >"
@@ -1112,7 +1122,7 @@ def viewgrip_functions(req_dict: dict):
                 while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
                     time.sleep(1)
     for_loop_like(driver)
-    logging.info("Channels liked successfully, quitting driver")
+    # logging.info("Channels liked successfully, quitting driver")
     driver.quit()
 
 
