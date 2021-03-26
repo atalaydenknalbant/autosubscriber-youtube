@@ -1081,11 +1081,11 @@ def viewgrip_functions(req_dict: dict):
         .click()
 
     driver.switch_to.window(driver.window_handles[1])
-    # driver.find_element_by_css_selector("#add-ons > span:nth-child(2)").click()
-    # time.sleep(2)
-    # ActionChains(driver).click_and_hold(driver.find_element_by_css_selector("#collapseTwo > div > div > div > span >"
-    #                                                                         " span.irs-handle.single"))\
-    #     .move_by_offset(250, 0).release().perform()
+    driver.find_element_by_css_selector("#add-ons > span:nth-child(2)").click()
+    time.sleep(2)
+    ActionChains(driver).click_and_hold(driver.find_element_by_css_selector("#collapseTwo > div > div > div > span >"
+                                                                            " span.irs-handle.single"))\
+        .move_by_offset(250, 0).release().perform()
     time.sleep(2)
     driver.find_element_by_id("surfButton").click()
     time.sleep(2)
