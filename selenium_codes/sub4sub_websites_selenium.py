@@ -1112,13 +1112,13 @@ def viewgrip_functions(req_dict: dict):
                                                                    "ytd-menu-renderer.force-icon-button"
                                                                    ".style-default-active")) > 0:
                     pass
-                else:
-                    liked_video_list.append(current_video)
-                    time.sleep(1)
-                    driver_8.switch_to_default_content()
-                    button = driver_8.find_element_by_xpath("//*[@id='top-level-buttons']/"
-                                                            "ytd-toggle-button-renderer[1]")
-                    ActionChains(driver_8).move_to_element(button).click(button).perform()
+                # else:
+                #     liked_video_list.append(current_video)
+                #     time.sleep(1)
+                #     driver_8.switch_to_default_content()
+                #     button = driver_8.find_element_by_xpath("//*[@id='top-level-buttons']/"
+                #                                             "ytd-toggle-button-renderer[1]")
+                #     ActionChains(driver_8).move_to_element(button).click(button).perform()
                 while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
                     time.sleep(1)
     for_loop_like(driver)
