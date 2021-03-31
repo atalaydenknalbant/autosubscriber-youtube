@@ -1209,7 +1209,10 @@ def goviral_functions(req_dict: dict):
                 time.sleep(1)
                 c += 1
                 if c == 30:
-                    driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
+                    try:
+                        driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
+                    except ElementNotInteractableException:
+                        pass
 
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
