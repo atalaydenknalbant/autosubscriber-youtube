@@ -1076,6 +1076,7 @@ def viewgrip_functions(req_dict: dict):
         pass
     driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition > div >"
                                         " ul:nth-child(3) > li:nth-child(1) > a").click()
+    time.sleep(1.25)
     driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) >"
                                         " div > div.top-right-button-container > a")\
         .click()
