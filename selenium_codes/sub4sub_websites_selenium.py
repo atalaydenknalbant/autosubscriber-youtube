@@ -54,21 +54,12 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     return driver
 
 
-def google_login(driver: webdriver, req_dict: dict, headless=True, sign_in_btn=True):
+def google_login(driver: webdriver, req_dict: dict,  sign_in_btn=True):
     """google login"""
     if sign_in_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).perform()
         sign_in_button.click()
-    # if headless:
-    #     email_area = driver.find_element_by_css_selector("#Email")
-    #     email_area.send_keys(req_dict['yt_email'])
-    #     driver.find_element_by_css_selector("#next").send_keys(Keys.ENTER)
-    #     driver.save_screenshot("screenshots/screenshot.png")
-    #     pw_area = driver.find_element_by_css_selector("#password")
-    #     pw_area.send_keys(req_dict['yt_pw'])
-    #     driver.find_element_by_css_selector("#submit").send_keys(Keys.ENTER)
-    # else:
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
@@ -131,25 +122,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         try:
             remaining_videos = driver.find_element_by_id("remainingHint").text
             logging.info(d+" Remaining Videos: " + remaining_videos)
-            # if driver.find_element_by_id("remainingHint").text == current_remaining:
-            #     current_remaining_time += 1
-            #     if current_remaining_time > 3:
-            #         logging.info(d+" same remaining videos 4 times in a row, resetting to begin function")
-            #         driver.quit()
-            #         if d == "subpals":
-            #             subpals_functions(req_dict)
-            #             break
-            #         if d == "sonuker":
-            #             sonuker_functions(req_dict)
-            #             break
-            #         if d == "ytpals":
-            #             ytpals_functions(req_dict)
-            #             break
-            #         break
-            # else:
-            #     if driver.find_element_by_id("remainingHint").text != "-":
-            #         current_remaining = driver.find_element_by_id("remainingHint").text
-            #         current_remaining_time = 0
         except NoSuchElementException:
             driver.save_screenshot("screenshots/screenshot.png")
             driver.quit()
@@ -710,7 +682,7 @@ def ytmonster_functions(req_dict: dict):
                     break
                 window_after = driver_6.window_handles[1]
                 driver_6.switch_to.window(window_after)
-                google_login(driver_6, req_dict, headless=False)
+                google_login(driver_6, req_dict)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 logging.info("login completed")
                 if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
@@ -1051,7 +1023,7 @@ def viewgrip_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict, False, True)
     driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, headless=False, sign_in_btn=False)
+    google_login(driver, req_dict, sign_in_btn=False)
     logging.info("youtube login completed")
     time.sleep(3)
     driver.save_screenshot("screenshots/screenshot.png")
@@ -1132,7 +1104,7 @@ def goviral_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, headless=False, sign_in_btn=False)
+    google_login(driver, req_dict, sign_in_btn=False)
     logging.info("youtube login completed")
     time.sleep(3)
     driver.get("https://members.goviral.ai/")  # Type_None
