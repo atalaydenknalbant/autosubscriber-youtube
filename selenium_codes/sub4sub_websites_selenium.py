@@ -49,7 +49,7 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument("--window-size=1920x1080")
-    # chrome_options.add_argument("--enable-automation")
+    chrome_options.add_argument("--enable-automation")
     driver = webdriver.Chrome(options=chrome_options)
     return driver
 
