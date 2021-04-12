@@ -21,4 +21,4 @@ Python Selenium-based automated subscribing functions for youtube sub4sub websit
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![ViewGrip](https://i.imgur.com/89LP1ci.png)](https://www.viewgrip.net/) [![GoViral](https://i.imgur.com/coZXiwg.png)](https://goviral.ai/) 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![GoViral](https://i.imgur.com/coZXiwg.png)](https://goviral.ai/) 

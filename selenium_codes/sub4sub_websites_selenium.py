@@ -42,6 +42,7 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
         prefs = {"profile.managed_default_content_settings.images": 2, "disk-cache-size": 4096}
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+        pass
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
@@ -49,7 +50,8 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument("--window-size=1920x1080")
-    chrome_options.add_argument("--enable-automation")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    # chrome_options.add_argument("--enable-automation")
     driver = webdriver.Chrome(options=chrome_options)
     return driver
 
@@ -1016,87 +1018,6 @@ def ytbpals_functions(req_dict: dict):
                         logging.info("couldn't find confirm button")
                         continue
     for_loop_sub(driver)
-
-
-def viewgrip_functions(req_dict: dict):
-    """ViewGrip login and then call inner like loop function(for_loop_like)"""
-    driver: webdriver = set_driver_opt(req_dict, False, True)
-    driver.implicitly_wait(6)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, sign_in_btn=False)
-    logging.info("youtube login completed")
-    time.sleep(3)
-    driver.save_screenshot("screenshots/screenshot.png")
-    driver.get("https://www.viewgrip.net")  # Type_None
-    driver.find_element_by_css_selector("body > div.landing-page > div.main-container >"
-                                        " nav > div > ul > li:nth-child(5) > a") \
-        .click()
-    driver.find_element_by_id("login").send_keys(req_dict['viewGrip_email'])
-    driver.find_element_by_id("pass").send_keys(req_dict['viewGrip_pw'])
-    driver.find_element_by_css_selector("#sign_in > button").click()
-    time.sleep(2)
-    try:
-        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
-    except (ElementNotInteractableException, NoSuchElementException):
-        pass
-    driver.find_element_by_css_selector("#app-container > div.sidebar > div.main-menu.default-transition >"
-                                        " div > ul > li:nth-child(3) > a") \
-        .click()
-    try:
-        driver.find_element_by_xpath("//*[@id='nocampaign']/div/div/div[3]/button").click()
-    except (ElementNotInteractableException, NoSuchElementException):
-        pass
-    driver.find_element_by_css_selector("#app-container > div.sidebar > div.sub-menu.default-transition > div >"
-                                        " ul:nth-child(3) > li:nth-child(1) > a").click()
-    time.sleep(1.25)
-    driver.find_element_by_css_selector("#app-container > main > div > div:nth-child(1) >"
-                                        " div > div.top-right-button-container > a")\
-        .click()
-
-    driver.switch_to.window(driver.window_handles[1])
-    driver.find_element_by_css_selector("#add-ons > span:nth-child(2)").click()
-    # time.sleep(2)
-    # ActionChains(driver).click_and_hold(driver.find_element_by_css_selector("#collapseTwo > div > div > div > span >"
-    #                                                                         " span.irs-handle.single"))\
-    #     .move_by_offset(250, 0).release().perform()
-    time.sleep(2)
-    driver.find_element_by_id("surfButton").click()
-    time.sleep(2)
-    driver.switch_to.window(driver.window_handles[2])
-
-    def for_loop_like(driver_8,
-                      like_btn="LikeButton",
-                      skip_btn="SkipLike",
-                      ):
-        liked_video_list = []
-        for i in range(25):
-            while len(driver_8.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) == 0:
-                time.sleep(1)
-            if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                    and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                          "ytd-toggle-button-renderer[1]")) > 0:
-                # if i == 0:
-                #     google_login(driver, req_dict, headless=False, sign_in_btn=False)
-                #     logging.info("youtube login completed")
-                current_video = driver_8.find_element_by_css_selector("#container > h1 > yt-formatted-string").text
-                if current_video in liked_video_list or\
-                        len(driver_8.find_elements_by_css_selector("#top-level-buttons >"
-                                                                   " ytd-toggle-button-renderer.style-scope."
-                                                                   "ytd-menu-renderer.force-icon-button"
-                                                                   ".style-default-active")) > 0:
-                    pass
-                # else:
-                #     liked_video_list.append(current_video)
-                #     time.sleep(1)
-                #     driver_8.switch_to_default_content()
-                #     button = driver_8.find_element_by_xpath("//*[@id='top-level-buttons']/"
-                #                                             "ytd-toggle-button-renderer[1]")
-                #     ActionChains(driver_8).move_to_element(button).click(button).perform()
-                while len(driver_8.find_elements_by_css_selector("body > main > div > center > font")) == 0:
-                    time.sleep(1)
-    for_loop_like(driver)
-    # logging.info("Channels liked successfully, quitting driver")
-    driver.quit()
 
 
 def goviral_functions(req_dict: dict):
