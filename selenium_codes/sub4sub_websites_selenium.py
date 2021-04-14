@@ -26,7 +26,7 @@ def clear_cache(driver: webdriver, timeout=60):
     wait.until_not(get_clear_browsing_button)
 
 
-def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
+def set_driver_opt(req_dict: dict, headless=True, extension=0):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
@@ -35,8 +35,8 @@ def set_driver_opt(req_dict: dict, headless=True, view_grip=False):
     else:
         pass
     chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
-    if view_grip:
-        chrome_options.add_extension('extensions/ViewGripExtension.crx')
+    if extension > 0:
+        pass
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2, "disk-cache-size": 4096}
