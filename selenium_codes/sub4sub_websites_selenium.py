@@ -506,7 +506,7 @@ def submenow_functions(req_dict: dict):
             driver.find_element_by_css_selector("#reviewDialog > div.headerPlan > div > a > img").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             pass
-        driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
+        driver.find_element_by_xpath("//*[@id='buttonPlan8']").click()
     else:
         logging.info("submenow active Button Passed")
         driver.quit()
