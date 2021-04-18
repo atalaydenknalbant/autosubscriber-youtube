@@ -73,13 +73,9 @@ def google_login(driver: webdriver, req_dict: dict,  sign_in_btn=True):
 
 def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
                                  confirm_btn="#likeSub3 > a",
-                                 subscribe_btn="#likeSub2 > i",
-                                 stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
-                                 skip_btn="#\31  > a:nth-child(5) > img"
+                                 subscribe_btn="#likeSub2 > i"
                                  ):
     """Loop for like and sub, includes google login"""
-    current_remaining_time = 0
-    current_remaining = ""
     i = 0
 
     def sc_0():
@@ -166,7 +162,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, spec
         else:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            # logging.info(d+" Video Not Found")
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
@@ -633,9 +628,8 @@ def ytmonster_functions(req_dict: dict):
     driver.get("https://www.ytmonster.net/exchange/likes")
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_6, yt_login_options=0, special_condition=0,
+    def for_loop_sub(driver_6, yt_login_options=0,
                      like_btn="likeText",
-                     stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                      skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
                               " div > div:nth-child(7) > div > a.likeSkip > div",
                      confirm_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
@@ -851,7 +845,6 @@ def ytbpals_functions(req_dict: dict):
     def for_loop_sub(driver_7, sub_btn="#ytbpals-channels > div > div > div >"
                                        " div.col-sm-4.text-center >"
                                        " button.subscribe.yt-btn.ytb-subscribe",
-                     stop_condition_xpath="/html/body/div/center[2]/div/div[2]/div[1]/div[4]/a",
                      skip_btn="#ytbpals-channels > div > div > div > div.col-sm-4.text-center >"
                               " button.skip.yt-btn.ytb-subscribe.ytb-skip",
                      confirm_btn="ytbconfirm",
@@ -1016,6 +1009,7 @@ def ytbpals_functions(req_dict: dict):
                         driver_7.switch_to.window(window_before)
                         logging.info("couldn't find confirm button")
                         continue
+
     for_loop_sub(driver)
 
 
