@@ -18,4 +18,3 @@ required_dict = {
 if __name__ == "__main__":
     submenow_thread = Thread(target=sws.submenow_functions, args=[required_dict]).start()
     subscribersvideo_thread = Thread(target=sws.subscribersvideo_functions, args=[required_dict]).start()
-    # sws.test1(required_dict)
