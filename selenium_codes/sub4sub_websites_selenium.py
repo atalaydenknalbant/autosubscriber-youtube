@@ -495,7 +495,8 @@ def submenow_functions(req_dict: dict):
     driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
     time.sleep(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
-        logging.info("submenow Your channel doesn't have any public video Please try to reload this page one more time.")
+        logging\
+            .info("submenow Your channel doesn't have any public video Please try to reload this page one more time.")
         driver.quit()
         return
     else:
@@ -538,7 +539,8 @@ def submenow_functions(req_dict: dict):
                         break
                     driver.save_screenshot("screenshots/screenshot5_1.png")
                     try:
-                        while driver.find_element_by_css_selector("#marketStatus > span").text != "Watch, Like & Subscribe":
+                        while driver.find_element_by_css_selector("#marketStatus > span").text != \
+                                "Watch, Like & Subscribe":
                             time.sleep(1.25)
                     except StaleElementReferenceException:
                         logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
@@ -604,8 +606,8 @@ def submenow_functions(req_dict: dict):
                 if len(driver.find_elements_by_id("buttonPlan8")) > 0:
                     try:
                         driver.find_element_by_id("buttonPlan8").click()
-                    except Exception as ex:
-                        logging.info("submenow Alert Skipped Exception: " + str(ex))
+                    except Exception as ex_5:
+                        logging.info("submenow Alert Skipped Exception: " + str(ex_5))
                         driver.close()
                         return
                 driver.find_element_by_id("btnReload").send_keys(Keys.ENTER)
@@ -1033,8 +1035,6 @@ def goviral_functions(req_dict: dict):
                       like_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
                                          " div.disabled-area.position-relative >"
                                          " section.earn-likes.earning-box.position-relative.disabled",
-                      skip_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
-                               " button.btn.btn-secondary.skip-video",
                       subscribe_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
                                               " div.disabled-area.position-relative >"
                                               " section.earn-subscribes.earning-box.position-relative.disabled",
