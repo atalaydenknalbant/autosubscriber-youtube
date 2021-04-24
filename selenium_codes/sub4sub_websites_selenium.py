@@ -17,7 +17,8 @@ def get_clear_browsing_button(driver: webdriver):
     return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
 
 
-def clear_cache(driver: webdriver, timeout=60):
+def clear_cache(driver: webdriver,
+                timeout=60):
     """Clear the cookies and cache for the ChromeDriver instance."""
     driver.get('chrome://settings/clearBrowserData')
     wait = WebDriverWait(driver, timeout)
@@ -26,7 +27,9 @@ def clear_cache(driver: webdriver, timeout=60):
     wait.until_not(get_clear_browsing_button)
 
 
-def set_driver_opt(req_dict: dict, headless=True, extension=0):
+def set_driver_opt(req_dict: dict,
+                   headless=True,
+                   extension=0):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
@@ -55,7 +58,9 @@ def set_driver_opt(req_dict: dict, headless=True, extension=0):
     return driver
 
 
-def google_login(driver: webdriver, req_dict: dict,  sign_in_btn=True):
+def google_login(driver: webdriver,
+                 req_dict: dict,
+                 sign_in_btn=True):
     """google login"""
     if sign_in_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
@@ -71,7 +76,10 @@ def google_login(driver: webdriver, req_dict: dict,  sign_in_btn=True):
     driver.save_screenshot("screenshots/screenshot.png")
 
 
-def type_1_for_loop_like_and_sub(driver: webdriver, d: str, req_dict: dict, special_condition=1,
+def type_1_for_loop_like_and_sub(driver: webdriver,
+                                 d: str,
+                                 req_dict: dict,
+                                 special_condition=1,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i"
                                  ):
@@ -227,7 +235,9 @@ def subpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "subpals", req_dict)
+    type_1_for_loop_like_and_sub(driver,
+                                 "subpals",
+                                 req_dict)
     driver.quit()
 
 
@@ -264,7 +274,9 @@ def ytpals_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, 300);")
-    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
+    type_1_for_loop_like_and_sub(driver,
+                                 "ytpals",
+                                 req_dict)
     driver.quit()
 
 
@@ -309,7 +321,9 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.execute_script("window.scrollTo(0, 500);")
-    type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
+    type_1_for_loop_like_and_sub(driver,
+                                 "sonuker",
+                                 req_dict)
     driver.quit()
 
 
@@ -826,7 +840,8 @@ def ytmonster_functions(req_dict: dict):
                         logging.info("couldn't find confirm button")
                         continue
 
-    for_loop_sub(driver, 1)
+    for_loop_sub(driver,
+                 1)
     logging.info("Channels liked successfully, quitting driver")
     driver.quit()
 
