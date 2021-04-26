@@ -1,4 +1,4 @@
-from selenium_codes import sub4sub_websites_selenium as sws
+from selenium import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
 
 config_object = ConfigParser()

@@ -366,7 +366,6 @@ def subscribersvideo_functions(req_dict: dict):
         pass
     if len(driver.find_elements_by_id("buttonPlan6")) > 0:
         try:
-            driver.save_screenshot("screenshots/screenshot4_1.png")
             driver.find_element_by_css_selector("#reviewDialog > div.greenHeader > div > a > i").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             pass
@@ -395,7 +394,6 @@ def subscribersvideo_functions(req_dict: dict):
         return
     else:
         driver.switch_to.default_content()
-        driver.save_screenshot("screenshots/screenshot4_1.png")
 
     def for_loop():
         try:
@@ -451,7 +449,6 @@ def subscribersvideo_functions(req_dict: dict):
                         driver.switch_to.window(window_before_4)
                         driver.switch_to.default_content()
                         time.sleep(1.25)
-                        driver.save_screenshot("screenshots/screenshot_driver4.png")
                         driver.find_element_by_id("btnSkip").click()
                         continue
                     driver.switch_to.window(window_before_4)
@@ -491,7 +488,6 @@ def submenow_functions(req_dict: dict):
     driver.set_window_size(1800, 900)
     driver.implicitly_wait(10)
     driver.get("https://www.submenow.com/")  # Type_2
-    driver.save_screenshot("screenshots/screenshot5_1.png")
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
             logging.info("submenow Website Temporarily Unavailable, closing driver")
@@ -516,7 +512,6 @@ def submenow_functions(req_dict: dict):
     else:
         pass
     if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
-        driver.save_screenshot("screenshots/screenshot5_1.png")
         try:
             driver.find_element_by_css_selector("#reviewDialog > div.headerPlan > div > a > img").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
@@ -551,7 +546,6 @@ def submenow_functions(req_dict: dict):
                     if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
-                    driver.save_screenshot("screenshots/screenshot5_1.png")
                     try:
                         while driver.find_element_by_css_selector("#marketStatus > span").text != \
                                 "Watch, Like & Subscribe":
