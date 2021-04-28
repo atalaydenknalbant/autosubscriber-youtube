@@ -557,7 +557,6 @@ def submenow_functions(req_dict: dict):
                     driver.find_element_by_id("btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after_5 = driver.window_handles[1]
                     driver.switch_to.window(window_after_5)
-                    driver.switch_to.default_content()
                     window_after_5 = driver.window_handles[1]
                     driver.switch_to.window(window_after_5)
                     driver.execute_script("window.scrollTo(0, 300)")
