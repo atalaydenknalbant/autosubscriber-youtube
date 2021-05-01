@@ -3,7 +3,7 @@
 [![last-release](https://img.shields.io/github/release-date/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/releases) [![last-commit](https://img.shields.io/github/last-commit/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/graphs/commit-activity) [![issues](https://img.shields.io/github/issues/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/issues) [![pullrequests](https://img.shields.io/github/issues-pr/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/pulls) [![License: GPL v3](https://img.shields.io/github/license/atalaydenknalbant/autosubscriber-youtube)](https://www.gnu.org/licenses/gpl-3.0) 
 
 # autosubscriber-youtube 
-Python Selenium-based automated subscribing functions for youtube sub4sub websites.
+Python Selenium-based automated subscribing, liking functions for youtube sub4sub websites.
 
 ## Pre-requisites
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) <a href="https://chromedriver.chromium.org/">
