@@ -2,6 +2,7 @@
 
 [![last-release](https://img.shields.io/github/release-date/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/releases) [![last-commit](https://img.shields.io/github/last-commit/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/graphs/commit-activity) [![issues](https://img.shields.io/github/issues/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/issues) [![pullrequests](https://img.shields.io/github/issues-pr/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/pulls) [![License: GPL v3](https://img.shields.io/github/license/atalaydenknalbant/autosubscriber-youtube)](https://www.gnu.org/licenses/gpl-3.0) 
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/atalaydenknalbant/autosubscriber-youtube)
 # autosubscriber-youtube 
 Python Selenium-based automated subscribing, liking functions for youtube sub4sub websites.
 
