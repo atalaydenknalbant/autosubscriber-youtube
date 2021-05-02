@@ -8,6 +8,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
+import os
+
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -33,6 +35,8 @@ def set_driver_opt(req_dict: dict,
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     if headless:
         chrome_options.add_argument('--headless')
     else:
@@ -54,7 +58,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
 
 

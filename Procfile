@@ -1,1 +1,1 @@
-worker: python GoViral.py
+worker: python Type_1_Websites.py

@@ -1,5 +1,13 @@
 {
   "name": "autosubscriber-youtube",
   "description": "Python Selenium-based automated subscribing functions for youtube sub4sub websites",
-  "repository": "https://github.com/atalaydenknalbant/autosubscriber-youtube"
+  "repository": "https://github.com/atalaydenknalbant/autosubscriber-youtube",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-chromedriver"
+    }
+  ]
 }
