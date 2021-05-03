@@ -87,8 +87,10 @@ def google_login(driver: webdriver,
     driver.find_element_by_id("next").click()
     time.sleep(3)
     driver.find_element_by_name("Passwd").send_keys(req_dict['yt_pw'])
-    time.sleep(2)
+    time.sleep(3)
     driver.find_element_by_id("submit").click()
+    time.sleep(4)
+    print(driver.page_source)
     driver.save_screenshot("screenshots/screenshot.png")
 
 
