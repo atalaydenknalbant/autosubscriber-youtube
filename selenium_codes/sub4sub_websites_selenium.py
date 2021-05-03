@@ -81,6 +81,7 @@ def google_login(driver: webdriver,
     time.sleep(2)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
     time.sleep(2)
+    print(driver.page_source)
     driver.save_screenshot("screenshots/screenshot.png")
 
 
