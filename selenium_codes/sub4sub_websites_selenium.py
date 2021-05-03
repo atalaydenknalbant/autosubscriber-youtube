@@ -76,8 +76,7 @@ def google_login(driver: webdriver,
     element = driver.find_element_by_xpath('//*')
     element = element.get_attribute('innerHTML')
     time.sleep(5)
-    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
-                                                  " div.Xb9hP > input")
+    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
     time.sleep(2)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
