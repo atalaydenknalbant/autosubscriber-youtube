@@ -12,5 +12,14 @@
     {
       "url": "heroku/python"
     }
-  ]
+  ],
+  "env": {
+    "CHROMEDRIVER_PATH": {
+      "value": "/app/.chromedriver/bin/chromedriver"
+    },
+    "GOOGLE_CHROME_BIN": {
+      "value": "/app/.apt/usr/bin/google-chrome"
+    }
+  }
+
 }
