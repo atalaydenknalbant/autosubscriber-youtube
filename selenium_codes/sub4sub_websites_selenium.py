@@ -73,6 +73,9 @@ def google_login(driver: webdriver,
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
+    element = driver.find_element_by_xpath('//*')
+    element = element.get_attribute('innerHTML')
+    print(element)
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
                                                   " div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
