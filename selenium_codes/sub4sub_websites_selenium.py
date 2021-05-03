@@ -36,7 +36,6 @@ def set_driver_opt(req_dict: dict,
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    chrome_options.add_argument("--disable-dev-shm-usage")
     if headless:
         chrome_options.add_argument('--headless')
     else:
@@ -50,6 +49,9 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-blink-features")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
