@@ -90,7 +90,7 @@ def google_login(driver: webdriver,
     time.sleep(3)
     driver.find_element_by_id("submit").click()
     time.sleep(4)
-    print(driver.page_source)
+    print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
 
 
