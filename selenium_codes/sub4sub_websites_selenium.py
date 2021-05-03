@@ -1080,6 +1080,7 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
+                    time.sleep(3)
                     button_subscribe_yt = driver_9.find_element_by_css_selector(
                         "#subscribe-button > ytd-subscribe-button-renderer")
                     ActionChains(driver_9).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
@@ -1091,6 +1092,7 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.find_element_by_css_selector(like_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
+                    time.sleep(3)
                     if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
                                                                   " ytd-toggle-button-renderer.style-scope."
                                                                   "ytd-menu-renderer.force-icon-button"
