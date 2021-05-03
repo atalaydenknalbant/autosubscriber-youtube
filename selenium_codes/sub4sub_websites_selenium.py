@@ -41,7 +41,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument('--headless')
     else:
         pass
-    # chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
+    chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
     if extension > 0:
         pass
     else:
@@ -71,26 +71,16 @@ def google_login(driver: webdriver,
         ActionChains(driver).move_to_element(sign_in_button).perform()
         sign_in_button.click()
     driver.save_screenshot("screenshots/screenshot.png")
-    # email_area = driver.find_element_by_id("identifierId")
-    # email_area.send_keys(req_dict['yt_email'])
-    # driver.find_element_by_css_selector("#identifierNext > div > button").click()
-    # time.sleep(7)
-    # pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
-    # pw_area.send_keys(req_dict['yt_pw'])
-    # time.sleep(2)
-    # driver.find_element_by_css_selector("#passwordNext > div > button").click()
-    # time.sleep(2)
-    # driver.save_screenshot("screenshots/screenshot.png")
+    email_area = driver.find_element_by_id("identifierId")
+    email_area.send_keys(req_dict['yt_email'])
+    driver.find_element_by_css_selector("#identifierNext > div > button").click()
     time.sleep(7)
-    driver.find_element_by_id("Email").send_keys(req_dict['yt_email'])
-    time.sleep(2)
-    driver.find_element_by_id("next").click()
-    time.sleep(4)
     print(driver.find_element_by_xpath("/html/body").text)
-    driver.find_element_by_name("Passwd").send_keys(req_dict['yt_pw'])
-    time.sleep(3)
-    driver.find_element_by_id("submit").click()
-    time.sleep(4)
+    pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
+    pw_area.send_keys(req_dict['yt_pw'])
+    time.sleep(2)
+    driver.find_element_by_css_selector("#passwordNext > div > button").click()
+    time.sleep(2)
     print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
 
