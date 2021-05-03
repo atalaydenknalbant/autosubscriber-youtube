@@ -75,11 +75,12 @@ def google_login(driver: webdriver,
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
     element = driver.find_element_by_xpath('//*')
     element = element.get_attribute('innerHTML')
-    print(element)
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div >"
                                                   " div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
+    time.sleep(2)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
+    time.sleep(2)
     driver.save_screenshot("screenshots/screenshot.png")
 
 
@@ -726,7 +727,7 @@ def ytmonster_functions(req_dict: dict):
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1)
+                        time.sleep(3)
                         driver_6.find_element_by_css_selector(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
@@ -820,7 +821,7 @@ def ytmonster_functions(req_dict: dict):
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(1.25)
+                        time.sleep(3)
                         driver_6.find_element_by_css_selector(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
