@@ -4,21 +4,98 @@
   "repository": "https://github.com/atalaydenknalbant/autosubscriber-youtube",
   "buildpacks": [
     {
-      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+      "url": "heroku/python"
     },
     {
       "url": "https://github.com/heroku/heroku-buildpack-chromedriver"
     },
     {
-      "url": "heroku/python"
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
     }
   ],
   "env": {
+    "HEROKU": {
+      "description":"DON'T CHANGE 'Tells Program to run using heroku' DON'T CHANGE",
+      "value": "available",
+      "required": false
+    },
     "CHROMEDRIVER_PATH": {
-      "value": "/app/.chromedriver/bin/chromedriver"
+      "description":"DON'T CHANGE 'Chromedriver path' DON'T CHANGE",
+      "value": "/app/.chromedriver/bin/chromedriver",
+      "required": false
     },
     "GOOGLE_CHROME_BIN": {
-      "value": "/app/.apt/usr/bin/google-chrome"
+      "description":"DON'T CHANGE 'Google Chrome path' DON'T CHANGE",
+      "value": "/app/.apt/usr/bin/google-chrome",
+      "required": false
+    },
+    "youtube_email": {
+      "value": "Enter Youtube Email",
+      "required": true
+    },
+    "youtube_password": {
+      "value": "Enter Youtube Password",
+      "required": true
+    },
+    "youtube_channel_id": {
+      "value": "Enter Youtube Channel ID",
+      "required": true
+    },
+    "youtube_useragent": {
+      "value": "Enter GO TO chrome://version/ > User Agent > Copy",
+      "required": true
+    },
+    "subpals_com_password": {
+      "value": "Enter Subpals password",
+      "required": true
+    },
+    "sonuker_com_password": {
+      "value": "Enter Sonuker password",
+      "required": true
+    },
+    "ytpals_com_password": {
+      "value": "Enter Ytpals password",
+      "required": true
+    },
+    "subscribers_video_email": {
+      "value": "Enter Subscribers.video email",
+      "required": true
+    },
+    "submenow_com_email": {
+      "value": "Enter Submenow email",
+      "required": true
+    },
+    "ytmonster_com_username": {
+      "value": "Enter Ytmonster Username",
+      "required": true
+    },
+    "ytmonster_com_password": {
+      "value": "Enter Ytmonster Password",
+      "required": true
+    },
+    "ytbpals_com_email": {
+      "value": "Enter Ytbpals Email",
+      "required": true
+    },
+    "ytbpals_com_password": {
+      "value": "Enter Ytbpals Password",
+      "required": true
+    },
+    "viewgrip_email": {
+      "value": "Enter ViewGrip Email",
+      "required": true
+    },
+    "viewgrip_password": {
+      "value": "Enter ViewGrip Password",
+      "required": true
+    },
+    "goviral_email": {
+      "value": "Enter GoViral Email",
+      "required": true
+    },
+    "goviral_password": {
+      "value": "Enter GoViral Password",
+      "required": true
     }
   }
 
