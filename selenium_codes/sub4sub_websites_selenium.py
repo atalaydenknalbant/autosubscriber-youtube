@@ -650,7 +650,7 @@ def ytmonster_functions(req_dict: dict):
     driver.get("https://www.ytmonster.net/exchange/likes")
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_6, yt_login_options=0,
+    def for_loop_sub(driver_6,
                      like_btn="likeText",
                      skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
                               " div > div:nth-child(7) > div > a.likeSkip > div",
@@ -732,8 +732,10 @@ def ytmonster_functions(req_dict: dict):
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(3)
-                        driver_6.find_element_by_css_selector(confirm_btn).click()
+                        time.sleep(2)
+                        confirm_el = WebDriverWait(driver_6, 5)\
+                            .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+                        ActionChains(driver).move_to_element(confirm_el).click().perform()
 
                         logging.info("confirm button was clicked")
                         i += 1
@@ -755,7 +757,7 @@ def ytmonster_functions(req_dict: dict):
                             continue
                         continue
                     except NoSuchElementException:
-                        time.sleep(1.25)
+                        time.sleep(2)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
@@ -788,7 +790,7 @@ def ytmonster_functions(req_dict: dict):
             else:
                 driver_6.switch_to_window(window_before)
                 driver_6.switch_to_default_content()
-                time.sleep(1.25)
+                time.sleep(2)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
                     driver_6.find_element_by_id(like_btn).click()
@@ -846,8 +848,7 @@ def ytmonster_functions(req_dict: dict):
                         logging.info("couldn't find confirm button")
                         continue
 
-    for_loop_sub(driver,
-                 1)
+    for_loop_sub(driver)
     logging.info("Channels liked successfully, quitting driver")
     driver.quit()
 
