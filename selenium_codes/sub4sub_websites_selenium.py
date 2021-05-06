@@ -50,14 +50,14 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
     chrome_options.add_experimental_option("useAutomationExtension", False)
-    chrome_options.add_argument("--disable-dev-shm-usage")
+    # chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--proxy-server='direct://'")
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("disable-infobars")
-    chrome_options.add_argument("--window-size=1920x1080")
+    # chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
@@ -77,7 +77,7 @@ def google_login(driver: webdriver,
     email_area.send_keys(req_dict['yt_email'])
     time.sleep(4)
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
-    time.sleep(6)
+    time.sleep(5)
     print(driver.find_element_by_xpath("/html/body").text)
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
@@ -725,7 +725,6 @@ def ytmonster_functions(req_dict: dict):
                 if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                         and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                               "ytd-toggle-button-renderer[1]")) > 0:
-                    driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
                     if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
@@ -734,6 +733,7 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
+                        time.sleep(5)
                         button_like = driver_6.find_element_by_xpath(
                             "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
                             "div[5]/div[1]/div/div[7]/div[2]/"
@@ -741,10 +741,7 @@ def ytmonster_functions(req_dict: dict):
                             "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
                             "yt-icon-button/button")
                         ActionChains(driver_6).move_to_element(button_like).click(button_like).perform()
-
-
-
-                    driver.save_screenshot("screenshots/screenshot_proof.png")
+                    driver_6.save_screenshot("screenshots/screenshot_proof.png")
                     driver_6.switch_to.window(window_before)
                     driver_6.switch_to_default_content()
                     logging.info("Liked Channel")
@@ -827,7 +824,6 @@ def ytmonster_functions(req_dict: dict):
                 if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                         and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                               "ytd-toggle-button-renderer[1]")) > 0:
-                    driver_6.execute_script("window.scrollTo(0, 300);")
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.switch_to_default_content()
                     if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
@@ -836,6 +832,7 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
+                        time.sleep(5)
                         button_like = driver_6.find_element_by_xpath(
                             "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
                             "div[5]/div[1]/div/div[7]/div[2]/"
