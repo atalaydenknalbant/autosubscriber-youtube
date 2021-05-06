@@ -51,7 +51,6 @@ def set_driver_opt(req_dict: dict,
         pass
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
@@ -161,6 +160,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             return
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
+        driver.switch_to_default_content()
         if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                 and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                       "ytd-toggle-button-renderer[1]")) > 0:
@@ -173,11 +173,17 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     ".style-default-active")) > 0:
                 pass
             else:
-                button_like = driver.find_element_by_xpath(
-                    "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]/a")
+                button_like = driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                                                           "div[5]/div[1]/div/div[7]/div[2]/"
+                                                           "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                                                           "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                                                           "yt-icon-button/button")
                 ActionChains(driver).move_to_element(button_like).click(button_like).perform()
-            button_subscribe_yt = driver.find_element_by_css_selector(
-                "#subscribe-button > ytd-subscribe-button-renderer")
+            button_subscribe_yt = driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                               "ytd-watch-flexy/"
+                                                               "div[5]/div[1]/div/div[8]/div[3]/"
+                                                               "ytd-video-secondary-info-renderer/div/div/div/"
+                                                               "ytd-subscribe-button-renderer/tp-yt-paper-button")
             ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
             driver.save_screenshot("screenshots/screenshot_proof.png")
         else:
@@ -247,7 +253,6 @@ def subpals_functions(req_dict: dict):
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    driver.execute_script("window.scrollTo(0, 300);")
     type_1_for_loop_like_and_sub(driver,
                                  "subpals",
                                  req_dict)
@@ -286,7 +291,6 @@ def ytpals_functions(req_dict: dict):
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    driver.execute_script("window.scrollTo(0, 300);")
     type_1_for_loop_like_and_sub(driver,
                                  "ytpals",
                                  req_dict)
@@ -333,7 +337,6 @@ def sonuker_functions(req_dict: dict):
         pass
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
-    driver.execute_script("window.scrollTo(0, 500);")
     type_1_for_loop_like_and_sub(driver,
                                  "sonuker",
                                  req_dict)
@@ -451,13 +454,22 @@ def subscribersvideo_functions(req_dict: dict):
                                 ".style-default-active")) > 0:
                             pass
                         else:
-                            button_4 = driver.find_element_by_css_selector(
-                                "#top-level-buttons > ytd-toggle-button-renderer:nth-child(1) > a")
-                            ActionChains(driver).move_to_element(button_4).click(button_4).perform()
-                        driver.save_screenshot("screenshots/screenshot.png")
-                        button_4 = driver.find_element_by_css_selector(
-                                "#subscribe-button > ytd-subscribe-button-renderer")
-                        ActionChains(driver).move_to_element(button_4).click(button_4).perform()
+                            button_like = driver.find_element_by_xpath(
+                                "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                                "div[5]/div[1]/div/div[7]/div[2]/"
+                                "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                                "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                                "yt-icon-button/button")
+                            ActionChains(driver).move_to_element(button_like).click(button_like).perform()
+                        button_subscribe_yt = driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                                           "ytd-watch-flexy/"
+                                                                           "div[5]/div[1]/div/div[8]/div[3]/"
+                                                                           "ytd-video-secondary-info-renderer/"
+                                                                           "div/div/div/"
+                                                                           "ytd-subscribe-button-renderer/"
+                                                                           "tp-yt-paper-button")
+                        ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
+                        driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before_4)
                         driver.switch_to.default_content()
@@ -586,13 +598,21 @@ def submenow_functions(req_dict: dict):
                                 ".style-default-active")) > 0:
                             pass
                         else:
-                            driver.save_screenshot("screenshots/screenshot.png")
-                            button_5 = driver.find_element_by_xpath("//*[@id='top-level-buttons']"
-                                                                    "/ytd-toggle-button-renderer[1]")
-                            ActionChains(driver).move_to_element(button_5).click(button_5).perform()
-                        button_5 = driver.find_element_by_xpath("//*[@id='subscribe-button']"
-                                                                "/ytd-subscribe-button-renderer")
-                        ActionChains(driver).move_to_element(button_5).click(button_5).perform()
+                            button_like = driver.find_element_by_xpath(
+                                "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                                "div[5]/div[1]/div/div[7]/div[2]/"
+                                "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                                "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                                "yt-icon-button/button")
+                            ActionChains(driver).move_to_element(button_like).click(button_like).perform()
+                        button_subscribe_yt = driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                                           "ytd-watch-flexy/"
+                                                                           "div[5]/div[1]/div/div[8]/div[3]/"
+                                                                           "ytd-video-secondary-info-renderer/div/"
+                                                                           "div/div/"
+                                                                           "ytd-subscribe-button-renderer/"
+                                                                           "tp-yt-paper-button")
+                        ActionChains(driver).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
 
                     else:
@@ -714,9 +734,15 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        button = driver_6.find_element_by_xpath(
-                            "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")
-                        ActionChains(driver_6).move_to_element(button).click(button).perform()
+                        button_like = driver_6.find_element_by_xpath(
+                            "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                            "div[5]/div[1]/div/div[7]/div[2]/"
+                            "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                            "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                            "yt-icon-button/button")
+                        ActionChains(driver_6).move_to_element(button_like).click(button_like).perform()
+
+
 
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_6.switch_to.window(window_before)
@@ -810,10 +836,14 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        button = driver_6.find_element_by_xpath(
-                            "//*[@id='top-level-buttons']/ytd-toggle-button-renderer[1]")
-                        ActionChains(driver_6).move_to_element(button).click(button).perform()
-                    driver.save_screenshot("screenshots/screenshot_proof.png")
+                        button_like = driver_6.find_element_by_xpath(
+                            "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                            "div[5]/div[1]/div/div[7]/div[2]/"
+                            "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                            "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                            "yt-icon-button/button")
+                        ActionChains(driver_6).move_to_element(button_like).click(button_like).perform()
+                    driver_6.save_screenshot("screenshots/screenshot_proof.png")
                     driver_6.switch_to.window(window_before)
                     driver_6.switch_to_default_content()
                     logging.info("Liked Channel")
@@ -919,12 +949,14 @@ def ytbpals_functions(req_dict: dict):
                                                                 "ytd-toggle-button-renderer[1]")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     time.sleep(2)
-                    driver_7.save_screenshot("screenshots/screenshot.png")
                     driver_7.switch_to_default_content()
-                    button = driver_7.find_element_by_xpath(
-                        "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
-                    ActionChains(driver_7).move_to_element(button).click(button).perform()
-                    driver_7.save_screenshot("screenshots/screenshot.png")
+                    button_subscribe_yt = driver_7.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                                       "ytd-watch-flexy/"
+                                                                       "div[5]/div[1]/div/div[8]/div[3]/"
+                                                                       "ytd-video-secondary-info-renderer/div/div/div/"
+                                                                       "ytd-subscribe-button-renderer/tp-yt-paper-button")
+                    ActionChains(driver_7).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
+                    driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
                     driver_7.switch_to_default_content()
@@ -1011,9 +1043,13 @@ def ytbpals_functions(req_dict: dict):
                     time.sleep(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
                     driver_7.switch_to_default_content()
-                    button = driver_7.find_element_by_xpath(
-                        "//*[@id='subscribe-button']/ytd-subscribe-button-renderer")
-                    ActionChains(driver_7).move_to_element(button).click(button).perform()
+                    button_subscribe_yt = driver_7.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                                         "ytd-watch-flexy/"
+                                                                         "div[5]/div[1]/div/div[8]/div[3]/"
+                                                                         "ytd-video-secondary-info-renderer/div/div/div/"
+                                                                         "ytd-subscribe-button-renderer/"
+                                                                         "tp-yt-paper-button")
+                    ActionChains(driver_7).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
@@ -1087,8 +1123,13 @@ def goviral_functions(req_dict: dict):
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     time.sleep(3)
-                    button_subscribe_yt = driver_9.find_element_by_css_selector(
-                        "#subscribe-button > ytd-subscribe-button-renderer")
+                    button_subscribe_yt = driver_9.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
+                                                                         "ytd-watch-flexy/"
+                                                                         "div[5]/div[1]/div/div[8]/div[3]/"
+                                                                         "ytd-video-secondary-info-renderer/div/div/"
+                                                                         "div/"
+                                                                         "ytd-subscribe-button-renderer/"
+                                                                         "tp-yt-paper-button")
                     ActionChains(driver_9).move_to_element(button_subscribe_yt).click(button_subscribe_yt).perform()
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver.save_screenshot("screenshots/screenshot.png")
@@ -1105,8 +1146,12 @@ def goviral_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        button_like = driver_9.find_element_by_xpath("//*[@id='top-level-buttons']/"
-                                                                     "ytd-toggle-button-renderer[1]")
+                        button_like = driver_9.find_element_by_xpath(
+                            "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/"
+                            "div[5]/div[1]/div/div[7]/div[2]/"
+                            "ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                            "ytd-menu-renderer/div[1]/ytd-toggle-button-renderer[1]/a/"
+                            "yt-icon-button/button")
                         ActionChains(driver_9).move_to_element(button_like).click(button_like).perform()
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver.save_screenshot("screenshots/screenshot.png")
