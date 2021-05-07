@@ -31,6 +31,7 @@ def clear_cache(driver: webdriver,
 
 def set_driver_opt(req_dict: dict,
                    headless=True,
+                   website="",
                    extension=0):
     """Set driver options for chrome or firefox"""
     # Chrome
@@ -57,7 +58,10 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--proxy-server='direct://'")
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("disable-infobars")
-    # chrome_options.add_argument("--window-size=1920x1080")
+    if website == "ytmonster":
+        pass
+    else:
+        chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
@@ -150,7 +154,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.save_screenshot("screenshots/screenshot.png")
         try:
             button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
-            button_subscribe.click()
+            ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
             break
@@ -192,7 +196,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            button_confirm.send_keys(Keys.ENTER)
+            ActionChains(driver).move_to_element(button_confirm).send_keys(Keys.ENTER).perform()
             continue
 
         driver.switch_to.window(window_before)
@@ -203,7 +207,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             time.sleep(1.25)
         try:
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            button_confirm.send_keys(Keys.ENTER)
+            ActionChains(driver).move_to_element(button_confirm).send_keys(Keys.ENTER).perform()
             continue
         except NoSuchElementException:
             time.sleep(1.25)
@@ -661,7 +665,7 @@ def submenow_functions(req_dict: dict):
 
 def ytmonster_functions(req_dict: dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, True, "ytmonster")
     driver.implicitly_wait(6)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
