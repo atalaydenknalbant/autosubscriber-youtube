@@ -227,6 +227,7 @@ def subpals_functions(req_dict: dict):
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
     pw_place.send_keys(req_dict['pw_subpals'])
+    time.sleep(3)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button") \
         .send_keys(Keys.ENTER)
 
