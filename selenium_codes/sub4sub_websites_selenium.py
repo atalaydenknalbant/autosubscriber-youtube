@@ -196,7 +196,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            ActionChains(driver).move_to_element(button_confirm).send_keys(Keys.ENTER).perform()
+            button_confirm.send_keys(Keys.ENTER)
             continue
 
         driver.switch_to.window(window_before)
@@ -207,7 +207,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             time.sleep(1.25)
         try:
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            ActionChains(driver).move_to_element(button_confirm).send_keys(Keys.ENTER).perform()
+            button_confirm.send_keys(Keys.ENTER)
             continue
         except NoSuchElementException:
             time.sleep(1.25)
