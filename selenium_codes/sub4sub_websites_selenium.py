@@ -51,7 +51,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
     chrome_options.add_experimental_option("useAutomationExtension", False)
-    # chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
