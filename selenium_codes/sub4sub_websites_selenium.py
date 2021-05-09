@@ -50,8 +50,8 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
-    # chrome_options.add_experimental_option("useAutomationExtension", False)
-    # chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--no-sandbox')
@@ -63,7 +63,7 @@ def set_driver_opt(req_dict: dict,
     else:
         chrome_options.add_argument("--window-size=1920x1080")
         pass
-    # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
 
@@ -1083,6 +1083,7 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
+                    driver.execute_script("window.scrollTo(0, 300)")
                     time.sleep(3)
                     driver.execute_script("document.querySelector('#subscribe-button >"
                                           " ytd-subscribe-button-renderer').click()")
