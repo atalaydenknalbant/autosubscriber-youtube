@@ -794,6 +794,7 @@ def ytmonster_functions(req_dict: dict):
                 time.sleep(2)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
+                    WebDriverWait(driver_6, 10).until(ec.element_to_be_clickable((By.ID, like_btn)))
                     driver_6.find_element_by_id(like_btn).click()
                 except NoSuchElementException:
                     break
