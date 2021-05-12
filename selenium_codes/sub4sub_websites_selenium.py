@@ -1084,12 +1084,12 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
-                    driver.execute_script("window.scrollTo(0, 300)")
+                    driver_9.execute_script("window.scrollTo(0, 300)")
                     time.sleep(3)
-                    driver.execute_script("document.querySelector('#subscribe-button >"
-                                          " ytd-subscribe-button-renderer').click()")
+                    driver_9.execute_script("document.querySelector('#subscribe-button >"
+                                            " ytd-subscribe-button-renderer').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
-                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver_9.save_screenshot("screenshots/screenshot.png")
                 except ElementClickInterceptedException:
                     pass
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
