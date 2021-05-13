@@ -1074,16 +1074,17 @@ def goviral_functions(req_dict: dict):
                 time.sleep(1)
             while len(driver_9.window_handles) == 1:
                 time.sleep(1)
-            driver.save_screenshot("screenshots/screenshot.png")
+            driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
                 pass
-            driver.save_screenshot("screenshots/screenshot.png")
+            driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 16:
                 pass
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
+                    driver_9.save_screenshot("screenshots/screenshot.png")
                     driver_9.execute_script("window.scrollTo(0, 300)")
                     time.sleep(3)
                     driver_9.execute_script("document.querySelector('#subscribe-button >"
@@ -1105,11 +1106,11 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         time.sleep(2)
-                        driver.execute_script("document.querySelector('#top-level-buttons >"
+                        driver_9.execute_script("document.querySelector('#top-level-buttons >"
                                               " ytd-toggle-button-renderer:nth-child(1)').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     logging.info("Liked Video")
-                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver_9.save_screenshot("screenshots/screenshot.png")
                 except ElementClickInterceptedException:
                     pass
             while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
