@@ -1090,6 +1090,7 @@ def goviral_functions(req_dict: dict):
                                             " ytd-subscribe-button-renderer').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver_9.save_screenshot("screenshots/screenshot.png")
+                    logging.info("Subscribed To Channel")
                 except ElementClickInterceptedException:
                     pass
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
@@ -1107,6 +1108,7 @@ def goviral_functions(req_dict: dict):
                         driver.execute_script("document.querySelector('#top-level-buttons >"
                                               " ytd-toggle-button-renderer:nth-child(1)').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
+                    logging.info("Liked Video")
                     driver.save_screenshot("screenshots/screenshot.png")
                 except ElementClickInterceptedException:
                     pass
