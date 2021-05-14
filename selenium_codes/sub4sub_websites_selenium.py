@@ -1050,6 +1050,7 @@ def goviral_functions(req_dict: dict):
                                         " button").click()
 
     driver.find_element_by_css_selector("#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
+    driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_like(driver_9,
                       like_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
@@ -1069,6 +1070,7 @@ def goviral_functions(req_dict: dict):
                       next_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
                                " button.btn.btn-primary.next-video.mr-3"
                       ):
+        logging.info("Loop Started")
         for i in range(25):
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
