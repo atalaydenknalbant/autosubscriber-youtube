@@ -30,14 +30,14 @@ def clear_cache(driver: webdriver,
 
 
 def set_driver_opt(req_dict: dict,
-                   headless=True,
+                   is_headless=True,
                    website="",
                    extension=0):
     """Set driver options for chrome or firefox"""
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    if headless:
+    if is_headless:
         chrome_options.add_argument('--headless')
     else:
         pass
@@ -70,9 +70,9 @@ def set_driver_opt(req_dict: dict,
 
 def google_login(driver: webdriver,
                  req_dict: dict,
-                 sign_in_btn=True):
+                 has_sign_in_btn=True):
     """google login"""
-    if sign_in_btn:
+    if has_sign_in_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).perform()
         sign_in_button.click()
@@ -1040,7 +1040,7 @@ def goviral_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, sign_in_btn=False)
+    google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
     time.sleep(3)
     driver.get("https://members.goviral.ai/")  # Type_None
@@ -1107,7 +1107,7 @@ def goviral_functions(req_dict: dict):
                     else:
                         time.sleep(2)
                         driver_9.execute_script("document.querySelector('#top-level-buttons >"
-                                              " ytd-toggle-button-renderer:nth-child(1)').click()")
+                                                " ytd-toggle-button-renderer:nth-child(1)').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     logging.info("Liked Video")
                     driver_9.save_screenshot("screenshots/screenshot.png")
