@@ -203,6 +203,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             time.sleep(1.25)
         try:
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
+            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.CSS_SELECTOR, button_confirm)))
+            time.sleep(1.25)
             button_confirm.send_keys(Keys.ENTER)
             continue
         except NoSuchElementException:
