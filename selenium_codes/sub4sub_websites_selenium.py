@@ -202,8 +202,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         while confirm_seconds == "0":
             time.sleep(1.25)
         try:
-            button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+            button_confirm = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
             time.sleep(1.25)
             button_confirm.send_keys(Keys.ENTER)
             continue
