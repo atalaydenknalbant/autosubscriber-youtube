@@ -1090,7 +1090,10 @@ def goviral_functions(req_dict: dict):
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     driver_9.save_screenshot("screenshots/screenshot.png")
-                    driver_9.execute_script("window.scrollTo(0, 300)")
+                    try:
+                        driver_9.execute_script("window.scrollTo(0, 300)")
+                    except TimeoutException:
+                        pass
                     time.sleep(3)
                     driver_9.execute_script("document.querySelector('#subscribe-button >"
                                             " ytd-subscribe-button-renderer').click()")
