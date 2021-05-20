@@ -166,7 +166,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         time.sleep(3)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        driver.switch_to_default_content()
+        # driver.switch_to_default_content()
         if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
                 and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
                                                       "ytd-toggle-button-renderer[1]")) > 0:
