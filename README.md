@@ -27,4 +27,4 @@ Python Selenium-based automated subscribing, liking functions for youtube sub4su
 [![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![GoViral](https://i.imgur.com/coZXiwg.png)](https://goviral.ai/) 
 
 ## License
-This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
