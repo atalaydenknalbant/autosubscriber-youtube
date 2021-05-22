@@ -80,7 +80,6 @@ def google_login(driver: webdriver,
     time.sleep(3)
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
-    time.sleep(3)
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
     time.sleep(3)
     # print(driver.find_element_by_xpath("/html/body").text)
