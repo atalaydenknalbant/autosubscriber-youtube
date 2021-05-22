@@ -6,7 +6,9 @@ import os
 heroku = "not available"
 try:
     heroku = os.environ['HEROKU']
-except Exception:
+    print("Running HEROKU Version")
+except KeyError:
+    print("Running Local Version")
     pass
 
 # Heroku
