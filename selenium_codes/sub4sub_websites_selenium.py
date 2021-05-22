@@ -89,7 +89,6 @@ def google_login(driver: webdriver,
     time.sleep(2)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
     time.sleep(2)
-    logging.info(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
 
 
@@ -167,27 +166,35 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         time.sleep(5)
-        driver.switch_to.default_content()
-        if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
-                and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
-                                                      "ytd-toggle-button-renderer[1]")) > 0:
-            if i == 0:
-                i += 1
-                google_login(driver, req_dict)
-            if len(driver.find_elements_by_css_selector(
-                    "#top-level-buttons > ytd-toggle-button-renderer."
-                    "style-scope." "ytd-menu-renderer.force-icon-button"
-                    ".style-default-active")) > 0:
-                pass
-            else:
+        try:
+            if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
+                    and len(driver.find_elements_by_xpath("//*[@id='top-level-buttons']/"
+                                                          "ytd-toggle-button-renderer[1]")) > 0:
+                if i == 0:
+                    i += 1
+                    google_login(driver, req_dict)
+                if len(driver.find_elements_by_css_selector(
+                        "#top-level-buttons > ytd-toggle-button-renderer."
+                        "style-scope." "ytd-menu-renderer.force-icon-button"
+                        ".style-default-active")) > 0:
+                    pass
+                else:
+                    time.sleep(2)
+                    driver.execute_script("document.querySelector('#top-level-buttons >"
+                                          " ytd-toggle-button-renderer:nth-child(1)').click()")
                 time.sleep(2)
-                driver.execute_script("document.querySelector('#top-level-buttons >"
-                                      " ytd-toggle-button-renderer:nth-child(1)').click()")
-            time.sleep(2)
-            driver.execute_script("document.querySelector('#subscribe-button >"
-                                  " ytd-subscribe-button-renderer').click()")
-            driver.save_screenshot("screenshots/screenshot_proof.png")
-        else:
+                driver.execute_script("document.querySelector('#subscribe-button >"
+                                      " ytd-subscribe-button-renderer').click()")
+                driver.save_screenshot("screenshots/screenshot_proof.png")
+            else:
+                driver.switch_to.window(window_before)
+                sc[special_condition]()
+                while confirm_seconds == "0":  # noqa
+                    time.sleep(1.25)
+                button_confirm = driver.find_element_by_css_selector(confirm_btn)
+                button_confirm.send_keys(Keys.ENTER)
+                continue
+        except TimeoutException:
             driver.switch_to.window(window_before)
             sc[special_condition]()
             while confirm_seconds == "0":  # noqa
@@ -195,7 +202,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             button_confirm = driver.find_element_by_css_selector(confirm_btn)
             button_confirm.send_keys(Keys.ENTER)
             continue
-
         driver.switch_to.window(window_before)
         driver.switch_to_default_content()
         sc[special_condition]()
