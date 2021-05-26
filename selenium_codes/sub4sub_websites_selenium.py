@@ -15,13 +15,24 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
 
 
 def get_clear_browsing_button(driver: webdriver):
-    """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page."""
+    """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
+    Args:
+    - driver (webdriver): webdriver parameter.
+
+    Returns:
+    - WebElement: returns "* /deep/ #clearBrowsingDataConfirm" WebElement.
+    """
     return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
 
 
-def clear_cache(driver: webdriver,
-                timeout=60):
-    """Clear the cookies and cache for the ChromeDriver instance."""
+def clear_cache(driver: webdriver, timeout=60):
+    """Clear the cookies and cache for the ChromeDriver instance.
+    Args:
+    - driver (webdriver): webdriver parameter.
+    - timeout (int): Parameter to stop program after reaches timeout.
+
+    """
+
     driver.get('chrome://settings/clearBrowserData')
     wait = WebDriverWait(driver, timeout)
     wait.until(get_clear_browsing_button)
@@ -31,9 +42,15 @@ def clear_cache(driver: webdriver,
 
 def set_driver_opt(req_dict: dict,
                    is_headless=True,
-                   website="",
-                   extension=0):
-    """Set driver options for chrome or firefox"""
+                   website=""):
+    """Set driver options for chrome or firefox
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    - is_headless(bool): bool parameter to check for chrome headless or not
+    - website (string): string parameter to enable extensions corresponding to the Website.
+    Returns:
+    - webdriver: returns driver with options already added to it.
+    """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -42,7 +59,7 @@ def set_driver_opt(req_dict: dict,
     else:
         pass
     chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
-    if extension > 0:
+    if website != "":
         pass
     else:
         chrome_options.add_argument("--disable-extensions")
@@ -71,7 +88,12 @@ def set_driver_opt(req_dict: dict,
 def google_login(driver: webdriver,
                  req_dict: dict,
                  has_sign_in_btn=True):
-    """google login"""
+    """ Logins to Google with given credentials.
+    Args:
+    - driver(webdriver): webdriver parameter.
+    - req_dict(dict): dictionary object of required parameters
+    - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
+    """
     if has_sign_in_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).perform()
@@ -1095,7 +1117,6 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
-                    driver_9.save_screenshot("screenshots/screenshot.png")
                     try:
                         driver_9.execute_script("window.scrollTo(0, 300)")
                     except TimeoutException:
