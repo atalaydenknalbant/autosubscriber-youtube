@@ -693,7 +693,7 @@ def ytmonster_functions(req_dict: dict):
                      ):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(40):
+        for i in range(50):
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
@@ -1102,7 +1102,7 @@ def goviral_functions(req_dict: dict):
                                " button.btn.btn-primary.next-video.mr-3"
                       ):
         logging.info("Loop Started")
-        for i in range(25):
+        for i in range(50):
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
             while len(driver_9.window_handles) == 1:
