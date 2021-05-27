@@ -1141,7 +1141,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         time.sleep(2)
-                        driver_9.save_screenshot("screenshots/screenshot.png")
+                        # driver_9.save_screenshot("screenshots/screenshot.png")
                         driver_9.execute_script("document.querySelector('#top-level-buttons >"
                                                 " ytd-toggle-button-renderer:nth-child(1)').click()")
                     driver_9.switch_to.window(driver_9.window_handles[0])
