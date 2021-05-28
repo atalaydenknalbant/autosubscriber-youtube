@@ -3,7 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException
+    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
+    NoSuchWindowException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -1142,8 +1143,11 @@ def goviral_functions(req_dict: dict):
                     else:
                         time.sleep(2)
                         # driver_9.save_screenshot("screenshots/screenshot.png")
-                        driver_9.execute_script("document.querySelector('#top-level-buttons >"
-                                                " ytd-toggle-button-renderer:nth-child(1)').click()")
+                        try:
+                            driver_9.execute_script("document.querySelector('#top-level-buttons >"
+                                                    " ytd-toggle-button-renderer:nth-child(1)').click()")
+                        except NoSuchWindowException:
+                            pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     logging.info("Liked Video")
                     driver_9.save_screenshot("screenshots/screenshot.png")
