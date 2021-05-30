@@ -1123,8 +1123,11 @@ def goviral_functions(req_dict: dict):
                     except TimeoutException:
                         pass
                     time.sleep(3)
-                    driver_9.execute_script("document.querySelector('#subscribe-button >"
+                    try:
+                        driver_9.execute_script("document.querySelector('#subscribe-button >"
                                             " ytd-subscribe-button-renderer').click()")
+                    except NoSuchWindowException:
+                        pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     logging.info("Subscribed To Channel")
