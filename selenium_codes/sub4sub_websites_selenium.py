@@ -1070,7 +1070,7 @@ def ytbpals_functions(req_dict: dict):
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(9)
+    driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
