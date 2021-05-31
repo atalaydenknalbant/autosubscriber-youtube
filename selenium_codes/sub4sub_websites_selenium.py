@@ -1117,14 +1117,19 @@ def goviral_functions(req_dict: dict):
                 pass
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
+            x = 0
             while len(driver_9.window_handles) == 1:
                 time.sleep(1)
+                x += 1
+                if x >= 30:
+                    driver_9.refresh()
+                    continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                pass
+                time.sleep(0.75)
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 16:
-                pass
+                time.sleep(0.75)
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
