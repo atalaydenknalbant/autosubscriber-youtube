@@ -1070,7 +1070,7 @@ def ytbpals_functions(req_dict: dict):
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1104,10 +1104,16 @@ def goviral_functions(req_dict: dict):
                       ):
         logging.info("Loop Started")
         for i in range(50):
+            logging.info("Loop Begin")
+            driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 driver.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
-            except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+                logging.info("Enable button has been pressed")
+            except (NoSuchElementException,
+                    ElementNotInteractableException,
+                    TimeoutException,
+                    StaleElementReferenceException):
                 pass
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
@@ -1168,7 +1174,7 @@ def goviral_functions(req_dict: dict):
             while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
                 time.sleep(1)
                 c += 1
-                if c == 30:
+                if c >= 30:
                     try:
                         driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
                     except ElementNotInteractableException:
