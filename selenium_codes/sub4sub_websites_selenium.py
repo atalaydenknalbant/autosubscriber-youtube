@@ -1123,7 +1123,9 @@ def goviral_functions(req_dict: dict):
                 x += 1
                 if x >= 30:
                     driver_9.refresh()
-                    continue
+                    break
+            if x >= 30:
+                continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
                 time.sleep(0.75)
