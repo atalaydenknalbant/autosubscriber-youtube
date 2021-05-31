@@ -1070,7 +1070,7 @@ def ytbpals_functions(req_dict: dict):
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(12)
+    driver.implicitly_wait(9)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1104,6 +1104,11 @@ def goviral_functions(req_dict: dict):
                       ):
         logging.info("Loop Started")
         for i in range(50):
+            try:
+                driver.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                    .send_keys(Keys.ENTER)
+            except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+                pass
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
             while len(driver_9.window_handles) == 1:
@@ -1125,7 +1130,7 @@ def goviral_functions(req_dict: dict):
                     time.sleep(3)
                     try:
                         driver_9.execute_script("document.querySelector('#subscribe-button >"
-                                            " ytd-subscribe-button-renderer').click()")
+                                                " ytd-subscribe-button-renderer').click()")
                     except NoSuchWindowException:
                         pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
