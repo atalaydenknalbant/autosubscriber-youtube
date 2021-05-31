@@ -1177,7 +1177,8 @@ def goviral_functions(req_dict: dict):
                 if c >= 30:
                     try:
                         driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
-                    except ElementNotInteractableException:
+                    except (ElementNotInteractableException,
+                            StaleElementReferenceException):
                         pass
 
     for_loop_like(driver)
