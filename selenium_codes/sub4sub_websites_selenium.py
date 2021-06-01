@@ -694,7 +694,7 @@ def submenow_functions(req_dict: dict):
 def ytmonster_functions(req_dict: dict):
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict, True, "ytmonster")
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(15)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
