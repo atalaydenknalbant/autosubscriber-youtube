@@ -1148,8 +1148,13 @@ def goviral_functions(req_dict: dict):
                 continue
             # print(x)
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                time.sleep(0.75)
+            try:
+                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
+                    time.sleep(0.75)
+            except (StaleElementReferenceException, ValueError):
+                driver_9.refresh()
+                time.sleep(3)
+                continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 16:
                 time.sleep(0.75)
