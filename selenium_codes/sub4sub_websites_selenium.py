@@ -246,7 +246,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             try:
                 # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
                 button_confirm = driver.find_elements_by_class_name('btn-step')[2]
-                WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
+                WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
             except TimeoutException:
                 pass
             # driver.execute_script("document.querySelector('#likeSub3 > a').click()")
