@@ -289,7 +289,7 @@ def subpals_functions(req_dict: dict):
     type_1_for_loop_like_and_sub(driver,
                                  "subpals",
                                  req_dict
-                                        )
+                                 )
     driver.quit()
 
 
