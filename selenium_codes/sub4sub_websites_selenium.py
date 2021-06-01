@@ -288,7 +288,9 @@ def subpals_functions(req_dict: dict):
     driver.switch_to.default_content()
     type_1_for_loop_like_and_sub(driver,
                                  "subpals",
-                                 req_dict)
+                                 req_dict,
+                                 subscribe_btn="#HpwlfoyvnFfILeiKjydzookrihYfxaZr > i",
+                                 confirm_btn="#elQQTUOTmtSbyjPVZVYLpGVBdSozJTal > a")
     driver.quit()
 
 
