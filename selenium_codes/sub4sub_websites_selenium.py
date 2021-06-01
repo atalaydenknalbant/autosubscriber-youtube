@@ -163,7 +163,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 else:
                     pass
         try:
-            remaining_videos = driver.find_element_by_id("remainingHint").text
+            # remaining_videos = driver.find_element_by_id("remainingHint").text
+            remaining_videos = driver.find_element_by_xpath("/html/body/div[1]/section/div/"
+                                                            "div/div/div/div/div[2]/div[1]/h2/span/div").text
             logging.info(d+" Remaining Videos: " + remaining_videos)
         except NoSuchElementException:
             driver.save_screenshot("screenshots/screenshot.png")
@@ -175,12 +177,18 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         try:
-            button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
+            # button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
+            button_subscribe = driver.find_elements_by_class_name('btn-step')[0]
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
             break
-        if driver.find_element_by_id("remainingHint").text == "-":
+        # if driver.find_element_by_id("remainingHint").text == "-":
+        #     logging.info(d+" Website is not working properly, closing driver")
+        #     driver.quit()
+        #     return
+        if driver.find_element_by_xpath("/html/body/div[1]/section/div/"
+                                        "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
@@ -213,16 +221,20 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 sc[special_condition]()
                 while confirm_seconds == "0":  # noqa
                     time.sleep(1.25)
-                button_confirm = driver.find_element_by_css_selector(confirm_btn)
-                button_confirm.send_keys(Keys.ENTER)
+                # button_confirm = driver.find_element_by_css_selector(confirm_btn)
+                # button_confirm.send_keys(Keys.ENTER)
+                button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+                ActionChains(driver).move_to_element(button_confirm).click().perform()
                 continue
         except TimeoutException:
             driver.switch_to.window(window_before)
             sc[special_condition]()
             while confirm_seconds == "0":  # noqa
                 time.sleep(1.25)
-            button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            button_confirm.send_keys(Keys.ENTER)
+            # button_confirm = driver.find_element_by_css_selector(confirm_btn)
+            # button_confirm.send_keys(Keys.ENTER)
+            button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+            ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
         driver.switch_to_default_content()
@@ -232,10 +244,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             time.sleep(1.25)
         try:
             try:
-                WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+                # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+                button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+                WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
             except TimeoutException:
                 pass
-            driver.execute_script("document.querySelector('#likeSub3 > a').click()")
+            # driver.execute_script("document.querySelector('#likeSub3 > a').click()")
+            button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+            ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
             time.sleep(1.25)
@@ -1180,8 +1196,13 @@ def goviral_functions(req_dict: dict):
                     driver_9.save_screenshot("screenshots/screenshot.png")
                 except ElementClickInterceptedException:
                     pass
-            while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                pass
+            try:
+                while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
+                    pass
+            except StaleElementReferenceException:
+                driver_9.refresh()
+                time.sleep(3)
+                continue
             c = 0
             while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
                 time.sleep(0.5)
