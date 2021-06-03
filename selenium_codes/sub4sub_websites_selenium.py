@@ -1126,8 +1126,7 @@ def goviral_functions(req_dict: dict):
                 driver.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
-                driver_9.refresh()
-                time.sleep(5)
+                time.sleep(10)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
