@@ -1086,7 +1086,7 @@ def ytbpals_functions(req_dict: dict):
 
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict,False)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
@@ -1123,10 +1123,11 @@ def goviral_functions(req_dict: dict):
         for i in range(50):
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
-                driver.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                driver_9.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
-                time.sleep(10)
+                driver_9.refresh()
+                time.sleep(3.25)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
