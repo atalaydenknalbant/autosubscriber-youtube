@@ -1121,7 +1121,6 @@ def goviral_functions(req_dict: dict):
                       ):
         logging.info("Loop Started")
         for i in range(50):
-            logging.info("Loop Begin")
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 driver.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
