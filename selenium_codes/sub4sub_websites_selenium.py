@@ -1087,7 +1087,7 @@ def ytbpals_functions(req_dict: dict):
 def goviral_functions(req_dict: dict):
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1117,23 +1117,13 @@ def goviral_functions(req_dict: dict):
                                     " section.earn-subscribes.earning-box.position-relative >"
                                     " div.row > div.col-4.text-right.mt-1.position-relative > button",
                       next_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
-                               " button.btn.btn-primary.next-video.mr-3"
+                               " button.btn.btn-primary.next-video.mr-3",
+                      skip_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
+                               " button.btn.btn-secondary.skip-video"
                       ):
         logging.info("Loop Started")
         for i in range(50):
             driver_9.save_screenshot("screenshots/screenshot.png")
-            try:
-                driver_9.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
-                    .send_keys(Keys.ENTER)
-                logging.info("Enable button has been pressed")
-                driver_9.refresh()
-                time.sleep(3.25)
-                continue
-            except (NoSuchElementException,
-                    ElementNotInteractableException,
-                    TimeoutException,
-                    StaleElementReferenceException):
-                pass
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(1)
             x = 0
@@ -1148,6 +1138,32 @@ def goviral_functions(req_dict: dict):
             # print(x)
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
+                driver_9.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                    .send_keys(Keys.ENTER)
+                logging.info("Enable button has been pressed")
+                driver_9.refresh()
+                time.sleep(3.25)
+                continue
+            except (NoSuchElementException,
+                    ElementNotInteractableException,
+                    TimeoutException,
+                    StaleElementReferenceException):
+                pass
+            try:
+                el = driver_9.find_element_by_css_selector("#kt_content > div > div.col-md-8 > div > form > div >"
+                                                           " section > div > div.col-md-12 > div")
+                if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
+                        len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
+                    driver_9.find_element_by_css_selector(skip_btn).click()
+                    time.sleep(3.25)
+                    continue
+
+            except (NoSuchElementException,
+                    ElementNotInteractableException,
+                    TimeoutException,
+                    StaleElementReferenceException):
+                pass
+            try:
                 while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
                     time.sleep(0.75)
             except (StaleElementReferenceException, ValueError):
@@ -1155,7 +1171,7 @@ def goviral_functions(req_dict: dict):
                 time.sleep(3)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 16:
+            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 17:
                 time.sleep(0.75)
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
