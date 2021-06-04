@@ -1095,9 +1095,7 @@ def goviral_functions(req_dict: dict):
     driver.get("https://members.goviral.ai/")  # Type_None
     driver.find_element_by_name("email").send_keys(req_dict['email_goviral'])
     driver.find_element_by_name("password").send_keys(req_dict['pw_goviral'])
-    driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around >"
-                                        " button").click()
-
+    driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around > button").click()
     driver.find_element_by_css_selector("#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
     driver.save_screenshot("screenshots/screenshot.png")
 
