@@ -166,6 +166,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             # remaining_videos = driver.find_element_by_id("remainingHint").text
             remaining_videos = driver.find_element_by_xpath("/html/body/div[1]/section/div/"
                                                             "div/div/div/div/div[2]/div[1]/h2/span/div").text
+
             logging.info(d+" Remaining Videos: " + remaining_videos)
         except NoSuchElementException:
             driver.save_screenshot("screenshots/screenshot.png")
@@ -1123,10 +1124,10 @@ def goviral_functions(req_dict: dict):
         for i in range(50):
             driver_9.save_screenshot("screenshots/screenshot.png")
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
-                time.sleep(1)
+                time.sleep(0.5)
             x = 0
             while len(driver_9.window_handles) == 1:
-                time.sleep(1)
+                time.sleep(0.5)
                 x += 1
                 if x >= 30:
                     driver_9.refresh()
@@ -1163,14 +1164,14 @@ def goviral_functions(req_dict: dict):
                 pass
             try:
                 while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                    time.sleep(0.75)
+                    pass
             except (StaleElementReferenceException, ValueError):
                 driver_9.refresh()
                 time.sleep(3)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 17:
-                time.sleep(0.75)
+            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 21:
+                pass
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
@@ -1180,6 +1181,7 @@ def goviral_functions(req_dict: dict):
                     except TimeoutException:
                         pass
                     time.sleep(3)
+                    driver_9.save_screenshot("screenshots/screenshot.png")
                     try:
                         driver_9.execute_script("document.querySelector('#subscribe-button >"
                                                 " ytd-subscribe-button-renderer').click()")
@@ -1203,7 +1205,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         time.sleep(2)
-                        # driver_9.save_screenshot("screenshots/screenshot.png")
+                        driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             driver_9.execute_script("document.querySelector('#top-level-buttons >"
                                                     " ytd-toggle-button-renderer:nth-child(1)').click()")
