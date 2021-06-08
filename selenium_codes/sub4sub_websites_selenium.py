@@ -1155,6 +1155,7 @@ def goviral_functions(req_dict: dict):
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                     driver_9.find_element_by_css_selector(skip_btn).click()
                     time.sleep(3.25)
+                    i -= 1
                     continue
 
             except (NoSuchElementException,
