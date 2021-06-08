@@ -1121,7 +1121,7 @@ def goviral_functions(req_dict: dict):
                                " button.btn.btn-secondary.skip-video"
                       ):
         logging.info("Loop Started")
-        for i in range(50):
+        for i in range(100):
             driver_9.save_screenshot("screenshots/screenshot.png")
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 time.sleep(0.5)
@@ -1225,15 +1225,21 @@ def goviral_functions(req_dict: dict):
                 time.sleep(3)
                 continue
             c = 0
-            while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
-                time.sleep(0.5)
-                c += 1
-                if c >= 30:
-                    try:
-                        driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
-                    except (ElementNotInteractableException,
-                            StaleElementReferenceException):
-                        pass
+            try:
+                while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
+                    time.sleep(0.5)
+                    c += 1
+                    if c >= 30:
+                        try:
+                            driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
+                        except (ElementNotInteractableException,
+                                StaleElementReferenceException):
+                            pass
+            except StaleElementReferenceException:
+                driver_9.refresh()
+                time.sleep(3)
+                continue
+
 
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
