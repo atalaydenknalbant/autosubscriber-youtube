@@ -1240,7 +1240,6 @@ def goviral_functions(req_dict: dict):
                 time.sleep(3)
                 continue
 
-
     for_loop_like(driver)
     logging.info("Channels liked successfully, quitting driver")
     driver.quit()
