@@ -121,7 +121,16 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                  confirm_btn="#likeSub3 > a",
                                  subscribe_btn="#likeSub2 > i"
                                  ):
-    """Loop for like and sub, includes google login"""
+    """ Loop for like and sub, includes google login
+    Args:
+    - driver(webdriver): webdriver parameter.
+    - d(str): string name of the current website driver.
+    - req_dict(dict): dictionary object of required parameters
+    - confirm_btn(str): css of website confirm button
+    - subscribe_btn(str): css of website subscribe button
+    Returns:
+    - None(NoneType)
+    """
     i = 0
 
     def sc_0():
@@ -303,10 +312,7 @@ def subpals_functions(req_dict: dict):
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    type_1_for_loop_like_and_sub(driver,
-                                 "subpals",
-                                 req_dict
-                                 )
+    type_1_for_loop_like_and_sub(driver, "subpals", req_dict)
     driver.quit()
 
 
@@ -342,9 +348,7 @@ def ytpals_functions(req_dict: dict):
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    type_1_for_loop_like_and_sub(driver,
-                                 "ytpals",
-                                 req_dict)
+    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
     driver.quit()
 
 
@@ -388,9 +392,7 @@ def sonuker_functions(req_dict: dict):
         pass
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
-    type_1_for_loop_like_and_sub(driver,
-                                 "sonuker",
-                                 req_dict)
+    type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
     driver.quit()
 
 
