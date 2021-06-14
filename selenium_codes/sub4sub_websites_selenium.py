@@ -1155,7 +1155,7 @@ def goviral_functions(req_dict: dict):
                                                            " section > div > div.col-md-12 > div")
                 if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
-                    driver_9.find_element_by_css_selector(skip_btn).click()
+                    driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
                     time.sleep(3.25)
                     i -= 1
                     continue
