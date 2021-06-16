@@ -33,7 +33,6 @@ def clear_cache(driver: webdriver, timeout=60):
     - timeout (int): Parameter to stop program after reaches timeout.
 
     """
-
     driver.get('chrome://settings/clearBrowserData')
     wait = WebDriverWait(driver, timeout)
     wait.until(get_clear_browsing_button)
@@ -273,7 +272,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
 
 
 def subpals_functions(req_dict: dict):
-    """subpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
+    """subpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(20)
@@ -317,7 +321,12 @@ def subpals_functions(req_dict: dict):
 
 
 def ytpals_functions(req_dict: dict):
-    """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
+    """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(20)
@@ -353,7 +362,12 @@ def ytpals_functions(req_dict: dict):
 
 
 def sonuker_functions(req_dict: dict):
-    """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)"""
+    """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(20)
@@ -397,7 +411,12 @@ def sonuker_functions(req_dict: dict):
 
 
 def subscribersvideo_functions(req_dict: dict):
-    """subscriber.video login and activate Free All-In-One plan then call inner subscribe loop function(for_loop)"""
+    """subscriber.video login and activate Free All-In-One plan then call inner subscribe loop function(for_loop)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(10)
     driver.get("https://www.subscribers.video/")  # Type_2
@@ -551,7 +570,12 @@ def subscribersvideo_functions(req_dict: dict):
 
 
 def submenow_functions(req_dict: dict):
-    """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)"""
+    """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
@@ -695,7 +719,12 @@ def submenow_functions(req_dict: dict):
 
 
 def ytmonster_functions(req_dict: dict):
-    """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
+    """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict, True, "ytmonster")
     driver.implicitly_wait(15)
     driver.get("https://www.ytmonster.net/login")  # Type_None
@@ -907,9 +936,14 @@ def ytmonster_functions(req_dict: dict):
 
 
 def ytbpals_functions(req_dict: dict):
-    """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan"""
+    """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(9)
     driver.get("https://ytbpals.com/")  # Type_None
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
     driver.find_element_by_id('email').send_keys(req_dict['email_ytbpals'])
@@ -933,7 +967,7 @@ def ytbpals_functions(req_dict: dict):
             window_before = driver_7.window_handles[0]
             driver_7.switch_to_window(window_before)
             driver_7.switch_to_default_content()
-            time.sleep(7)
+            time.sleep(5)
 
             if i == 0:
                 i += 1
@@ -964,7 +998,6 @@ def ytbpals_functions(req_dict: dict):
                 time.sleep(2)
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
-                time.sleep(5)
                 google_login(driver_7, req_dict)
                 logging.info("login completed")
                 if len(driver_7.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0 \
@@ -1009,7 +1042,7 @@ def ytbpals_functions(req_dict: dict):
             else:
                 driver_7.switch_to_window(window_before)
                 driver_7.switch_to_default_content()
-                time.sleep(7)
+                time.sleep(3)
                 try:
                     driver_7.find_element_by_css_selector(sub_btn).send_keys(Keys.ENTER)
                     logging.info("Remaining Videos:" + driver_7.find_element_by_id("ytbbal").text)
@@ -1088,7 +1121,12 @@ def ytbpals_functions(req_dict: dict):
 
 
 def goviral_functions(req_dict: dict):
-    """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)"""
+    """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin/v2/identifier")
