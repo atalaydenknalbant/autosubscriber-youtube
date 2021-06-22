@@ -280,7 +280,7 @@ def subpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(17)
+    driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
@@ -320,47 +320,6 @@ def subpals_functions(req_dict: dict):
     driver.quit()
 
 
-def ytpals_functions(req_dict: dict):
-    """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
-    Args:
-    - req_dict(dict): dictionary object of required parameters
-    Returns:
-    - None(NoneType)
-    """
-    driver: webdriver = set_driver_opt(req_dict)
-    driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(17)
-    driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
-                                        " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
-    driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
-    if len(driver.find_elements_by_partial_link_text("Activated")) > 0:
-        driver.quit()
-        return
-    driver.execute_script("window.scrollTo(0, 300);")
-    try:
-        driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
-                                     "div[1]/div/div[2]/div[2]/form/a") \
-            .send_keys(Keys.ENTER)
-    except NoSuchElementException:
-        logging.info("ytpals activate button passed 1")
-        pass
-    try:
-        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
-                                                           " div > div > div.userContent_pricing > div:nth-child(2) >"
-                                                           " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
-                                                           " form > a")
-        ActionChains(driver).move_to_element(activate_btn).perform()
-        activate_btn.click()
-
-    except NoSuchElementException:
-        logging.info("ytpals activate button passed 2")
-        pass
-    driver.save_screenshot("screenshots/screenshot.png")
-    driver.switch_to.default_content()
-    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
-    driver.quit()
-
-
 def sonuker_functions(req_dict: dict):
     """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
     Args:
@@ -370,7 +329,7 @@ def sonuker_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(17)
+    driver.implicitly_wait(15)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
@@ -407,6 +366,47 @@ def sonuker_functions(req_dict: dict):
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
+    driver.quit()
+
+
+def ytpals_functions(req_dict: dict):
+    """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict)
+    driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
+    driver.implicitly_wait(15)
+    driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
+                                        " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
+    driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
+    if len(driver.find_elements_by_partial_link_text("Activated")) > 0:
+        driver.quit()
+        return
+    driver.execute_script("window.scrollTo(0, 300);")
+    try:
+        driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
+                                     "div[1]/div/div[2]/div[2]/form/a") \
+            .send_keys(Keys.ENTER)
+    except NoSuchElementException:
+        logging.info("ytpals activate button passed 1")
+        pass
+    try:
+        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
+                                                           " div > div > div.userContent_pricing > div:nth-child(2) >"
+                                                           " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
+                                                           " form > a")
+        ActionChains(driver).move_to_element(activate_btn).perform()
+        activate_btn.click()
+
+    except NoSuchElementException:
+        logging.info("ytpals activate button passed 2")
+        pass
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.switch_to.default_content()
+    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
     driver.quit()
 
 
