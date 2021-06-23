@@ -56,6 +56,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
     if is_headless:
         chrome_options.add_argument('--headless')
+        pass
     else:
         pass
     chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
@@ -67,6 +68,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
@@ -74,13 +76,13 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--proxy-server='direct://'")
     chrome_options.add_argument("--proxy-bypass-list=*")
-    chrome_options.add_argument("disable-infobars")
+    chrome_options.add_argument("--disable-web-security")
+    chrome_options.add_argument("--allow-running-insecure-content")
     if website == "ytmonster":
         pass
     else:
         chrome_options.add_argument("--window-size=1920x1080")
         pass
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
 
