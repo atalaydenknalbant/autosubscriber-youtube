@@ -1340,12 +1340,10 @@ def goviral_functions(req_dict: dict):
                         #     pass
                     try:
                         like_button = driver_9.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
-                                                                     "ytd-watch-flexy/"
-                                                                     "div[5]/div[1]/div/div[8]/div[2]/"
-                                                                     "ytd-video-primary-info-renderer/"
-                                                                     "div/div/div[3]/div/"
-                                                                     "ytd-menu-renderer/div[2]/"
-                                                                     "ytd-toggle-button-renderer[1]/a/"
+                                                                     "ytd-watch-flexy/div[5]/div[1]/div/div[8]/"
+                                                                     "div[2]/ytd-video-primary-info-renderer/"
+                                                                     "div/div/div[3]/div/ytd-menu-renderer/"
+                                                                     "div/ytd-toggle-button-renderer[1]/a/"
                                                                      "yt-icon-button/yt-interaction")
                         ActionChains(driver_9).move_to_element(like_button).click().perform()
                     except NoSuchWindowException:
