@@ -183,8 +183,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             driver.save_screenshot("screenshots/screenshot.png")
             driver.quit()
             return
-        if i == 0:
-            confirm_seconds = driver.find_elements_by_id("seconds")[1].text
         driver.switch_to_window(window_before)
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
@@ -246,7 +244,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             else:
                 driver.switch_to.window(window_before)
                 sc[special_condition]()
-                while confirm_seconds == "0":  # noqa
+                while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
                     time.sleep(1.25)
                 # button_confirm = driver.find_element_by_css_selector(confirm_btn)
                 # button_confirm.send_keys(Keys.ENTER)
@@ -256,7 +254,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except TimeoutException:
             driver.switch_to.window(window_before)
             sc[special_condition]()
-            while confirm_seconds == "0":  # noqa
+            while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
                 time.sleep(1.25)
             # button_confirm = driver.find_element_by_css_selector(confirm_btn)
             # button_confirm.send_keys(Keys.ENTER)
@@ -267,7 +265,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.switch_to_default_content()
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
-        while confirm_seconds == "0":
+        while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
             time.sleep(1.25)
         try:
             try:
