@@ -219,7 +219,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         ".style-default-active")) > 0:
                     pass
                 else:
-                    time.sleep(2)
+                    time.sleep(1.25)
                     # driver.execute_script("document.querySelector('#top-level-buttons >"
                     #                       " ytd-toggle-button-renderer:nth-child(1)').click()")
                     like_button = driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/"
@@ -1297,6 +1297,7 @@ def goviral_functions(req_dict: dict):
                     except TimeoutException:
                         pass
                     time.sleep(1.25)
+                    driver_9.execute_script("window.scrollTo(0, 300)")
                     # driver_9.save_screenshot("screenshots/screenshot.png")
                     # try:
                     #     driver_9.execute_script("document.querySelector('#subscribe-button >"
@@ -1328,8 +1329,10 @@ def goviral_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        time.sleep(1.25)
+                        driver_9.execute_script("window.scrollTo(0, 300)")
+                        time.sleep(2)
                         driver_9.save_screenshot("screenshots/screenshot.png")
+
                         # try:
                         #     driver_9.execute_script("document.querySelector('#top-level-buttons >"
                         #                             " ytd-toggle-button-renderer:nth-child(1)').click()")
