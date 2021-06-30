@@ -1262,8 +1262,6 @@ def goviral_functions(req_dict: dict):
                         driver_9.execute_script("window.scrollTo(0, 300)")
                     except TimeoutException:
                         pass
-                    time.sleep(1.25)
-                    driver_9.execute_script("window.scrollTo(0, 300)")
                     # driver_9.save_screenshot("screenshots/screenshot.png")
                     # try:
                     #     driver_9.execute_script("document.querySelector('#subscribe-button >"
