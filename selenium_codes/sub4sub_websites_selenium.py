@@ -541,7 +541,7 @@ def subscribersvideo_functions(req_dict: dict):
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         # driver.execute_script("document.querySelector('#subscribe-button >"
                         #                       " ytd-subscribe-button-renderer').click()")
-                        sub_button = driver.find_element_by_css_selector(yt_sub_button)
+                        sub_button = driver.find_element_by_xpath(yt_sub_button)
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
