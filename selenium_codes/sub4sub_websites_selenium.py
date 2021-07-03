@@ -1258,9 +1258,7 @@ def goviral_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        driver_9.execute_script("window.scrollTo(0, 300)")
                         time.sleep(2)
-                        driver_9.save_screenshot("screenshots/screenshot.png")
 
                         # try:
                         #     driver_9.execute_script("document.querySelector('#top-level-buttons >"
