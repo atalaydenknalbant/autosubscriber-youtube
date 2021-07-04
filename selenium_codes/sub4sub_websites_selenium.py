@@ -1220,7 +1220,7 @@ def goviral_functions(req_dict: dict):
                 time.sleep(3)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 21:
+            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 20:
                 pass
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
