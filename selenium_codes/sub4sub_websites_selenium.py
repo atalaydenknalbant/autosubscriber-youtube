@@ -107,18 +107,18 @@ def google_login(driver: webdriver,
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     driver.save_screenshot("screenshots/screenshot.png")
-    time.sleep(3)
+    time.sleep(2)
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
-    time.sleep(3)
+    time.sleep(2)
     # print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
-    time.sleep(2)
+    time.sleep(1.25)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
-    time.sleep(2)
+    time.sleep(1.25)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to_default_content()
 
@@ -127,8 +127,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
                                  req_dict: dict,
                                  special_condition=1,
-                                 confirm_btn="#likeSub3 > a",
-                                 subscribe_btn="#likeSub2 > i"
+                                 confirm_btn="driver.find_elements_by_class_name('btn-step')[2]",
+                                 subscribe_btn="driver.find_elements_by_class_name('btn-step')[0]"
                                  ):
     """ Loop for like and sub, includes google login
     Args:
@@ -195,7 +195,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.save_screenshot("screenshots/screenshot.png")
         try:
             # button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
-            button_subscribe = driver.find_elements_by_class_name('btn-step')[0]
+            button_subscribe = eval(subscribe_btn)
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
@@ -209,10 +209,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
-        time.sleep(3)
+        time.sleep(1.25)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        time.sleep(5)
+        time.sleep(2)
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if i == 0:
@@ -266,12 +266,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             try:
                 # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
-                button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+                button_confirm = eval(confirm_btn)
                 WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
             except TimeoutException:
                 pass
             # driver.execute_script("document.querySelector('#likeSub3 > a').click()")
-            button_confirm = driver.find_elements_by_class_name('btn-step')[2]
+            button_confirm = eval(confirm_btn)
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
@@ -292,7 +292,7 @@ def subpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(15)
+    driver.implicitly_wait(13)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
@@ -341,7 +341,7 @@ def sonuker_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(15)
+    driver.implicitly_wait(13)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
@@ -390,7 +390,7 @@ def ytpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(15)
+    driver.implicitly_wait(13)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                         " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
@@ -735,7 +735,7 @@ def ytmonster_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, True, "ytmonster")
-    driver.implicitly_wait(13)
+    driver.implicitly_wait(12)
     driver.get("https://www.ytmonster.net/login")  # Type_None
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
@@ -1220,7 +1220,7 @@ def goviral_functions(req_dict: dict):
                 time.sleep(3)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 20:
+            while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
                 pass
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
