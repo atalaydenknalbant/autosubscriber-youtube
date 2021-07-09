@@ -212,7 +212,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         time.sleep(1.25)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        time.sleep(2)
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if i == 0:
@@ -297,7 +296,7 @@ def subpals_functions(req_dict: dict):
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
     pw_place.send_keys(req_dict['pw_subpals'])
-    time.sleep(3)
+    time.sleep(2)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button") \
         .send_keys(Keys.ENTER)
 
