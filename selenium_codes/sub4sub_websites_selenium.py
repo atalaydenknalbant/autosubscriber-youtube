@@ -209,9 +209,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
-        time.sleep(1.25)
+        time.sleep(3)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
+        time.sleep(1.5)
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if i == 0:
