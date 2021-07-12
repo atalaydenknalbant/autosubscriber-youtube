@@ -107,11 +107,11 @@ def google_login(driver: webdriver,
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     driver.save_screenshot("screenshots/screenshot.png")
-    time.sleep(2)
+    time.sleep(1.25)
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
-    time.sleep(2)
+    time.sleep(1.25)
     # print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
@@ -209,7 +209,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
-        time.sleep(3)
+        time.sleep(2)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         time.sleep(1.5)
