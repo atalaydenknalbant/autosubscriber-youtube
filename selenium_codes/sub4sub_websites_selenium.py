@@ -316,11 +316,11 @@ def subpals_functions(req_dict: dict):
     #     logging.info("subpals activate button passed 1")
     #     pass
     try:
-        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
-                                                           " div.userContent_pricing > div:nth-child(2) >"
-                                                           " div:nth-child(1) > div > div.panel-body > "
-                                                           "div.btn-holder > form > a")
-        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
+        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div.dashboardBody >"
+                                                           " div:nth-child(2) > div > div > div.userContent_pricing >"
+                                                           " div:nth-child(2) > div:nth-child(1) > div >"
+                                                           " div.panel-body > div.btn-holder > form > a")
+        activate_btn.send_keys(Keys.ENTER)
 
     except NoSuchElementException:
         logging.info("subpals activate button passed")
@@ -365,11 +365,11 @@ def sonuker_functions(req_dict: dict):
     #     logging.info("sonuker activate button passed 1")
     #     pass
     try:
-        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
-                                                           " div > div > div.userContent_pricing > div:nth-child(2) >"
-                                                           " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
-                                                           " form > a")
-        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
+        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div.dashboardBody >"
+                                                           " div:nth-child(2) > div > div > div.userContent_pricing >"
+                                                           " div:nth-child(2) > div:nth-child(1) > div >"
+                                                           " div.panel-body > div.btn-holder > form > a")
+        activate_btn.send_keys(Keys.ENTER)
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
         pass
@@ -404,11 +404,11 @@ def ytpals_functions(req_dict: dict):
     #     logging.info("ytpals activate button passed 1")
     #     pass
     try:
-        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
-                                                           " div > div > div.userContent_pricing > div:nth-child(2) >"
-                                                           " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
-                                                           " form > a")
-        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
+        activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div.dashboardBody >"
+                                                           " div:nth-child(2) > div > div > div.userContent_pricing >"
+                                                           " div:nth-child(2) > div:nth-child(1) >"
+                                                           " div > div.panel-body > div.btn-holder > form > a")
+        activate_btn.send_keys(Keys.ENTER)
 
     except NoSuchElementException:
         logging.info("ytpals activate button passed")
