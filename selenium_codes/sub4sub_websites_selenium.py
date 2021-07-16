@@ -306,25 +306,24 @@ def subpals_functions(req_dict: dict):
         driver.quit()
         return
     driver.execute_script("window.scrollTo(0, 300);")
-    try:
-        driver.find_element_by_xpath("#core-wrapper > section > div > div > div > div > div >" 
-                                     " div.userContent_pricing > div:nth-child(2) >" 
-                                     " div:nth-child(1) > div > div.panel-body > div.btn-holder > form > a") \
-            .send_keys(Keys.ENTER)
-        time.sleep(1.25)
-    except NoSuchElementException:
-        logging.info("subpals activate button passed 1")
-        pass
+    # try:
+    #     driver.find_element_by_xpath("#core-wrapper > section > div > div > div > div > div >"
+    #                                  " div.userContent_pricing > div:nth-child(2) >"
+    #                                  " div:nth-child(1) > div > div.panel-body > div.btn-holder > form > a") \
+    #         .send_keys(Keys.ENTER)
+    #     time.sleep(1.25)
+    # except NoSuchElementException:
+    #     logging.info("subpals activate button passed 1")
+    #     pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                            " div.userContent_pricing > div:nth-child(2) >"
                                                            " div:nth-child(1) > div > div.panel-body > "
                                                            "div.btn-holder > form > a")
-        ActionChains(driver).move_to_element(activate_btn).perform()
-        activate_btn.click()
+        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
 
     except NoSuchElementException:
-        logging.info("subpals activate button passed 2")
+        logging.info("subpals activate button passed")
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
@@ -358,22 +357,21 @@ def sonuker_functions(req_dict: dict):
     except NoSuchElementException:
         logging.info("Couldn't find activate button ")
     driver.save_screenshot("screenshots/screenshot.png")
-    try:
-        driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/" 
-                                     "div[1]/div/div[2]/div[2]/form/a").click()
-        time.sleep(2)
-    except NoSuchElementException:
-        logging.info("sonuker activate button passed 1")
-        pass
+    # try:
+    #     driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
+    #                                  "div[1]/div/div[2]/div[2]/form/a").click()
+    #     time.sleep(2)
+    # except NoSuchElementException:
+    #     logging.info("sonuker activate button passed 1")
+    #     pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
                                                            " div > div > div.userContent_pricing > div:nth-child(2) >"
                                                            " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
                                                            " form > a")
-        ActionChains(driver).move_to_element(activate_btn).perform()
-        activate_btn.click()
+        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
     except NoSuchElementException:
-        logging.info("sonuker activate button passed 2")
+        logging.info("sonuker activate button passed")
         pass
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
@@ -398,23 +396,22 @@ def ytpals_functions(req_dict: dict):
         driver.quit()
         return
     driver.execute_script("window.scrollTo(0, 300);")
-    try:
-        driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
-                                     "div[1]/div/div[2]/div[2]/form/a") \
-            .send_keys(Keys.ENTER)
-    except NoSuchElementException:
-        logging.info("ytpals activate button passed 1")
-        pass
+    # try:
+    #     driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
+    #                                  "div[1]/div/div[2]/div[2]/form/a") \
+    #         .send_keys(Keys.ENTER)
+    # except NoSuchElementException:
+    #     logging.info("ytpals activate button passed 1")
+    #     pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div:nth-child(2) >"
                                                            " div > div > div.userContent_pricing > div:nth-child(2) >"
                                                            " div:nth-child(1) > div > div.panel-body > div.btn-holder >"
                                                            " form > a")
-        ActionChains(driver).move_to_element(activate_btn).perform()
-        activate_btn.click()
+        ActionChains(driver).move_to_element(activate_btn).send_keys(Keys.ENTER).perform()
 
     except NoSuchElementException:
-        logging.info("ytpals activate button passed 2")
+        logging.info("ytpals activate button passed")
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
@@ -445,7 +442,7 @@ def subscribersvideo_functions(req_dict: dict):
         logging.info("subscribersvideo"+str(ex))
         driver.quit()
         return
-    driver.find_element_by_xpath("//*[@id='main-nav']/ul/li[4]/button").click()
+    driver.find_element_by_css_selector("#main-nav > ul > li:nth-child(4) > button").click()
     driver.find_element_by_id("inputEmail").send_keys(req_dict['email_subscribersvideo'])
     driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element_by_id("buttonSignIn").click()
@@ -487,8 +484,7 @@ def subscribersvideo_functions(req_dict: dict):
         pass
 
     time.sleep(2)
-    if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0 \
-            or len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[12]/div/div[3]/button")) > 0:
+    if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
         logging.info("subscribersvideo found gray button")
         driver.quit()
         return
@@ -603,10 +599,11 @@ def submenow_functions(req_dict: dict):
         logging.info("submenow" + str(ex))
         driver.quit()
         return
-    driver.find_element_by_xpath("//*[@id='header-wrapper']/div[2]/div[1]/div/button").click()
-    driver.find_element_by_xpath("//*[@id='inputEmail']").send_keys(req_dict['email_submenow'])
-    driver.find_element_by_xpath("//*[@id='inputIdChannel']").send_keys(req_dict['yt_channel_id'])
-    driver.find_element_by_xpath("//*[@id='buttonSignIn']").click()
+    driver.find_element_by_css_selector("#header-wrapper > div.header-section.last-child >"
+                                        " div:nth-child(1) > div > button").click()
+    driver.find_element_by_id("inputEmail").send_keys(req_dict['email_submenow'])
+    driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
+    driver.find_element_by_id("buttonSignIn").click()
     time.sleep(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
         logging\
@@ -615,12 +612,12 @@ def submenow_functions(req_dict: dict):
         return
     else:
         pass
-    if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
+    if len(driver.find_elements_by_id("buttonPlan6")) > 0:
         try:
             driver.find_element_by_css_selector("#reviewDialog > div.headerPlan > div > a > img").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             pass
-        driver.find_element_by_xpath("//*[@id='buttonPlan8']").click()
+        driver.find_element_by_id("buttonPlan8").click()
     else:
         logging.info("submenow active Button Passed")
         driver.quit()
@@ -1259,7 +1256,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         time.sleep(2)
-
+                        driver_9.save_screenshot("screenshots/screenshot.png")
                         # try:
                         #     driver_9.execute_script("document.querySelector('#top-level-buttons >"
                         #                             " ytd-toggle-button-renderer:nth-child(1)').click()")
