@@ -292,7 +292,7 @@ def subpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(9)
+    driver.implicitly_wait(8)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
@@ -340,7 +340,7 @@ def sonuker_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(9)
+    driver.implicitly_wait(8)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
@@ -388,7 +388,7 @@ def ytpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(9)
+    driver.implicitly_wait(8)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                         " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
@@ -1236,7 +1236,7 @@ def goviral_functions(req_dict: dict):
                     try:
                         sub_button = driver_9.find_element_by_xpath(yt_sub_button)
                         ActionChains(driver_9).move_to_element(sub_button).click().perform()
-                    except NoSuchWindowException:
+                    except (NoSuchWindowException, NoSuchElementException):
                         pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1265,7 +1265,7 @@ def goviral_functions(req_dict: dict):
                     try:
                         like_button = driver.find_element_by_xpath(yt_like_button)
                         ActionChains(driver_9).move_to_element(like_button).click().perform()
-                    except NoSuchWindowException:
+                    except (NoSuchWindowException,NoSuchElementException):
                         pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     logging.info("Liked Video")
