@@ -225,23 +225,23 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     pass
                 else:
                     time.sleep(1.25)
-                    # driver.execute_script("document.querySelector('#top-level-buttons >"
-                    #                       " ytd-toggle-button-renderer:nth-child(1)').click()")
-                    like_button = driver.find_element_by_xpath(yt_like_button)
-                    ActionChains(driver).move_to_element(like_button).click().perform()
+                    driver.execute_script("document.querySelector('#top-level-buttons-computed >"
+                                          " ytd-toggle-button-renderer:nth-child(1)').click()")
+                    # like_button = driver.find_element_by_xpath(yt_like_button)
+                    # ActionChains(driver).move_to_element(like_button).click().perform()
 
                 time.sleep(1.25)
-                sub_button = driver.find_element_by_xpath(yt_sub_button)
-                ActionChains(driver).move_to_element(sub_button).click().perform()
-                # driver.execute_script("document.querySelector('#subscribe-button >"
-                #                       " ytd-subscribe-button-renderer').click()")
+                # sub_button = driver.find_element_by_xpath(yt_sub_button)
+                # ActionChains(driver).move_to_element(sub_button).click().perform()
+                driver.execute_script("document.querySelector('#subscribe-button >"
+                                      " ytd-subscribe-button-renderer').click()")
 
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
                 sc[special_condition]()
                 while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
-                    time.sleep(1.25)
+                    pass
                 # button_confirm = driver.find_element_by_css_selector(confirm_btn)
                 # button_confirm.send_keys(Keys.ENTER)
                 button_confirm = driver.find_elements_by_class_name('btn-step')[2]
@@ -251,7 +251,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             driver.switch_to.window(window_before)
             sc[special_condition]()
             while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
-                time.sleep(1.25)
+                pass
             # button_confirm = driver.find_element_by_css_selector(confirm_btn)
             # button_confirm.send_keys(Keys.ENTER)
             button_confirm = driver.find_elements_by_class_name('btn-step')[2]
@@ -262,7 +262,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
-            time.sleep(1.25)
+            pass
         try:
             try:
                 # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
@@ -292,7 +292,7 @@ def subpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(8)
+    driver.implicitly_wait(7)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
@@ -340,7 +340,7 @@ def sonuker_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(8)
+    driver.implicitly_wait(7)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
@@ -388,7 +388,7 @@ def ytpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(8)
+    driver.implicitly_wait(7)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                         " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
