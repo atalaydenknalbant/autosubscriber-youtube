@@ -10,16 +10,17 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
 import os
+from threading import Event
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
+event = Event()
 yt_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
                  "ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/" \
                  "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction"
-yt_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]" \
-                "/div[1]/div/div[9]/div[2]/ytd-video-secondary-info-renderer/div/div/div/" \
-                "ytd-subscribe-button-renderer/tp-yt-paper-button"
+yt_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
+                "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
+                "tp-yt-paper-button"
 
 
 def get_clear_browsing_button(driver: webdriver):
@@ -107,18 +108,18 @@ def google_login(driver: webdriver,
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     driver.save_screenshot("screenshots/screenshot.png")
-    time.sleep(1.25)
+    event.wait(1.25)
     email_area = driver.find_element_by_id("identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
-    time.sleep(1.25)
+    event.wait(1.25)
     # print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
-    time.sleep(1.25)
+    event.wait(1.25)
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
-    time.sleep(1.25)
+    event.wait(1.25)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to_default_content()
 
@@ -170,7 +171,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 continue
         except (StaleElementReferenceException, NoSuchElementException):
             try:
-                time.sleep(1.25)
+                event.wait(1.25)
                 while driver.find_element_by_id("seconds").text == "0":
                     continue
             except NoSuchElementException:
@@ -209,10 +210,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
-        time.sleep(2)
+        event.wait(2)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
-        time.sleep(1.5)
+        event.wait(1.5)
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if i == 0:
@@ -224,17 +225,17 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         ".style-default-active")) > 0:
                     pass
                 else:
-                    time.sleep(1.25)
-                    driver.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                          " ytd-toggle-button-renderer:nth-child(1)').click()")
-                    # like_button = driver.find_element_by_xpath(yt_like_button)
-                    # ActionChains(driver).move_to_element(like_button).click().perform()
+                    event.wait(1.25)
+                    # driver.execute_script("document.querySelector('#top-level-buttons-computed >"
+                    #                       " ytd-toggle-button-renderer:nth-child(1)').click()")
+                    like_button = driver.find_element_by_xpath(yt_like_button)
+                    ActionChains(driver).move_to_element(like_button).click().perform()
 
-                time.sleep(1.25)
-                # sub_button = driver.find_element_by_xpath(yt_sub_button)
-                # ActionChains(driver).move_to_element(sub_button).click().perform()
-                driver.execute_script("document.querySelector('#subscribe-button >"
-                                      " ytd-subscribe-button-renderer').click()")
+                event.wait(1.25)
+                sub_button = driver.find_element_by_xpath(yt_sub_button)
+                ActionChains(driver).move_to_element(sub_button).click().perform()
+                # driver.execute_script("document.querySelector('#subscribe-button >"
+                #                       " ytd-subscribe-button-renderer').click()")
 
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
@@ -275,7 +276,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
-            time.sleep(1.25)
+            event.wait(1.25)
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
             driver.close()
@@ -297,7 +298,7 @@ def subpals_functions(req_dict: dict):
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
     pw_place.send_keys(req_dict['pw_subpals'])
-    time.sleep(2)
+    event.wait(2)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button") \
         .send_keys(Keys.ENTER)
 
@@ -311,7 +312,7 @@ def subpals_functions(req_dict: dict):
     #                                  " div.userContent_pricing > div:nth-child(2) >"
     #                                  " div:nth-child(1) > div > div.panel-body > div.btn-holder > form > a") \
     #         .send_keys(Keys.ENTER)
-    #     time.sleep(1.25)
+    #     event.wait(1.25)
     # except NoSuchElementException:
     #     logging.info("subpals activate button passed 1")
     #     pass
@@ -360,7 +361,7 @@ def sonuker_functions(req_dict: dict):
     # try:
     #     driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
     #                                  "div[1]/div/div[2]/div[2]/form/a").click()
-    #     time.sleep(2)
+    #     event.wait(2)
     # except NoSuchElementException:
     #     logging.info("sonuker activate button passed 1")
     #     pass
@@ -446,7 +447,7 @@ def subscribersvideo_functions(req_dict: dict):
     driver.find_element_by_id("inputEmail").send_keys(req_dict['email_subscribersvideo'])
     driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element_by_id("buttonSignIn").click()
-    time.sleep(1.25)
+    event.wait(1.25)
     try:
         WebDriverWait(driver, 10).until(ec.alert_is_present())
         alert = driver.switch_to.alert
@@ -470,7 +471,7 @@ def subscribersvideo_functions(req_dict: dict):
             driver.find_element_by_id("buttonPlan6").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
             logging.info("subscribersvideo Button Passed")
-    time.sleep(3)
+    event.wait(3)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
@@ -483,7 +484,7 @@ def subscribersvideo_functions(req_dict: dict):
     else:
         pass
 
-    time.sleep(2)
+    event.wait(2)
     if len(driver.find_elements_by_xpath("//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
         logging.info("subscribersvideo found gray button")
         driver.quit()
@@ -519,7 +520,7 @@ def subscribersvideo_functions(req_dict: dict):
                     window_after = driver.window_handles[1]
                     driver.switch_to.window(window_after)
                     driver.switch_to.default_content()
-                    time.sleep(2)
+                    event.wait(2)
                     if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
@@ -543,12 +544,12 @@ def subscribersvideo_functions(req_dict: dict):
                     else:
                         driver.switch_to.window(window_before)
                         driver.switch_to.default_content()
-                        time.sleep(1.25)
+                        event.wait(1.25)
                         driver.find_element_by_id("btnSkip").click()
                         continue
                     driver.switch_to.window(window_before)
                     while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                        time.sleep(1.5)
+                        event.wait(1.5)
                     el = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                     el.click()
                     logging.info("subscribersvideo done sub & like")
@@ -558,7 +559,7 @@ def subscribersvideo_functions(req_dict: dict):
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
                 alert_4 = driver.switch_to.alert
                 alert_4.accept()
-                time.sleep(1.25)
+                event.wait(1.25)
                 if len(driver.find_elements_by_xpath("//*[@id='buttonPlan6']")) > 0:
                     try:
                         driver.find_element_by_xpath("//*[@id='buttonPlan6']").click()
@@ -566,7 +567,7 @@ def subscribersvideo_functions(req_dict: dict):
                         logging.info("subscribersvideo Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
                         driver.close()
                         return
-                time.sleep(1.25)
+                event.wait(1.25)
                 for_loop()
             except TimeoutException:
                 logging.info("subscribersvideo outer timeout exception")
@@ -604,7 +605,7 @@ def submenow_functions(req_dict: dict):
     driver.find_element_by_id("inputEmail").send_keys(req_dict['email_submenow'])
     driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element_by_id("buttonSignIn").click()
-    time.sleep(1.25)
+    event.wait(1.25)
     if len(driver.find_elements_by_partial_link_text("Your channel doesn't have any public video.")) > 0:
         logging\
             .info("submenow Your channel doesn't have any public video Please try to reload this page one more time.")
@@ -622,7 +623,7 @@ def submenow_functions(req_dict: dict):
         logging.info("submenow active Button Passed")
         driver.quit()
         return
-    time.sleep(1.25)
+    event.wait(1.25)
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
@@ -650,7 +651,7 @@ def submenow_functions(req_dict: dict):
                     try:
                         while driver.find_element_by_css_selector("#marketStatus > span").text != \
                                 "Watch, Like & Subscribe":
-                            time.sleep(1.25)
+                            event.wait(1.25)
                     except StaleElementReferenceException:
                         logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
                         driver.quit()
@@ -659,7 +660,7 @@ def submenow_functions(req_dict: dict):
                     window_after = driver.window_handles[1]
                     driver.switch_to.window(window_after)
                     driver.save_screenshot("screenshots/screenshot.png")
-                    time.sleep(2)
+                    event.wait(2)
                     if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                         if i == 0:
                             google_login(driver, req_dict)
@@ -688,7 +689,7 @@ def submenow_functions(req_dict: dict):
                     try:
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
-                            time.sleep(1.5)
+                            event.wait(1.5)
                         driver.save_screenshot("screenshots/screenshot.png")
                         el = \
                             WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
@@ -753,7 +754,7 @@ def ytmonster_functions(req_dict: dict):
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
             driver_6.switch_to_default_content()
-            time.sleep(2)
+            event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
                                                         " div.mainContent >"
@@ -762,7 +763,7 @@ def ytmonster_functions(req_dict: dict):
                                                         " > b") \
                     .text == "Loading...":
                 continue
-            time.sleep(1.25)
+            event.wait(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
             yt_channel_name = driver_6.find_element_by_css_selector("""body > div.container-fluid > div > div.main > 
                                                                     div.mainContent > div > div > div >
@@ -771,7 +772,7 @@ def ytmonster_functions(req_dict: dict):
                 .text
             if i == 0:
                 i += 1
-                time.sleep(1.25)
+                event.wait(1.25)
                 try:
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     driver_6.find_element_by_css_selector("#intercom-container > div > div > div > div >"
@@ -801,7 +802,7 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        time.sleep(2)
+                        event.wait(2)
                         # driver.execute_script("document.querySelector('#top-level-buttons >"
                         #                       " ytd-toggle-button-renderer:nth-child(1)').click()")
                         like_button = driver.find_element_by_xpath(yt_like_button)
@@ -815,12 +816,12 @@ def ytmonster_functions(req_dict: dict):
                                                                  " div.mainContent > div > div.col-md-9 > div >"
                                                                  " div:nth-child(7) > div > div > div")\
                                 .text != "Verify Like":
-                            time.sleep(1)
+                            event.wait(1)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(2)
+                        event.wait(2)
                         confirm_el = WebDriverWait(driver_6, 5)\
                             .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
                         ActionChains(driver).move_to_element(confirm_el).click().perform()
@@ -835,7 +836,7 @@ def ytmonster_functions(req_dict: dict):
                                                                                        " div.col-md-10.campaignData "
                                                                                        "> b")\
                                 .text:
-                            time.sleep(1.25)
+                            event.wait(1.25)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number" \
                                " of likes. Try verifying again, or skip the video.":
@@ -845,7 +846,7 @@ def ytmonster_functions(req_dict: dict):
                             continue
                         continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        event.wait(2)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
@@ -865,7 +866,7 @@ def ytmonster_functions(req_dict: dict):
                                                                                    " div > div > div:nth-child(4) >"
                                                                                    " div.col-md-10.campaignData > b") \
                             .text:
-                        time.sleep(2)
+                        event.wait(2)
                         if driver_6.find_element_by_id("error").text == \
                                 "We failed to verify your like as we did not find an increase in the number of likes." \
                                 " Try verifying again, or skip the video.":
@@ -878,7 +879,7 @@ def ytmonster_functions(req_dict: dict):
             else:
                 driver_6.switch_to_window(window_before)
                 driver_6.switch_to_default_content()
-                time.sleep(2)
+                event.wait(2)
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 try:
                     WebDriverWait(driver_6, 20).until(ec.element_to_be_clickable((By.ID, like_btn)))
@@ -896,7 +897,7 @@ def ytmonster_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        time.sleep(2)
+                        event.wait(2)
                         # driver.execute_script("document.querySelector('#top-level-buttons >"
                         #                       " ytd-toggle-button-renderer:nth-child(1)').click()")
                         like_button = driver.find_element_by_xpath(yt_like_button)
@@ -911,24 +912,24 @@ def ytmonster_functions(req_dict: dict):
                                                                  " div.mainContent > div > div.col-md-9 > div >"
                                                                  " div:nth-child(7) > div > div > div") \
                                 .text != "Verify Like":
-                            time.sleep(1.25)
+                            event.wait(1.25)
                         else:
                             logging.info("confirm button is clickable")
                             break
                     try:
-                        time.sleep(3)
+                        event.wait(3)
                         driver_6.find_element_by_css_selector(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
                         while yt_channel_name == driver_6.find_element_by_class_name("yt-name").text:
-                            time.sleep(1.25)
+                            event.wait(1.25)
                             if driver_6.find_element_by_id("error").text == \
                                "We failed to verify your like as we did not find an increase in the number of likes." \
                                " Try verifying again, or skip the video.":
                                 driver_6.find_element_by_css_selector(skip_btn).click()
                                 logging.info("Skip button has been pressed")
                     except NoSuchElementException:
-                        time.sleep(3)
+                        event.wait(3)
                         window_after = driver_6.window_handles[1]
                         driver_6.switch_to.window(window_after)
                         driver_6.close()
@@ -973,7 +974,7 @@ def ytbpals_functions(req_dict: dict):
             window_before = driver_7.window_handles[0]
             driver_7.switch_to_window(window_before)
             driver_7.switch_to_default_content()
-            time.sleep(5)
+            event.wait(5)
 
             if i == 0:
                 i += 1
@@ -1001,14 +1002,14 @@ def ytbpals_functions(req_dict: dict):
                         driver_7.save_screenshot("screenshots/screenshot.png")
                     driver_7.quit()
                     break
-                time.sleep(2)
+                event.wait(2)
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
                 google_login(driver_7, req_dict)
                 logging.info("login completed")
                 if len(driver_7.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 400);")
-                    time.sleep(2)
+                    event.wait(2)
                     driver_7.switch_to_default_content()
                     # driver.execute_script("document.querySelector('#subscribe-button >"
                     #                       " ytd-subscribe-button-renderer').click()")
@@ -1021,14 +1022,14 @@ def ytbpals_functions(req_dict: dict):
                     logging.info("Subbed to Channel")
                     driver_7.switch_to_default_content()
                     try:
-                        time.sleep(2)
+                        event.wait(2)
                         driver_7.find_element_by_id(confirm_btn).click()
 
                         logging.info("confirm button was clicked")
                         i += 1
                         continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        event.wait(2)
                         window_after = driver_7.window_handles[1]
                         driver_7.switch_to.window(window_after)
                         driver_7.close()
@@ -1048,7 +1049,7 @@ def ytbpals_functions(req_dict: dict):
             else:
                 driver_7.switch_to_window(window_before)
                 driver_7.switch_to_default_content()
-                time.sleep(3)
+                event.wait(3)
                 try:
                     driver_7.find_element_by_css_selector(sub_btn).send_keys(Keys.ENTER)
                     logging.info("Remaining Videos:" + driver_7.find_element_by_id("ytbbal").text)
@@ -1069,20 +1070,20 @@ def ytbpals_functions(req_dict: dict):
                     driver_7.find_element_by_css_selector("body > div.page-container.horizontal-menu > header > div >"
                                                           " ul.navbar-nav > li:nth-child(4) > a")\
                         .send_keys(Keys.ENTER)
-                    time.sleep(3)
+                    event.wait(3)
                     driver_7.find_element_by_css_selector("#inactive-plans > div.panel-heading >"
                                                           " div.panel-options > a:nth-child(2)")\
                         .send_keys(Keys.ENTER)
-                    time.sleep(2)
+                    event.wait(2)
                     driver_7.find_element_by_css_selector("#inactive-plans > div.panel-heading >"
                                                           " div.panel-options > a:nth-child(2)") \
                         .send_keys(Keys.ENTER)
-                    time.sleep(2)
+                    event.wait(2)
                     try:
                         button = driver_7.find_element_by_css_selector("#inactive-plans > div.panel-body.with-table >"
                                                                        " table > tbody > tr > td:nth-child(8) > button")
                         button.send_keys(Keys.ENTER)
-                        time.sleep(3)
+                        event.wait(3)
                         button = driver_7.find_element_by_id("start-now")
                         ActionChains(driver_7).move_to_element(button).click(button).perform()
 
@@ -1091,12 +1092,12 @@ def ytbpals_functions(req_dict: dict):
                         logging.info("Error:" + str(ex))
                     driver_7.quit()
                     break
-                time.sleep(3)
+                event.wait(3)
                 window_after = driver_7.window_handles[1]
                 driver_7.switch_to.window(window_after)
                 if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 600);")
-                    time.sleep(2)
+                    event.wait(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
                     driver_7.switch_to_default_content()
                     # driver.execute_script("document.querySelector('#subscribe-button >"
@@ -1110,12 +1111,12 @@ def ytbpals_functions(req_dict: dict):
                     logging.info("Subbed to Channel")
                     driver_7.switch_to_default_content()
                     try:
-                        time.sleep(2)
+                        event.wait(2)
                         driver_7.find_element_by_id(confirm_btn).click()
                         logging.info("confirm button was clicked")
                         continue
                     except NoSuchElementException:
-                        time.sleep(2)
+                        event.wait(2)
                         window_after = driver_7.window_handles[1]
                         driver_7.switch_to.window(window_after)
                         driver_7.close()
@@ -1138,7 +1139,7 @@ def goviral_functions(req_dict: dict):
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
-    time.sleep(3)
+    event.wait(3)
     driver.get("https://members.goviral.ai/")  # Type_None
     driver.find_element_by_name("email").send_keys(req_dict['email_goviral'])
     driver.find_element_by_name("password").send_keys(req_dict['pw_goviral'])
@@ -1170,10 +1171,10 @@ def goviral_functions(req_dict: dict):
         for i in range(100):
             driver_9.save_screenshot("screenshots/screenshot.png")
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
-                time.sleep(0.5)
+                event.wait(0.5)
             x = 0
             while len(driver_9.window_handles) == 1:
-                time.sleep(0.5)
+                event.wait(0.5)
                 x += 1
                 if x >= 30:
                     driver_9.refresh()
@@ -1187,7 +1188,7 @@ def goviral_functions(req_dict: dict):
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
                 driver_9.refresh()
-                time.sleep(3.25)
+                event.wait(3.25)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
@@ -1200,7 +1201,7 @@ def goviral_functions(req_dict: dict):
                 if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                     driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
-                    time.sleep(3.25)
+                    event.wait(3.25)
                     i -= 1
                     continue
 
@@ -1214,7 +1215,7 @@ def goviral_functions(req_dict: dict):
                     pass
             except (StaleElementReferenceException, ValueError):
                 driver_9.refresh()
-                time.sleep(3)
+                event.wait(3)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
@@ -1248,14 +1249,14 @@ def goviral_functions(req_dict: dict):
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     driver_9.find_element_by_css_selector(like_btn).click()
                     driver_9.switch_to.window(driver_9.window_handles[1])
-                    time.sleep(3)
+                    event.wait(3)
                     if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
                                                                   " ytd-toggle-button-renderer.style-scope."
                                                                   "ytd-menu-renderer.force-icon-button"
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
-                        time.sleep(2)
+                        event.wait(2)
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         # try:
                         #     driver_9.execute_script("document.querySelector('#top-level-buttons >"
@@ -1277,12 +1278,12 @@ def goviral_functions(req_dict: dict):
                     pass
             except StaleElementReferenceException:
                 driver_9.refresh()
-                time.sleep(3)
+                event.wait(3)
                 continue
             c = 0
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
-                    time.sleep(0.5)
+                    event.wait(0.5)
                     c += 1
                     if c >= 30:
                         try:
@@ -1292,7 +1293,7 @@ def goviral_functions(req_dict: dict):
                             pass
             except StaleElementReferenceException:
                 driver_9.refresh()
-                time.sleep(3)
+                event.wait(3)
                 continue
 
     for_loop_like(driver)

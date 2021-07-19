@@ -1,6 +1,7 @@
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
 from threading import Thread
+import multiprocessing
 import os
 
 heroku = "not available"
@@ -41,6 +42,6 @@ else:
 
 
 if __name__ == "__main__":
-    subpals_thread = Thread(target=sws.subpals_functions, args=[required_dict]).start()
-    sonuker_thread = Thread(target=sws.sonuker_functions, args=[required_dict]).start()
-    ytpals_thread = Thread(target=sws.ytpals_functions, args=[required_dict]).start()
+    subpals_thread = Thread(target=sws.subpals_functions, args=(required_dict,)).start()
+    sonuker_thread = Thread(target=sws.sonuker_functions, args=(required_dict,)).start()
+    ytpals_thread = Thread(target=sws.ytpals_functions, args=(required_dict,)).start()
