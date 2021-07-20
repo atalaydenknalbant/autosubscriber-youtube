@@ -428,7 +428,7 @@ def subscribersvideo_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(9)
     driver.get("https://www.subscribers.video/")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -587,7 +587,7 @@ def submenow_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(9)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
