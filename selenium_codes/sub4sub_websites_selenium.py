@@ -1265,13 +1265,17 @@ def goviral_functions(req_dict: dict):
                     try:
                         like_button = driver.find_element_by_xpath(yt_like_button)
                         ActionChains(driver_9).move_to_element(like_button).click().perform()
-                    except (NoSuchWindowException,NoSuchElementException):
+                        driver_9.save_screenshot("screenshots/screenshot_proof.png")
+                    except (NoSuchWindowException, NoSuchElementException):
                         pass
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     logging.info("Liked Video")
-                    driver_9.save_screenshot("screenshots/screenshot.png")
                 except ElementClickInterceptedException:
                     pass
+            try:
+                driver_9.find_element_by_id('verify-action-button').click()
+            except (ElementNotInteractableException, StaleElementReferenceException):
+                pass
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     pass
