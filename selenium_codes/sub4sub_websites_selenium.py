@@ -1275,7 +1275,8 @@ def goviral_functions(req_dict: dict):
             try:
                 driver_9.find_element_by_id('verify-action-button').send_keys(Keys.ENTER)
                 logging.info("Clicked Verify Action Button")
-            except (ElementNotInteractableException, StaleElementReferenceException):
+                driver_9.save_screenshot("screenshots/screenshot.png")
+            except (ElementNotInteractableException, StaleElementReferenceException, ElementClickInterceptedException):
                 pass
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
