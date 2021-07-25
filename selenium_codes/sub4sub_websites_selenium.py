@@ -1273,7 +1273,7 @@ def goviral_functions(req_dict: dict):
                 except ElementClickInterceptedException:
                     pass
             try:
-                driver_9.find_element_by_id('verify-action-button').send_keys(Keys.ENTER)
+                driver_9.find_element_by_id('verify-action-button').click()
                 logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
             except (ElementNotInteractableException, StaleElementReferenceException, ElementClickInterceptedException):
