@@ -1274,6 +1274,7 @@ def goviral_functions(req_dict: dict):
                     pass
             try:
                 driver_9.find_element_by_id('verify-action-button').click()
+                logging.info("Clicked Verify Action Button")
             except (ElementNotInteractableException, StaleElementReferenceException):
                 pass
             try:
