@@ -20,6 +20,10 @@ yt_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]
 yt_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
                 "tp-yt-paper-button"
+yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
+                    " ytd-toggle-button-renderer:nth-child(1)').click()"
+yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
+                   ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()'
 yt_javascript = False
 
 
@@ -72,7 +76,10 @@ def set_driver_opt(req_dict: dict,
         pass
     else:
         chrome_options.add_argument("--disable-extensions")
-        prefs = {"profile.managed_default_content_settings.images": 2, "disk-cache-size": 4096}
+        prefs = {"profile.managed_default_content_settings.images": 2,
+                 "disk-cache-size": 4096,
+                 "profile.password_manager_enabled": False,
+                 "credentials_enable_service": False}
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         pass
@@ -81,16 +88,13 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
+    chrome_options.add_argument('--disable-notifications')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--proxy-server='direct://'")
     chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
-    if website == "ytmonster":
-        pass
-    else:
-        chrome_options.add_argument("--window-size=1920,1080")
-        pass
+    chrome_options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
 
@@ -227,16 +231,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 else:
                     event.wait(1.25)
                     if yt_javascript:
-                        driver.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                              " ytd-toggle-button-renderer:nth-child(1)').click()")
+                        driver.execute_script(yt_js_like_button)
                     else:
                         like_button = driver.find_element_by_xpath(yt_like_button)
                         ActionChains(driver).move_to_element(like_button).click().perform()
 
                 event.wait(1.25)
                 if yt_javascript:
-                    driver.execute_script("document.querySelector('#subscribe-button >"
-                                          " ytd-subscribe-button-renderer').click()")
+                    driver.execute_script(yt_js_sub_button)
                 else:
                     sub_button = driver.find_element_by_xpath(yt_sub_button)
                     ActionChains(driver).move_to_element(sub_button).click().perform()
@@ -529,16 +531,14 @@ def subscribersvideo_functions(req_dict: dict):
                             pass
                         else:
                             if yt_javascript:
-                                driver.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                                      " ytd-toggle-button-renderer:nth-child(1)').click()")
+                                driver.execute_script(yt_js_like_button)
                             else:
                                 like_button = driver.find_element_by_xpath(yt_like_button)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
-                            driver.execute_script("document.querySelector('#subscribe-button >"
-                                                  " ytd-subscribe-button-renderer').click()")
+                            driver.execute_script(yt_js_sub_button)
                         else:
                             sub_button = driver.find_element_by_xpath(yt_sub_button)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
@@ -675,16 +675,14 @@ def submenow_functions(req_dict: dict):
                             pass
                         else:
                             if yt_javascript:
-                                driver.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                                      " ytd-toggle-button-renderer:nth-child(1)').click()")
+                                driver.execute_script(yt_js_like_button)
                             else:
                                 like_button = driver.find_element_by_xpath(yt_like_button)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
-                            driver.execute_script("document.querySelector('#subscribe-button >"
-                                                  " ytd-subscribe-button-renderer').click()")
+                            driver.execute_script(yt_js_sub_button)
                         else:
                             sub_button = driver.find_element_by_xpath(yt_sub_button)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
@@ -740,21 +738,24 @@ def ytmonster_functions(req_dict: dict):
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, True, "ytmonster")
-    driver.implicitly_wait(12)
-    driver.get("https://www.ytmonster.net/login")  # Type_None
+    driver: webdriver = set_driver_opt(req_dict)
+    driver.implicitly_wait(10)
+    driver.get("https://www.ytmonster.net/login")  # Type_Undefined
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
     driver.find_element_by_css_selector("#formLogin > button").send_keys(Keys.ENTER)
-    driver.get("https://www.ytmonster.net/exchange/likes")
+    driver.get("https://www.ytmonster.net/exchange/subscribers")
     driver.save_screenshot("screenshots/screenshot.png")
+    yt_javascript = True
 
     def for_loop_sub(driver_6,
-                     like_btn="likeText",
+                     sub_btn="subText",
                      skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
-                              " div > div:nth-child(7) > div > a.likeSkip > div",
-                     confirm_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
-                                 " div > div:nth-child(7) > div > div > div",
+                              " div.ct-full-wrap > div > div.ct-well.position-relative > div.row > div:nth-child(3) >"
+                              " a.subSkip > div",
+                     confirm_btn="body > div.container-fluid > div > div.main > div.mainContent > div >"
+                                 " div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                 " div.row > div:nth-child(3) > div > div",
                      ):
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
@@ -765,189 +766,126 @@ def ytmonster_functions(req_dict: dict):
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
-                                                        " div.mainContent >"
-                                                        " div > div > div > div:nth-child(4) >"
-                                                        " div.col-md-10.campaignData"
-                                                        " > b") \
+                                                        " div.mainContent > div > div.col-md-9 >"
+                                                        " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                        " div.row > div:nth-child(2) > b") \
                     .text == "Loading...":
                 continue
             event.wait(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
-            yt_channel_name = driver_6.find_element_by_css_selector("""body > div.container-fluid > div > div.main > 
-                                                                    div.mainContent > div > div > div >
-                                                                    div:nth-child(4)
-                                                                    > div.col-md-10.campaignData > b""") \
+            yt_channel_name = driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
+                                                                    " div.mainContent > div > div.col-md-9 >"
+                                                                    " div.ct-full-wrap > div >"
+                                                                    " div.ct-well.position-relative >"
+                                                                    " div.row > div:nth-child(2) > b") \
                 .text
-            if i == 0:
-                i += 1
-                event.wait(1.25)
-                try:
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.find_element_by_css_selector("#intercom-container > div > div > div > div >"
-                                                          " div.intercom-tour-step-header > span").click()
-                    logging.info("closed notification")
-                except NoSuchElementException:
-                    pass
-                try:
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.find_element_by_id(like_btn).click()
-                    logging.info("clicked like btn")
-                except NoSuchElementException:
-                    logging.info("Couldn't Find Like button")
-                    driver_6.quit()
-                    break
-                window_after = driver_6.window_handles[1]
-                driver_6.switch_to.window(window_after)
-                google_login(driver_6, req_dict)
+            event.wait(1.25)
+            try:
                 driver_6.save_screenshot("screenshots/screenshot.png")
-                logging.info("login completed")
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.switch_to_default_content()
-                    if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
-                                                                  " ytd-toggle-button-renderer.style-scope."
-                                                                  "ytd-menu-renderer.force-icon-button"
-                                                                  ".style-default-active")) > 0:
-                        pass
-                    else:
-                        event.wait(2)
-                        if yt_javascript:
-                            driver_6.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                                    " ytd-toggle-button-renderer:nth-child(1)').click()")
-                        else:
-                            like_button = driver_6.find_element_by_xpath(yt_like_button)
-                            ActionChains(driver_6).move_to_element(like_button).click().perform()
-                    driver_6.save_screenshot("screenshots/screenshot_proof.png")
-                    driver_6.switch_to.window(window_before)
-                    driver_6.switch_to_default_content()
-                    logging.info("Liked Channel")
-                    for _ in range(50000):
-                        if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
-                                                                 " div.mainContent > div > div.col-md-9 > div >"
-                                                                 " div:nth-child(7) > div > div > div")\
-                                .text != "Verify Like":
-                            event.wait(1)
-                        else:
-                            logging.info("confirm button is clickable")
-                            break
-                    try:
-                        event.wait(2.5)
-                        confirm_el = WebDriverWait(driver_6, 5)\
-                            .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
-                        ActionChains(driver).move_to_element(confirm_el).click().perform()
-
-                        logging.info("confirm button was clicked")
-                        i += 1
-                        driver_6.save_screenshot("screenshots/screenshot.png")
-                        while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid > "
-                                                                                       "div > div.main >"
-                                                                                       " div.mainContent > div > div >"
-                                                                                       " div > div:nth-child(4) >"
-                                                                                       " div.col-md-10.campaignData "
-                                                                                       "> b")\
-                                .text:
-                            event.wait(1.25)
-                            if driver_6.find_element_by_id("error").text == \
-                               "We failed to verify your like as we did not find an increase in the number" \
-                               " of likes. Try verifying again, or skip the video.":
-
-                                driver_6.find_element_by_css_selector(skip_btn).click()
-                                logging.info("Skip button has been pressed")
-                            continue
-                        continue
-                    except NoSuchElementException:
-                        event.wait(2)
-                        window_after = driver_6.window_handles[1]
-                        driver_6.switch_to.window(window_after)
-                        driver_6.close()
-                        driver_6.switch_to.window(window_before)
-                        logging.info("couldn't find confirm button")
-                        i += 1
-                        continue
-
-                else:
-                    driver_6.switch_to.window(window_before)
-                    driver_6.switch_to_default_content()
-                    driver_6.find_element_by_css_selector(skip_btn).click()
-
+                driver_6.find_element_by_css_selector("#intercom-container > div > div > div > div >"
+                                                      " div.intercom-tour-step-header > span").click()
+                logging.info("Closed Notification")
+            except NoSuchElementException:
+                pass
+            try:
+                driver_6.save_screenshot("screenshots/screenshot.png")
+                driver_6.find_element_by_id(sub_btn).click()
+                logging.info("Clicked Subscribe Button")
+            except NoSuchElementException:
+                logging.info("Couldn't Find Subscribe Button")
+                driver_6.quit()
+                break
+            window_after = driver_6.window_handles[1]
+            driver_6.switch_to.window(window_after)
+            if len(driver_6.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
+                driver_6.save_screenshot("screenshots/screenshot.png")
+                driver_6.switch_to_default_content()
+                if i == 0:
                     i += 1
+                    google_login(driver_6, req_dict)
+                    logging.info("google login completed")
+                if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
+                                                              " ytd-toggle-button-renderer.style-scope."
+                                                              "ytd-menu-renderer.force-icon-button"
+                                                              ".style-default-active")) > 0:
+                    pass
+                else:
+                    driver_6.execute_script("window.scrollTo(0, 300);")
+                    event.wait(2)
+                    driver_6.switch_to_default_content()
+                    if yt_javascript:
+                        driver_6.execute_script(yt_js_sub_button)
+                    else:
+                        sub_button = driver_6.find_element_by_xpath(yt_sub_button)
+                        ActionChains(driver_6).move_to_element(sub_button).click().perform()
+                driver_6.save_screenshot("screenshots/screenshot_proof.png")
+                driver_6.switch_to.window(window_before)
+                driver_6.switch_to_default_content()
+                logging.info("Subscribed To Channel")
+                for _ in range(50000):
+                    if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
+                                                             " div.mainContent > div > div.col-md-9 >"
+                                                             " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                             " div.row > div:nth-child(3) > div > div")\
+                            .text != "Verify Subscription":
+                        event.wait(1)
+                    else:
+                        logging.info("confirm button is clickable")
+                        break
+                try:
+                    event.wait(2.5)
+                    confirm_el = WebDriverWait(driver_6, 5)\
+                        .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+                    ActionChains(driver_6).move_to_element(confirm_el).click().perform()
+
+                    logging.info("confirm button was clicked")
+                    i += 1
+                    driver_6.save_screenshot("screenshots/screenshot.png")
                     while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid > div >"
                                                                                    " div.main > div.mainContent > div >"
-                                                                                   " div > div > div:nth-child(4) >"
-                                                                                   " div.col-md-10.campaignData > b") \
+                                                                                   " div.col-md-9 > div.ct-full-wrap >"
+                                                                                   " div >"
+                                                                                   " div.ct-well.position-relative >"
+                                                                                   " div.row > div:nth-child(2) > b")\
                             .text:
-                        event.wait(2)
+                        event.wait(1.25)
                         if driver_6.find_element_by_id("error").text == \
-                                "We failed to verify your like as we did not find an increase in the number of likes." \
-                                " Try verifying again, or skip the video.":
+                           "We failed to verify your like as we did not find an increase in the number" \
+                           " of likes. Try verifying again, or skip the video.":
+
                             driver_6.find_element_by_css_selector(skip_btn).click()
                             logging.info("Skip button has been pressed")
-                        driver_6.save_screenshot("screenshots/screenshot.png")
                         continue
+                    continue
+                except NoSuchElementException:
+                    event.wait(2)
+                    window_after = driver_6.window_handles[1]
+                    driver_6.switch_to.window(window_after)
+                    driver_6.close()
+                    driver_6.switch_to.window(window_before)
+                    logging.info("couldn't find confirm button")
+                    i += 1
                     continue
 
             else:
-                driver_6.switch_to_window(window_before)
+                driver_6.switch_to.window(window_before)
                 driver_6.switch_to_default_content()
-                event.wait(2)
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                try:
-                    WebDriverWait(driver_6, 20).until(ec.element_to_be_clickable((By.ID, like_btn)))
-                    driver_6.find_element_by_id(like_btn).click()
-                except NoSuchElementException:
-                    break
-                window_after = driver_6.window_handles[1]
-                driver_6.switch_to.window(window_after)
-                if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
+                driver_6.find_element_by_css_selector(skip_btn).click()
+                i -= 1
+                while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid > div >"
+                                                                               " div.main > div.mainContent > div >"
+                                                                               " div.col-md-9 > div.ct-full-wrap >"
+                                                                               " div > div.ct-well.position-relative >"
+                                                                               " div.row > div:nth-child(2) > b") \
+                        .text:
+                    event.wait(2)
+                    if driver_6.find_element_by_id("error").text == \
+                            "We failed to verify your like as we did not find an increase in the number of likes." \
+                            " Try verifying again, or skip the video.":
+                        driver_6.find_element_by_css_selector(skip_btn).click()
+                        logging.info("Skip button has been pressed")
                     driver_6.save_screenshot("screenshots/screenshot.png")
-                    driver_6.switch_to_default_content()
-                    if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
-                                                                  " ytd-toggle-button-renderer.style-scope."
-                                                                  "ytd-menu-renderer.force-icon-button"
-                                                                  ".style-default-active")) > 0:
-                        pass
-                    else:
-                        event.wait(2)
-                        if yt_javascript:
-                            driver_6.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                                    " ytd-toggle-button-renderer:nth-child(1)').click()")
-                        else:
-                            like_button = driver_6.find_element_by_xpath(yt_like_button)
-                            ActionChains(driver_6).move_to_element(like_button).click().perform()
-                    driver_6.save_screenshot("screenshots/screenshot_proof.png")
-                    driver_6.switch_to.window(window_before)
-                    driver_6.switch_to_default_content()
-                    logging.info("Liked Channel")
-                    driver_6.switch_to_default_content()
-                    for _ in range(500000):
-                        if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
-                                                                 " div.mainContent > div > div.col-md-9 > div >"
-                                                                 " div:nth-child(7) > div > div > div") \
-                                .text != "Verify Like":
-                            event.wait(1.25)
-                        else:
-                            logging.info("confirm button is clickable")
-                            break
-                    try:
-                        event.wait(3)
-                        driver_6.find_element_by_css_selector(confirm_btn).click()
-
-                        logging.info("confirm button was clicked")
-                        while yt_channel_name == driver_6.find_element_by_class_name("yt-name").text:
-                            event.wait(1.25)
-                            if driver_6.find_element_by_id("error").text == \
-                               "We failed to verify your like as we did not find an increase in the number of likes." \
-                               " Try verifying again, or skip the video.":
-                                driver_6.find_element_by_css_selector(skip_btn).click()
-                                logging.info("Skip button has been pressed")
-                    except NoSuchElementException:
-                        event.wait(3)
-                        window_after = driver_6.window_handles[1]
-                        driver_6.switch_to.window(window_after)
-                        driver_6.close()
-                        driver_6.switch_to.window(window_before)
-                        logging.info("couldn't find confirm button")
-                        continue
+                    continue
 
     for_loop_sub(driver)
     logging.info("Channels liked successfully, quitting driver")
@@ -963,7 +901,7 @@ def ytbpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(9)
-    driver.get("https://ytbpals.com/")  # Type_None
+    driver.get("https://ytbpals.com/")  # Type_Undefined
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
     driver.find_element_by_id('email').send_keys(req_dict['email_ytbpals'])
     driver.find_element_by_id("password").send_keys(req_dict['pw_ytbpals'])
@@ -1023,10 +961,11 @@ def ytbpals_functions(req_dict: dict):
                     driver_7.execute_script("window.scrollTo(0, 400);")
                     event.wait(2)
                     driver_7.switch_to_default_content()
-                    # driver.execute_script("document.querySelector('#subscribe-button >"
-                    #                       " ytd-subscribe-button-renderer').click()")
-                    sub_button = driver_7.find_element_by_xpath(yt_sub_button)
-                    ActionChains(driver_7).move_to_element(sub_button).click().perform()
+                    if yt_javascript:
+                        driver.execute_script(yt_js_sub_button)
+                    else:
+                        sub_button = driver_7.find_element_by_xpath(yt_sub_button)
+                        ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
@@ -1114,8 +1053,7 @@ def ytbpals_functions(req_dict: dict):
                     driver_7.switch_to_default_content()
                     event.wait(1.25)
                     if yt_javascript:
-                        driver_7.execute_script("document.querySelector('#subscribe-button >"
-                                                " ytd-subscribe-button-renderer').click()")
+                        driver_7.execute_script(yt_js_sub_button)
                     else:
                         sub_button = driver_7.find_element_by_xpath(yt_sub_button)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
@@ -1155,7 +1093,7 @@ def goviral_functions(req_dict: dict):
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
-    driver.get("https://members.goviral.ai/")  # Type_None
+    driver.get("https://members.goviral.ai/")  # Type_Undefined
     driver.find_element_by_name("email").send_keys(req_dict['email_goviral'])
     driver.find_element_by_name("password").send_keys(req_dict['pw_goviral'])
     driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around > button").click()
@@ -1196,7 +1134,6 @@ def goviral_functions(req_dict: dict):
                     break
             if x >= 30:
                 continue
-            # print(x)
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 driver_9.find_element_by_xpath("//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
@@ -1245,8 +1182,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     try:
                         if yt_javascript:
-                            driver_9.execute_script("document.querySelector('#subscribe-button >"
-                                                    " ytd-subscribe-button-renderer').click()")
+                            driver_9.execute_script(yt_js_sub_button)
                         else:
                             sub_button = driver_9.find_element_by_xpath(yt_sub_button)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
@@ -1271,15 +1207,9 @@ def goviral_functions(req_dict: dict):
                     else:
                         event.wait(2)
                         driver_9.save_screenshot("screenshots/screenshot.png")
-                        # try:
-                        #     driver_9.execute_script("document.querySelector('#top-level-buttons >"
-                        #                             " ytd-toggle-button-renderer:nth-child(1)').click()")
-                        # except NoSuchWindowException:
-                        #     pass
                         try:
                             if yt_javascript:
-                                driver_9.execute_script("document.querySelector('#top-level-buttons-computed >"
-                                                        " ytd-toggle-button-renderer:nth-child(1)').click()")
+                                driver_9.execute_script(yt_js_like_button)
                             else:
                                 like_button = driver_9.find_element_by_xpath(yt_like_button)
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
