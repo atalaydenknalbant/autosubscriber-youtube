@@ -12,7 +12,6 @@ Python Selenium-based automated subscribing, liking functions for youtube sub4su
 <img src="https://i.ibb.co/cyHK2vW/Artboard-1.png" width=100 height=100 >
 </a> 
 
-
 ## Usage
 1. Create a path in environment variables "CHROMEDRIVER_PATH" that matches with your chromedriver path.
 1. Try to use a newly created youtube account to avoid security questions and make that account simple.
