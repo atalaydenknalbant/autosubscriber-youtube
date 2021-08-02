@@ -14,12 +14,13 @@ from threading import Event
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 event = Event()
-yt_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
+yt_like_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
                  "ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/" \
                  "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction"
-yt_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
+yt_sub_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
                 "tp-yt-paper-button"
+yt_sub_button_css = "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button"
 yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
 yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
@@ -233,14 +234,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     if yt_javascript:
                         driver.execute_script(yt_js_like_button)
                     else:
-                        like_button = driver.find_element_by_xpath(yt_like_button)
+                        like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
                         ActionChains(driver).move_to_element(like_button).click().perform()
 
                 event.wait(1.25)
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver.find_element_by_xpath(yt_sub_button)
+                    sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
                     ActionChains(driver).move_to_element(sub_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
@@ -533,14 +534,14 @@ def subscribersvideo_functions(req_dict: dict):
                             if yt_javascript:
                                 driver.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver.find_element_by_xpath(yt_like_button)
+                                like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
                             driver.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_sub_button)
+                            sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -677,14 +678,14 @@ def submenow_functions(req_dict: dict):
                             if yt_javascript:
                                 driver.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver.find_element_by_xpath(yt_like_button)
+                                like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
                             driver.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_sub_button)
+                            sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -804,20 +805,14 @@ def ytmonster_functions(req_dict: dict):
                     i += 1
                     google_login(driver_6, req_dict)
                     logging.info("google login completed")
-                if len(driver_6.find_elements_by_css_selector("#top-level-buttons >"
-                                                              " ytd-toggle-button-renderer.style-scope."
-                                                              "ytd-menu-renderer.force-icon-button"
-                                                              ".style-default-active")) > 0:
-                    pass
+                driver_6.execute_script("window.scrollTo(0, 300);")
+                event.wait(2)
+                driver_6.switch_to_default_content()
+                if yt_javascript:
+                    driver_6.execute_script(yt_js_sub_button)
                 else:
-                    driver_6.execute_script("window.scrollTo(0, 300);")
-                    event.wait(2)
-                    driver_6.switch_to_default_content()
-                    if yt_javascript:
-                        driver_6.execute_script(yt_js_sub_button)
-                    else:
-                        sub_button = driver_6.find_element_by_xpath(yt_sub_button)
-                        ActionChains(driver_6).move_to_element(sub_button).click().perform()
+                    sub_button = driver_6.find_element_by_xpath(yt_sub_button_full_xpath)
+                    ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
                 driver_6.switch_to_default_content()
@@ -964,7 +959,7 @@ def ytbpals_functions(req_dict: dict):
                     if yt_javascript:
                         driver.execute_script(yt_js_sub_button)
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_sub_button)
+                        sub_button = driver_7.find_element_by_xpath(yt_sub_button_full_xpath)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1055,7 +1050,7 @@ def ytbpals_functions(req_dict: dict):
                     if yt_javascript:
                         driver_7.execute_script(yt_js_sub_button)
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_sub_button)
+                        sub_button = driver_7.find_element_by_xpath(yt_sub_button_full_xpath)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1184,7 +1179,7 @@ def goviral_functions(req_dict: dict):
                         if yt_javascript:
                             driver_9.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_sub_button)
+                            sub_button = driver_9.find_element_by_xpath(yt_sub_button_full_xpath)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, NoSuchElementException):
                         pass
@@ -1211,7 +1206,7 @@ def goviral_functions(req_dict: dict):
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_xpath(yt_like_button)
+                                like_button = driver_9.find_element_by_xpath(yt_like_button_full_xpath)
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
                         except (NoSuchWindowException, NoSuchElementException):
                             pass
@@ -1250,5 +1245,86 @@ def goviral_functions(req_dict: dict):
                 continue
 
     for_loop_like(driver)
-    logging.info("Channels liked successfully, quitting driver")
+    logging.info("Channels were liked and subscribed successfully, quitting driver")
+    driver.quit()
+
+
+def tolikes_functions(req_dict: dict):
+    """tolikes login and then earn credits by subscribing videos with inner like loop function(for_loop_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict)
+    driver.implicitly_wait(10)
+    driver.get("https://accounts.google.com/signin/v2/identifier")
+    google_login(driver, req_dict, has_sign_in_btn=False)
+    logging.info("youtube login completed")
+    event.wait(3)
+    driver.get("https://tolikes.com/")  # Type_Undefined
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.find_element_by_name("login").send_keys(req_dict['username_tolikes'])
+    driver.find_element_by_name("pass").send_keys(req_dict['pw_tolikes'])
+    driver.find_element_by_name("connect").click()
+    driver.execute_script("window.scrollTo(0, 300);")
+    event.wait(2)
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.find_element_by_css_selector("#images > div > a:nth-child(6)").click()
+    driver.save_screenshot("screenshots/screenshot.png")
+
+    def for_loop_like(driver,
+                      subscribe_btn="single_like_button.btn3-wrap",
+                      skip_btn="/html/body/div[2]/div[2]/div[1]/div/div[2]/div[2]/div[5]/div[{}]/center/p[3]/font/a"
+                      ):
+        logging.info("Loop Started")
+        for i in range(50):
+            try:
+                if driver.find_element_by_css_selector('body > div.header > div.container > div.main > div >'
+                                                       ' div.content > div.overflow > div.err1')\
+                        .text == 'Sorry, there are no more coins to be earned at the moment. Please try again later.':
+                    logging.info("There is no more channel left, quitting driver")
+                    driver.quit()
+                    return
+            except NoSuchElementException:
+                pass
+            event.wait(2)
+            driver.save_screenshot("screenshots/screenshot.png")
+            window_before = driver.window_handles[0]
+            try:
+                subscribe_button = driver.find_elements_by_class_name(subscribe_btn)[i]
+                ActionChains(driver).move_to_element(subscribe_button).click().perform()
+            except NoSuchElementException:
+                logging.info("Couldn't find subscribe button closing driver")
+                driver.quit()
+                return
+            window_after = driver.window_handles[1]
+            driver.switch_to.window(window_after)
+            if driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
+                                            "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/"
+                                            "tp-yt-app-header/div[2]/div[2]/div/div[1]/div/div[1]/"
+                                            "ytd-channel-name/div/div/yt-formatted-string").text != "":
+                driver.save_screenshot("screenshots/screenshot.png")
+                event.wait(2)
+                if yt_javascript:
+                    driver.execute_script(yt_js_sub_button)
+                else:
+                    sub_button = driver.find_element_by_css_selector(yt_sub_button_css)
+                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                driver.save_screenshot("screenshots/screenshot_proof.png")
+                event.wait(3.25)
+                driver.close()
+                driver.switch_to.window(window_before)
+                # driver.switch_to_default_content()
+                logging.info("Subscribed To Channel")
+                driver.save_screenshot("screenshots/screenshot.png")
+            else:
+                driver.close()
+                driver.switch_to.window(window_before)
+                # driver.switch_to_default_content()
+                driver.find_element_by_xpath(skip_btn.format(i+1)).click()
+                logging.info("Skip button has been pressed")
+                driver.save_screenshot("screenshots/screenshot.png")
+        logging.info("Channels were successfully subscribed, quitting driver")
+    for_loop_like(driver)
     driver.quit()

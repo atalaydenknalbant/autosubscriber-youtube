@@ -96,6 +96,14 @@
     "goviral_password": {
       "value": "Enter GoViral Password",
       "required": true
+    },
+    "tolikes_username": {
+      "value": "Enter TOLikes Username",
+      "required": true
+    },
+    "tolikes_password": {
+      "value": "Enter TOLikes Password",
+      "required": true
     }
   }
 
