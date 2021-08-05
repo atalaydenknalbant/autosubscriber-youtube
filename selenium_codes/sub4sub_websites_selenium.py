@@ -895,7 +895,7 @@ def ytbpals_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(9)
+    driver.implicitly_wait(7)
     driver.get("https://ytbpals.com/")  # Type_Undefined
     driver.find_element_by_css_selector("#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
     driver.find_element_by_id('email').send_keys(req_dict['email_ytbpals'])
@@ -1257,7 +1257,7 @@ def tolikes_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1315,13 +1315,11 @@ def tolikes_functions(req_dict: dict):
                 event.wait(3.25)
                 driver.close()
                 driver.switch_to.window(window_before)
-                # driver.switch_to_default_content()
                 logging.info("Subscribed To Channel")
                 driver.save_screenshot("screenshots/screenshot.png")
             else:
                 driver.close()
                 driver.switch_to.window(window_before)
-                # driver.switch_to_default_content()
                 driver.find_element_by_xpath(skip_btn.format(i+1)).click()
                 logging.info("Skip button has been pressed")
                 driver.save_screenshot("screenshots/screenshot.png")
