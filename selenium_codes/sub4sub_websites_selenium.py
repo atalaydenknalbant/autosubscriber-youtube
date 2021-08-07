@@ -20,6 +20,7 @@ yt_like_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-f
 yt_sub_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
                 "tp-yt-paper-button"
+yt_like_button_css = '#top-level-buttons-computed > ytd-toggle-button-renderer:nth-child(1) > a'
 yt_sub_button_css = "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button"
 yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
@@ -1273,19 +1274,19 @@ def tolikes_functions(req_dict: dict):
     driver.find_element_by_css_selector("#images > div > a:nth-child(6)").click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_like(driver,
-                      subscribe_btn="single_like_button.btn3-wrap",
-                      skip_btn="/html/body/div[2]/div[2]/div[1]/div/div[2]/div[2]/div[5]/div[{}]/center/p[3]/font/a"
-                      ):
+    def for_loop_sub(driver,
+                     subscribe_btn="single_like_button.btn3-wrap",
+                     skip_btn_sub="/html/body/div[2]/div[2]/div[1]/div/div[2]/"
+                                  "div[2]/div[5]/div[{}]/center/p[3]/font/a",
+                     ):
         logging.info("Loop Started")
         for i in range(50):
             try:
                 if driver.find_element_by_css_selector('body > div.header > div.container > div.main > div >'
                                                        ' div.content > div.overflow > div.err1')\
                         .text == 'Sorry, there are no more coins to be earned at the moment. Please try again later.':
-                    logging.info("There is no more channel left, quitting driver")
-                    driver.quit()
-                    return
+                    logging.info("There is no more channel left to subscribe")
+                    break
             except NoSuchElementException:
                 pass
             event.wait(2)
@@ -1296,33 +1297,37 @@ def tolikes_functions(req_dict: dict):
                 ActionChains(driver).move_to_element(subscribe_button).click().perform()
             except NoSuchElementException:
                 logging.info("Couldn't find subscribe button closing driver")
-                driver.quit()
                 return
             window_after = driver.window_handles[1]
             driver.switch_to.window(window_after)
-            if driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
-                                            "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/"
-                                            "tp-yt-app-header/div[2]/div[2]/div/div[1]/div/div[1]/"
-                                            "ytd-channel-name/div/div/yt-formatted-string").text != "":
-                driver.save_screenshot("screenshots/screenshot.png")
-                event.wait(2)
-                if yt_javascript:
-                    driver.execute_script(yt_js_sub_button)
-                else:
-                    sub_button = driver.find_element_by_css_selector(yt_sub_button_css)
-                    ActionChains(driver).move_to_element(sub_button).click().perform()
-                driver.save_screenshot("screenshots/screenshot_proof.png")
-                event.wait(3.25)
-                driver.close()
-                driver.switch_to.window(window_before)
-                logging.info("Subscribed To Channel")
-                driver.save_screenshot("screenshots/screenshot.png")
+            if len(driver.find_elements_by_xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
+                                                 "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/"
+                                                 "tp-yt-app-header/div[2]/div[2]/div/div[1]/div/div[1]/"
+                                                 "ytd-channel-name/div/div/yt-formatted-string")) > 0:
+                if driver.find_element_by_xpath("/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
+                                                "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/"
+                                                "tp-yt-app-header/div[2]/div[2]/div/div[1]/div/div[1]/"
+                                                "ytd-channel-name/div/div/yt-formatted-string").text != "":
+                    driver.save_screenshot("screenshots/screenshot.png")
+                    event.wait(2)
+                    if yt_javascript:
+                        driver.execute_script(yt_js_sub_button)
+                    else:
+                        sub_button = driver.find_element_by_css_selector(yt_sub_button_css)
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                    driver.save_screenshot("screenshots/screenshot_proof.png")
+                    event.wait(5)
+                    driver.close()
+                    driver.switch_to.window(window_before)
+                    logging.info("Subscribed To Channel")
+                    driver.save_screenshot("screenshots/screenshot.png")
             else:
                 driver.close()
                 driver.switch_to.window(window_before)
-                driver.find_element_by_xpath(skip_btn.format(i+1)).click()
+                driver.find_element_by_xpath(skip_btn_sub.format(i + 1)).click()
                 logging.info("Skip button has been pressed")
                 driver.save_screenshot("screenshots/screenshot.png")
         logging.info("Channels were successfully subscribed, quitting driver")
-    for_loop_like(driver)
+
+    for_loop_sub(driver)
     driver.quit()
