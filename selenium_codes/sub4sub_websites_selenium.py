@@ -300,7 +300,7 @@ def subpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_place = driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                                    " form > div:nth-child(2) > input")
@@ -348,7 +348,7 @@ def sonuker_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.save_screenshot("screenshots/screenshot.png")
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
@@ -396,7 +396,7 @@ def ytpals_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div >"
                                         " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form > button").click()
