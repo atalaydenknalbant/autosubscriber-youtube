@@ -248,7 +248,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     if yt_javascript:
                         driver.execute_script(yt_js_like_button)
                     else:
-                        like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
+                        like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
                         ActionChains(driver).move_to_element(like_button).click().perform()
 
                 event.wait(1.25)
@@ -548,7 +548,7 @@ def subscribersvideo_functions(req_dict: dict):
                             if yt_javascript:
                                 driver.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
+                                like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
@@ -692,7 +692,7 @@ def submenow_functions(req_dict: dict):
                             if yt_javascript:
                                 driver.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver.find_element_by_xpath(yt_like_button_full_xpath)
+                                like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
