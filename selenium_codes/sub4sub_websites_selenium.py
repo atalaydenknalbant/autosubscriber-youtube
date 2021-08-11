@@ -1225,7 +1225,7 @@ def goviral_functions(req_dict: dict):
                                 like_button.click()
                         except (NoSuchWindowException, NoSuchElementException):
                             pass
-                        driver_9.save_screenshot("screenshots/screenshot.png")
+                        driver_9.save_screenshot("screenshots/screenshot_proof.png")
                         driver_9.switch_to.window(driver_9.window_handles[0])
                         logging.info("Liked Video")
                 except ElementClickInterceptedException:
