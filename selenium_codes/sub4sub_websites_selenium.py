@@ -14,14 +14,27 @@ from threading import Event
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 event = Event()
-yt_like_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
+yt_full_xpath_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
                  "ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/" \
                  "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction"
-yt_sub_button_full_xpath = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
+yt_full_xpath_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
                 "tp-yt-paper-button"
-yt_like_button_css = '#top-level-buttons-computed > ytd-toggle-button-renderer:nth-child(1) > a'
-yt_sub_button_css = "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button"
+yt_css_like_button = 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)' \
+                     ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton' \
+                     ' div.style-scope.ytd-watch-flexy:nth-child(8)' \
+                     ' div.style-scope.ytd-watch-flexy:nth-child(1)' \
+                     ' div.style-scope.ytd-watch-flexy div.style-scope.ytd-watch-flexy:nth-child(11)' \
+                     ' div.style-scope.ytd-watch-flexy ytd-video-primary-info-renderer.style-scope.ytd-watch-flexy' \
+                     ' div.style-scope.ytd-video-primary-info-renderer' \
+                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(6)' \
+                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(3)' \
+                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(1)' \
+                     ' ytd-menu-renderer.style-scope.ytd-video-primary-info-renderer' \
+                     ' div.top-level-buttons.style-scope.ytd-menu-renderer > ' \
+                     'ytd-toggle-button' \
+                     '-renderer.style-scope.ytd-menu-renderer.force-icon-button.style-text:nth-child(1)'
+yt_css_sub_button = "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button"
 yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
 yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
@@ -242,7 +255,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
+                    sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
                     ActionChains(driver).move_to_element(sub_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
@@ -542,7 +555,7 @@ def subscribersvideo_functions(req_dict: dict):
                         if yt_javascript:
                             driver.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
+                            sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -686,7 +699,7 @@ def submenow_functions(req_dict: dict):
                         if yt_javascript:
                             driver.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_sub_button_full_xpath)
+                            sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -812,7 +825,7 @@ def ytmonster_functions(req_dict: dict):
                 if yt_javascript:
                     driver_6.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver_6.find_element_by_xpath(yt_sub_button_full_xpath)
+                    sub_button = driver_6.find_element_by_xpath(yt_full_xpath_sub_button)
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
@@ -960,7 +973,7 @@ def ytbpals_functions(req_dict: dict):
                     if yt_javascript:
                         driver.execute_script(yt_js_sub_button)
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_sub_button_full_xpath)
+                        sub_button = driver_7.find_element_by_xpath(yt_full_xpath_sub_button)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1051,7 +1064,7 @@ def ytbpals_functions(req_dict: dict):
                     if yt_javascript:
                         driver_7.execute_script(yt_js_sub_button)
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_sub_button_full_xpath)
+                        sub_button = driver_7.find_element_by_xpath(yt_full_xpath_sub_button)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1180,7 +1193,7 @@ def goviral_functions(req_dict: dict):
                         if yt_javascript:
                             driver_9.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_sub_button_full_xpath)
+                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, NoSuchElementException):
                         pass
@@ -1201,16 +1214,18 @@ def goviral_functions(req_dict: dict):
                                                                   ".style-default-active")) > 0:
                         pass
                     else:
+                        driver_9.execute_script("window.scrollTo(0, 300)")
                         event.wait(2)
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_xpath(yt_like_button_full_xpath)
-                                ActionChains(driver_9).move_to_element(like_button).click().perform()
+                                like_button = driver_9.find_element_by_css_selector(yt_css_like_button)
+                                like_button.click()
                         except (NoSuchWindowException, NoSuchElementException):
                             pass
+                        driver_9.save_screenshot("screenshots/screenshot.png")
                         driver_9.switch_to.window(driver_9.window_handles[0])
                         logging.info("Liked Video")
                 except ElementClickInterceptedException:
@@ -1313,7 +1328,7 @@ def tolikes_functions(req_dict: dict):
                     if yt_javascript:
                         driver.execute_script(yt_js_sub_button)
                     else:
-                        sub_button = driver.find_element_by_css_selector(yt_sub_button_css)
+                        sub_button = driver.find_element_by_css_selector(yt_css_sub_button)
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     event.wait(5)
