@@ -754,7 +754,7 @@ def ytmonster_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(7)
     driver.get("https://www.ytmonster.net/login")  # Type_Undefined
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
