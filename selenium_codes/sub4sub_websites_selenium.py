@@ -971,11 +971,11 @@ def ytbpals_functions(req_dict: dict):
                     event.wait(2)
                     driver_7.switch_to_default_content()
                     if yt_javascript:
-                        driver.execute_script(yt_js_sub_button)
+                        driver_7.execute_script(yt_js_sub_button)
                     else:
                         sub_button = driver_7.find_element_by_xpath(yt_full_xpath_sub_button)
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
-                    driver.save_screenshot("screenshots/screenshot_proof.png")
+                    driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
                     driver_7.switch_to_default_content()
@@ -1097,7 +1097,7 @@ def goviral_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1197,6 +1197,7 @@ def goviral_functions(req_dict: dict):
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, NoSuchElementException):
                         pass
+                    driver_9.save_screenshot("screenshots/screenshot_proof.png")
                     driver_9.switch_to.window(driver_9.window_handles[0])
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     logging.info("Subscribed To Channel")
