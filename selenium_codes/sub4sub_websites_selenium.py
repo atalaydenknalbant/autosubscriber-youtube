@@ -1232,7 +1232,7 @@ def goviral_functions(req_dict: dict):
                 except ElementClickInterceptedException:
                     pass
             try:
-                event.wait(6.25)
+                event.wait(2)
                 driver_9.find_element_by_id('verify-action-button').click()
                 logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1244,7 +1244,7 @@ def goviral_functions(req_dict: dict):
                     pass
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
-                event.wait(3)
+                event.wait(1.25)
                 continue
             c = 0
             try:
@@ -1259,7 +1259,7 @@ def goviral_functions(req_dict: dict):
                             pass
             except StaleElementReferenceException:
                 driver_9.refresh()
-                event.wait(3)
+                event.wait(1.25)
                 continue
 
     for_loop_like(driver)
