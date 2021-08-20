@@ -1096,8 +1096,8 @@ def goviral_functions(req_dict: dict):
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(5)
+    driver: webdriver = set_driver_opt(req_dict, False)
+    driver.implicitly_wait(4)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_sign_in_btn=False)
     logging.info("youtube login completed")
@@ -1132,6 +1132,8 @@ def goviral_functions(req_dict: dict):
         logging.info("Loop Started")
         for i in range(100):
             driver_9.save_screenshot("screenshots/screenshot.png")
+            if i == 0:
+                window_before = driver_9.window_handles[0]
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 event.wait(0.5)
             x = 0
@@ -1149,7 +1151,7 @@ def goviral_functions(req_dict: dict):
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
                 driver_9.refresh()
-                event.wait(3.25)
+                event.wait(1)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
@@ -1162,7 +1164,7 @@ def goviral_functions(req_dict: dict):
                 if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                     driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
-                    event.wait(3.25)
+                    event.wait(1)
                     i -= 1
                     continue
 
@@ -1176,7 +1178,7 @@ def goviral_functions(req_dict: dict):
                     pass
             except (StaleElementReferenceException, ValueError):
                 driver_9.refresh()
-                event.wait(3)
+                event.wait(1)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
@@ -1184,6 +1186,7 @@ def goviral_functions(req_dict: dict):
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
+                    event.wait(2)
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     try:
                         driver_9.execute_script("window.scrollTo(0, 300)")
@@ -1198,17 +1201,18 @@ def goviral_functions(req_dict: dict):
                     except (NoSuchWindowException, NoSuchElementException):
                         pass
                     driver_9.save_screenshot("screenshots/screenshot_proof.png")
-                    driver_9.switch_to.window(driver_9.window_handles[0])
+                    driver_9.switch_to.window(window_before)
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     logging.info("Subscribed To Channel")
                 except ElementClickInterceptedException:
                     pass
+            driver_9.save_screenshot("screenshots/screenshot.png")
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                 try:
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     driver_9.find_element_by_css_selector(like_btn).click()
+                    event.wait(2)
                     driver_9.switch_to.window(driver_9.window_handles[1])
-                    event.wait(3)
                     if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
                                                                   " ytd-toggle-button-renderer.style-scope."
                                                                   "ytd-menu-renderer.force-icon-button"
@@ -1216,7 +1220,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         driver_9.execute_script("window.scrollTo(0, 300)")
-                        event.wait(2)
+                        event.wait(1.25)
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             if yt_javascript:
@@ -1227,10 +1231,11 @@ def goviral_functions(req_dict: dict):
                         except (NoSuchWindowException, NoSuchElementException):
                             pass
                         driver_9.save_screenshot("screenshots/screenshot_proof.png")
-                        driver_9.switch_to.window(driver_9.window_handles[0])
+                        driver_9.switch_to.window(window_before)
                         logging.info("Liked Video")
                 except ElementClickInterceptedException:
                     pass
+            driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 event.wait(2)
                 driver_9.find_element_by_id('verify-action-button').click()
@@ -1239,9 +1244,11 @@ def goviral_functions(req_dict: dict):
             except (ElementNotInteractableException, StaleElementReferenceException,
                     ElementClickInterceptedException, NoSuchElementException):
                 pass
+            driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                    pass
+                    event.wait(1.25)
+                    driver_9.save_screenshot("screenshots/screenshot.png")
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
                 event.wait(1.25)
@@ -1249,7 +1256,8 @@ def goviral_functions(req_dict: dict):
             c = 0
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
-                    event.wait(0.5)
+                    event.wait(1.25)
+                    driver_9.save_screenshot("screenshots/screenshot.png")
                     c += 1
                     if c >= 30:
                         try:
