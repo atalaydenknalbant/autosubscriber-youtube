@@ -20,6 +20,15 @@ yt_full_xpath_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-f
 yt_full_xpath_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
                 "tp-yt-paper-button"
+yt_full_xpath_like_button_type1 = "/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/" \
+                                  "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/tp-yt-app-header/" \
+                                  "div[2]/div[2]/div/div[1]/div/div[2]/div[4]/ytd-subscribe-button-renderer/" \
+                                  "tp-yt-paper-button"
+yt_full_xpath_sub_button_type1 = "/html[1]/body[1]/ytd-app[1]/div[1]/ytd-page-manager[1]/" \
+                                 "ytd-browse[1]/div[3]/ytd-c4-tabbed-header-renderer[1]/tp-yt-app-header-layout[1]/" \
+                                 "div[1]/tp-yt-app-header[1]/div[2]/div[2]/div[1]/div[1]/div[1]/" \
+                                 "div[2]/div[4]/ytd-subscribe-button-renderer[1]/" \
+                                 "tp-yt-paper-button[1]/paper-ripple[1]"
 yt_css_like_button = 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)' \
                      ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton' \
                      ' div.style-scope.ytd-watch-flexy:nth-child(8)' \
@@ -116,14 +125,14 @@ def set_driver_opt(req_dict: dict,
 
 def google_login(driver: webdriver,
                  req_dict: dict,
-                 has_sign_in_btn=True):
+                 has_login_btn=True):
     """ Logins to Google with given credentials.
     Args:
     - driver(webdriver): webdriver parameter.
     - req_dict(dict): dictionary object of required parameters
     - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
     """
-    if has_sign_in_btn:
+    if has_login_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     driver.save_screenshot("screenshots/screenshot.png")
@@ -248,14 +257,19 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     if yt_javascript:
                         driver.execute_script(yt_js_like_button)
                     else:
-                        like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
-                        ActionChains(driver).move_to_element(like_button).click().perform()
+                        try:
+                            like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_type1)
+                            ActionChains(driver).move_to_element(like_button).click().perform()
+                        except NoSuchElementException:
+                            pass
+
 
                 event.wait(1.25)
+                driver.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
+                    sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
                     ActionChains(driver).move_to_element(sub_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
@@ -1099,7 +1113,7 @@ def goviral_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(4)
     driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, has_sign_in_btn=False)
+    google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
     driver.get("https://members.goviral.ai/")  # Type_Undefined
@@ -1248,7 +1262,6 @@ def goviral_functions(req_dict: dict):
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     event.wait(1.25)
-                    driver_9.save_screenshot("screenshots/screenshot.png")
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
                 event.wait(1.25)
@@ -1257,7 +1270,6 @@ def goviral_functions(req_dict: dict):
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
                     event.wait(1.25)
-                    driver_9.save_screenshot("screenshots/screenshot.png")
                     c += 1
                     if c >= 30:
                         try:
@@ -1285,7 +1297,7 @@ def tolikes_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
-    google_login(driver, req_dict, has_sign_in_btn=False)
+    google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
     driver.get("https://tolikes.com/")  # Type_Undefined
