@@ -836,6 +836,7 @@ def ytmonster_functions(req_dict: dict):
                 driver_6.execute_script("window.scrollTo(0, 300);")
                 event.wait(2)
                 driver_6.switch_to_default_content()
+                driver_6.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver_6.execute_script(yt_js_sub_button)
                 else:
