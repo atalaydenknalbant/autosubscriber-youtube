@@ -769,6 +769,10 @@ def ytmonster_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
+    driver.get("https://accounts.google.com/signin/v2/identifier")
+    google_login(driver, req_dict, has_login_btn=False)
+    logging.info("youtube login completed")
+    event.wait(3)
     driver.get("https://www.ytmonster.net/login")  # Type_Undefined
     driver.find_element_by_id('inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element_by_id('inputPassword').send_keys(req_dict['pw_ytmonster'])
@@ -827,20 +831,14 @@ def ytmonster_functions(req_dict: dict):
             window_after = driver_6.window_handles[1]
             driver_6.switch_to.window(window_after)
             if len(driver_6.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                driver_6.switch_to_default_content()
-                if i == 0:
-                    i += 1
-                    google_login(driver_6, req_dict)
-                    logging.info("google login completed")
-                driver_6.execute_script("window.scrollTo(0, 300);")
                 event.wait(2)
+                driver_6.execute_script("window.scrollTo(0, 500);")
                 driver_6.switch_to_default_content()
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver_6.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver_6.find_element_by_xpath(yt_full_xpath_sub_button)
+                    sub_button = driver_6.find_element_by_css_selector(yt_css_sub_button)
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
