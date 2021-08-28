@@ -263,14 +263,16 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         except NoSuchElementException:
                             pass
 
-
                 event.wait(1.25)
                 driver.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
-                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                    try:
+                        sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                    except NoSuchElementException:
+                        pass
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
