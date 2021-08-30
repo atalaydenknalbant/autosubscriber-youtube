@@ -156,8 +156,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
                                  req_dict: dict,
                                  special_condition=1,
-                                 confirm_btn="driver.find_elements_by_class_name('btn-step')[2]",
-                                 subscribe_btn="driver.find_elements_by_class_name('btn-step')[0]"
+                                 confirm_btn_code="driver.find_elements_by_class_name('btn-step')[2]",
+                                 subscribe_btn_code="driver.find_elements_by_class_name('btn-step')[0]"
                                  ):
     """ Loop for like and sub, includes google login
     Args:
@@ -224,7 +224,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.save_screenshot("screenshots/screenshot.png")
         try:
             # button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
-            button_subscribe = eval(subscribe_btn)
+            button_subscribe = eval(subscribe_btn_code)
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
@@ -303,12 +303,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             try:
                 # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
-                button_confirm = eval(confirm_btn)
+                button_confirm = eval(confirm_btn_code)
                 WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
             except TimeoutException:
                 pass
             # driver.execute_script("document.querySelector('#likeSub3 > a').click()")
-            button_confirm = eval(confirm_btn)
+            button_confirm = eval(confirm_btn_code)
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
