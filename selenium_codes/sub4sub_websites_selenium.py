@@ -141,7 +141,6 @@ def google_login(driver: webdriver,
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element_by_css_selector("#identifierNext > div > button").click()
     event.wait(1.25)
-    # print(driver.find_element_by_xpath("/html/body").text)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element_by_css_selector("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
@@ -210,7 +209,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 else:
                     pass
         try:
-            # remaining_videos = driver.find_element_by_id("remainingHint").text
             remaining_videos = driver.find_element_by_xpath("/html/body/div[1]/section/div/"
                                                             "div/div/div/div/div[2]/div[1]/h2/span/div").text
 
@@ -223,16 +221,11 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         try:
-            # button_subscribe = driver.find_element_by_css_selector(subscribe_btn)
             button_subscribe = eval(subscribe_btn_code)
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
             break
-        # if driver.find_element_by_id("remainingHint").text == "-":
-        #     logging.info(d+" Website is not working properly, closing driver")
-        #     driver.quit()
-        #     return
         if driver.find_element_by_xpath("/html/body/div[1]/section/div/"
                                         "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
             logging.info(d+" Website is not working properly, closing driver")
@@ -279,8 +272,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 sc[special_condition]()
                 while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
                     pass
-                # button_confirm = driver.find_element_by_css_selector(confirm_btn)
-                # button_confirm.send_keys(Keys.ENTER)
                 button_confirm = driver.find_elements_by_class_name('btn-step')[2]
                 ActionChains(driver).move_to_element(button_confirm).click().perform()
                 continue
@@ -289,8 +280,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             sc[special_condition]()
             while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
                 pass
-            # button_confirm = driver.find_element_by_css_selector(confirm_btn)
-            # button_confirm.send_keys(Keys.ENTER)
             button_confirm = driver.find_elements_by_class_name('btn-step')[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
@@ -302,12 +291,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             pass
         try:
             try:
-                # WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
                 button_confirm = eval(confirm_btn_code)
                 WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
             except TimeoutException:
                 pass
-            # driver.execute_script("document.querySelector('#likeSub3 > a').click()")
             button_confirm = eval(confirm_btn_code)
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
