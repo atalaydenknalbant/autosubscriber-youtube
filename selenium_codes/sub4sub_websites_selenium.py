@@ -445,7 +445,7 @@ def subscribersvideo_functions(req_dict: dict):
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
-    driver.get("https://www.subscribers.video/")  # Type_2
+    driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
     try:
