@@ -250,22 +250,22 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     if yt_javascript:
                         driver.execute_script(yt_js_like_button)
                     else:
-                        try:
-                            like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_type1)
-                            ActionChains(driver).move_to_element(like_button).click().perform()
-                        except NoSuchElementException:
-                            pass
+                        # try:
+                        like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_type1)
+                        ActionChains(driver).move_to_element(like_button).click().perform()
+                        # except NoSuchElementException:
+                        #     pass
 
                 event.wait(1.25)
                 driver.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    try:
-                        sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
-                        ActionChains(driver).move_to_element(sub_button).click().perform()
-                    except NoSuchElementException:
-                        pass
+                    # try:
+                    sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
+                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                    # except NoSuchElementException:
+                    #     pass
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
@@ -1101,6 +1101,12 @@ def goviral_functions(req_dict: dict):
     driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around > button").click()
     driver.find_element_by_css_selector("#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
     driver.save_screenshot("screenshots/screenshot.png")
+    yt_full_xpath_sub_button = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[7]' \
+                               '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer' \
+                               '/tp-yt-paper-button/yt-formatted-string'
+    yt_full_xpath_like_button = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[6]' \
+                                '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/' \
+                                'div/ytd-toggle-button-renderer[1]'
 
     def for_loop_like(driver_9,
                       like_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
@@ -1179,7 +1185,7 @@ def goviral_functions(req_dict: dict):
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
-                    event.wait(2)
+                    event.wait(1)
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     try:
                         driver_9.execute_script("window.scrollTo(0, 300)")
@@ -1204,7 +1210,7 @@ def goviral_functions(req_dict: dict):
                 try:
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     driver_9.find_element_by_css_selector(like_btn).click()
-                    event.wait(2)
+                    event.wait(1)
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
                                                                   " ytd-toggle-button-renderer.style-scope."
@@ -1213,13 +1219,13 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         driver_9.execute_script("window.scrollTo(0, 300)")
-                        event.wait(1.25)
+                        event.wait(1)
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_css_selector(yt_css_like_button)
+                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button)
                                 like_button.click()
                         except (NoSuchWindowException, NoSuchElementException):
                             pass
@@ -1230,7 +1236,7 @@ def goviral_functions(req_dict: dict):
                     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
-                event.wait(2)
+                event.wait(1)
                 driver_9.find_element_by_id('verify-action-button').click()
                 logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1240,15 +1246,15 @@ def goviral_functions(req_dict: dict):
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                    event.wait(1.25)
+                    event.wait(1)
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
-                event.wait(1.25)
+                event.wait(1)
                 continue
             c = 0
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
-                    event.wait(1.25)
+                    event.wait(1)
                     c += 1
                     if c >= 30:
                         try:
