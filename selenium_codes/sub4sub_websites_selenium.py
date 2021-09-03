@@ -330,15 +330,6 @@ def subpals_functions(req_dict: dict):
         driver.quit()
         return
     driver.execute_script("window.scrollTo(0, 300);")
-    # try:
-    #     driver.find_element_by_xpath("#core-wrapper > section > div > div > div > div > div >"
-    #                                  " div.userContent_pricing > div:nth-child(2) >"
-    #                                  " div:nth-child(1) > div > div.panel-body > div.btn-holder > form > a") \
-    #         .send_keys(Keys.ENTER)
-    #     event.wait(1.25)
-    # except NoSuchElementException:
-    #     logging.info("subpals activate button passed 1")
-    #     pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div.dashboardBody >"
                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
