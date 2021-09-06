@@ -1090,7 +1090,7 @@ def goviral_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, False)
-    driver.implicitly_wait(4)
+    driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1124,8 +1124,7 @@ def goviral_functions(req_dict: dict):
                                     " section.earn-subscribes.earning-box.position-relative >"
                                     " div.row > div.col-4.text-right.mt-1.position-relative > button",
                       next_btn="/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]/button[1]",
-                      skip_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
-                               " button.btn.btn-secondary.skip-video"
+                      skip_btn="//button[contains(text(),'Skip Video')]"
                       ):
         logging.info("Loop Started")
         for i in range(100):
@@ -1138,7 +1137,7 @@ def goviral_functions(req_dict: dict):
                 n += 1
                 if n > 30:
                     try:
-                        driver_9.find_element_by_xpath(next_btn).send_keys(Keys.ENTER)
+                        driver_9.find_element_by_xpath(skip_btn).send_keys(Keys.ENTER)
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
                         pass
@@ -1268,7 +1267,7 @@ def goviral_functions(req_dict: dict):
                     c += 1
                     if c >= 30:
                         try:
-                            driver_9.find_element_by_xpath(next_btn).send_keys(Keys.ENTER)
+                            driver_9.find_element_by_xpath(skip_btn).send_keys(Keys.ENTER)
                         except (ElementNotInteractableException,
                                 StaleElementReferenceException):
                             pass
