@@ -1123,8 +1123,7 @@ def goviral_functions(req_dict: dict):
                                     " div.disabled-area.position-relative >"
                                     " section.earn-subscribes.earning-box.position-relative >"
                                     " div.row > div.col-4.text-right.mt-1.position-relative > button",
-                      next_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
-                               " button.btn.btn-primary.next-video.mr-3",
+                      next_btn="/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]/button[1]",
                       skip_btn="#kt_content > div > div.col-md-8 > div > form > div > div.text-right.mt-3 >"
                                " button.btn.btn-secondary.skip-video"
                       ):
@@ -1133,8 +1132,19 @@ def goviral_functions(req_dict: dict):
             driver_9.save_screenshot("screenshots/screenshot.png")
             if i == 0:
                 window_before = driver_9.window_handles[0]
+            n = 0
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 event.wait(0.5)
+                n += 1
+                if n > 30:
+                    try:
+                        driver_9.find_element_by_xpath(next_btn).send_keys(Keys.ENTER)
+                    except (ElementNotInteractableException,
+                            StaleElementReferenceException):
+                        pass
+                    event.wait(0.5)
+                    continue
+
             x = 0
             while len(driver_9.window_handles) == 1:
                 event.wait(0.5)
@@ -1163,7 +1173,7 @@ def goviral_functions(req_dict: dict):
                 if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                     driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
-                    event.wait(1)
+                    event.wait(0.5)
                     i -= 1
                     continue
 
@@ -1174,18 +1184,18 @@ def goviral_functions(req_dict: dict):
                 pass
             try:
                 while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                    pass
+                    event.wait(0.5)
             except (StaleElementReferenceException, ValueError):
                 driver_9.refresh()
-                event.wait(1)
+                event.wait(0.5)
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
-                pass
+                event.wait(0.5)
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
-                    event.wait(1)
+                    event.wait(0.25)
                     driver_9.switch_to.window(driver_9.window_handles[1])
                     try:
                         driver_9.execute_script("window.scrollTo(0, 300)")
@@ -1197,13 +1207,13 @@ def goviral_functions(req_dict: dict):
                         else:
                             sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
-                    except (NoSuchWindowException, NoSuchElementException):
+                    except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
                         pass
                     driver_9.save_screenshot("screenshots/screenshot_proof.png")
                     driver_9.switch_to.window(window_before)
                     driver_9.save_screenshot("screenshots/screenshot.png")
                     logging.info("Subscribed To Channel")
-                except ElementClickInterceptedException:
+                except (ElementClickInterceptedException, ElementNotInteractableException):
                     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             if len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
@@ -1219,7 +1229,7 @@ def goviral_functions(req_dict: dict):
                         pass
                     else:
                         driver_9.execute_script("window.scrollTo(0, 300)")
-                        event.wait(1)
+                        event.wait(0.5)
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             if yt_javascript:
@@ -1227,12 +1237,12 @@ def goviral_functions(req_dict: dict):
                             else:
                                 like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button)
                                 like_button.click()
-                        except (NoSuchWindowException, NoSuchElementException):
+                        except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
                             pass
                         driver_9.save_screenshot("screenshots/screenshot_proof.png")
                         driver_9.switch_to.window(window_before)
                         logging.info("Liked Video")
-                except ElementClickInterceptedException:
+                except (ElementClickInterceptedException, ElementNotInteractableException):
                     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
@@ -1246,19 +1256,19 @@ def goviral_functions(req_dict: dict):
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
-                    event.wait(1)
+                    event.wait(0.5)
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
-                event.wait(1)
+                event.wait(0.5)
                 continue
             c = 0
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
-                    event.wait(1)
+                    event.wait(0.5)
                     c += 1
                     if c >= 30:
                         try:
-                            driver_9.find_element_by_css_selector(next_btn).send_keys(Keys.ENTER)
+                            driver_9.find_element_by_xpath(next_btn).send_keys(Keys.ENTER)
                         except (ElementNotInteractableException,
                                 StaleElementReferenceException):
                             pass
