@@ -1264,9 +1264,9 @@ def goviral_functions(req_dict: dict):
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     event.wait(0.5)
                     # logging.info('Flag4')
-            except (StaleElementReferenceException):
+            except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
-                event.wait(0.5)
+                event.wait(2)
                 continue
             c = 0
             try:
