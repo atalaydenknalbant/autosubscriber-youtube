@@ -1124,7 +1124,7 @@ def goviral_functions(req_dict: dict):
                                     " section.earn-subscribes.earning-box.position-relative >"
                                     " div.row > div.col-4.text-right.mt-1.position-relative > button",
                       next_btn="/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]/button[1]",
-                      skip_btn="//button[contains(text(),'Skip Video')]"
+                      skip_btn='btn btn-secondary skip-video'
                       ):
         logging.info("Loop Started")
         for i in range(100):
@@ -1134,24 +1134,29 @@ def goviral_functions(req_dict: dict):
             n = 0
             while len(driver_9.find_elements_by_class_name("time-remaining-amount")) == 0:
                 event.wait(0.5)
+                # logging.info('Flag1')
                 n += 1
-                if n > 30:
+                if n == 120:
                     try:
-                        driver_9.find_element_by_xpath(skip_btn).send_keys(Keys.ENTER)
+                        driver_9.refresh()
+                        logging.info('Goviral is not continue its functions, refreshing the website 1')
+                        break
+                        # driver_9.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
+                        # driver_9.find_element_by_class_name(skip_btn).click()
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
                         pass
                     event.wait(0.5)
                     continue
-
             x = 0
             while len(driver_9.window_handles) == 1:
                 event.wait(0.5)
+                # logging.info('Flag2')
                 x += 1
-                if x >= 30:
+                if x >= 120:
                     driver_9.refresh()
                     break
-            if x >= 30:
+            if x >= 120:
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
@@ -1183,6 +1188,7 @@ def goviral_functions(req_dict: dict):
                 pass
             try:
                 while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
+                    # logging.info('Flag2.75')
                     event.wait(0.5)
             except (StaleElementReferenceException, ValueError):
                 driver_9.refresh()
@@ -1191,6 +1197,7 @@ def goviral_functions(req_dict: dict):
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
                 event.wait(0.5)
+                # logging.info('Flag3')
             if len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0:
                 try:
                     driver_9.find_element_by_css_selector(subscribe_btn).click()
@@ -1256,7 +1263,8 @@ def goviral_functions(req_dict: dict):
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text != "0":
                     event.wait(0.5)
-            except (StaleElementReferenceException, NoSuchElementException):
+                    # logging.info('Flag4')
+            except (StaleElementReferenceException):
                 driver_9.refresh()
                 event.wait(0.5)
                 continue
@@ -1264,15 +1272,21 @@ def goviral_functions(req_dict: dict):
             try:
                 while driver_9.find_element_by_class_name("time-remaining-amount").text == "0":
                     event.wait(0.5)
+                    # logging.info('Flag5')
                     c += 1
-                    if c >= 30:
+                    if c == 120:
                         try:
-                            driver_9.find_element_by_xpath(skip_btn).send_keys(Keys.ENTER)
+                            driver_9.refresh()
+                            logging.info('Goviral is not continuing its functions, refreshing the website 2')
+                            break
+                            # driver_9.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
+                            # driver_9.switch_to.default_content()
+                            # driver_9.find_elements_by_class_name(skip_btn)[0].click()
+
                         except (ElementNotInteractableException,
                                 StaleElementReferenceException):
                             pass
             except StaleElementReferenceException:
-                driver_9.refresh()
                 event.wait(1.25)
                 continue
 
