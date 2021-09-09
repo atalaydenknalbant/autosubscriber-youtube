@@ -1148,6 +1148,8 @@ def goviral_functions(req_dict: dict):
                         pass
                     event.wait(0.5)
                     continue
+            if n >= 120:
+                continue
             x = 0
             while len(driver_9.window_handles) == 1:
                 event.wait(0.5)
