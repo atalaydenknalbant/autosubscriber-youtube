@@ -48,6 +48,12 @@ yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
 yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
                    ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()'
+yt_full_xpath_sub_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[7]' \
+                           '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer' \
+                           '/tp-yt-paper-button/yt-formatted-string'
+yt_full_xpath_like_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[6]' \
+                            '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/' \
+                            'div/ytd-toggle-button-renderer[1]'
 yt_javascript = False
 
 
@@ -1089,7 +1095,7 @@ def goviral_functions(req_dict: dict):
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1101,12 +1107,7 @@ def goviral_functions(req_dict: dict):
     driver.find_element_by_css_selector("#loginForm > div.kt-login__actions.justify-content-around > button").click()
     driver.find_element_by_css_selector("#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
     driver.save_screenshot("screenshots/screenshot.png")
-    yt_full_xpath_sub_button = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[7]' \
-                               '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer' \
-                               '/tp-yt-paper-button/yt-formatted-string'
-    yt_full_xpath_like_button = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[6]' \
-                                '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/' \
-                                'div/ytd-toggle-button-renderer[1]'
+    # yt_javascript = True
 
     def for_loop_like(driver_9,
                       like_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
@@ -1136,7 +1137,7 @@ def goviral_functions(req_dict: dict):
                 event.wait(0.5)
                 # logging.info('Flag1')
                 n += 1
-                if n == 120:
+                if n >= 60:
                     try:
                         driver_9.refresh()
                         logging.info('Goviral is not continue its functions, refreshing the website 1')
@@ -1146,9 +1147,10 @@ def goviral_functions(req_dict: dict):
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
                         pass
-                    event.wait(0.5)
+                    event.wait(1)
                     continue
-            if n >= 120:
+            if n >= 60:
+                driver.switch_to.window(driver_9.window_handles[0])
                 continue
             x = 0
             while len(driver_9.window_handles) == 1:
@@ -1188,14 +1190,6 @@ def goviral_functions(req_dict: dict):
                     TimeoutException,
                     StaleElementReferenceException):
                 pass
-            try:
-                while int(driver_9.find_element_by_class_name("time-remaining-amount").text) < 5:
-                    # logging.info('Flag2.75')
-                    event.wait(0.5)
-            except (StaleElementReferenceException, ValueError):
-                driver_9.refresh()
-                event.wait(0.5)
-                continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element_by_class_name("time-remaining-amount").text) > 19:
                 event.wait(0.5)
@@ -1213,10 +1207,11 @@ def goviral_functions(req_dict: dict):
                         if yt_javascript:
                             driver_9.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button)
+                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_type1)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
                         pass
+                    event.wait(1)
                     driver_9.save_screenshot("screenshots/screenshot_proof.png")
                     driver_9.switch_to.window(window_before)
                     driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1243,10 +1238,11 @@ def goviral_functions(req_dict: dict):
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button)
+                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_type1)
                                 like_button.click()
                         except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
                             pass
+                        event.wait(1)
                         driver_9.save_screenshot("screenshots/screenshot_proof.png")
                         driver_9.switch_to.window(window_before)
                         logging.info("Liked Video")
@@ -1298,7 +1294,7 @@ def goviral_functions(req_dict: dict):
 
 
 def tolikes_functions(req_dict: dict):
-    """tolikes login and then earn credits by subscribing videos with inner like loop function(for_loop_sub)
+    """tolikes login and then earn credits by subscribing videos with inner subscribe loop function(for_loop_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
     Returns:
@@ -1377,4 +1373,84 @@ def tolikes_functions(req_dict: dict):
         logging.info("Channels were successfully subscribed, quitting driver")
 
     for_loop_sub(driver)
+    driver.quit()
+
+
+def youtubviews_functions(req_dict: dict):
+    """youtubviews login and then earn credits by liking videos with inner like loop function(for_loop_sub)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict)
+    driver.implicitly_wait(7)
+    driver.get("https://accounts.google.com/signin/v2/identifier")
+    google_login(driver, req_dict, has_login_btn=False)
+    logging.info("youtube login completed")
+    event.wait(3)
+    driver.get("https://youtubviews.com/")  # Type_Undefined
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.find_element_by_name("login").send_keys(req_dict['username_youtubviews'])
+    driver.find_element_by_name("pass").send_keys(req_dict['pw_youtubviews'])
+    driver.find_element_by_name("connect").click()
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.find_element_by_css_selector("body > div.container > div > div:nth-child(2) > div >"
+                                        " div.exchange_content > div > ul > li:nth-child(2) > a")\
+        .click()
+    driver.save_screenshot("screenshots/screenshot.png")
+    yt_javascript = True
+
+    def for_loop_like(driver,
+                      like_btn="followbutton"
+                      ):
+        logging.info("Loop Started")
+        for i in range(50):
+            event.wait(4)
+            if i >= 1:
+                WebDriverWait(driver, 100)\
+                 .until(ec.visibility_of_element_located((By.XPATH,
+                                                         "/html/body/div[2]/div/div[2]/center/div/div")))\
+                 .get_attribute("value")
+            driver.save_screenshot("screenshots/screenshot.png")
+            driver.switch_to.window(driver.window_handles[0])
+            event.wait(28)
+            try:
+                if i >= 1:
+                    driver.switch_to.window(driver.window_handles[1])
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+            except (NoSuchWindowException, IndexError):
+                pass
+            event.wait(20)
+            try:
+                like_button = driver.find_elements_by_class_name(like_btn)[i]
+                ActionChains(driver).move_to_element(like_button).click().send_keys(Keys.ENTER).perform()
+            except NoSuchElementException:
+                logging.info("Couldn't find like button closing driver")
+                return
+            event.wait(3)
+            driver.switch_to.window(driver.window_handles[1])
+            if len(driver.find_elements_by_css_selector("#container > h1 > yt-formatted-string")) > 0:
+                driver.save_screenshot("screenshots/screenshot.png")
+                event.wait(2)
+                if len(driver.find_elements_by_css_selector(
+                        "#top-level-buttons > ytd-toggle-button-renderer."
+                        "style-scope." "ytd-menu-renderer.force-icon-button"
+                        ".style-default-active")) > 0:
+                    pass
+                else:
+                    if yt_javascript:
+                        driver.execute_script(yt_js_like_button)
+                    else:
+                        yt_like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_goviral)
+                        ActionChains(driver).move_to_element(yt_like_button).click().perform()
+                driver.save_screenshot("screenshots/screenshot_proof.png")
+                event.wait(5)
+                logging.info("Liked the Video")
+                driver.save_screenshot("screenshots/screenshot.png")
+            driver.switch_to.window(driver.window_handles[0])
+        logging.info("Channels were successfully Liked, quitting driver")
+
+    for_loop_like(driver)
     driver.quit()
