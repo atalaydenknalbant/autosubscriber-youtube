@@ -48,12 +48,11 @@ yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
 yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
                    ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()'
-yt_full_xpath_sub_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[7]' \
-                           '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer' \
-                           '/tp-yt-paper-button/yt-formatted-string'
-yt_full_xpath_like_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[6]' \
-                            '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/' \
-                            'div/ytd-toggle-button-renderer[1]'
+yt_full_xpath_sub_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]' \
+                                   '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer'
+yt_full_xpath_like_button_goviral = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]' \
+                                    '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/' \
+                                    'ytd-toggle-button-renderer[1]/a'
 yt_javascript = False
 
 
@@ -1207,9 +1206,9 @@ def goviral_functions(req_dict: dict):
                         if yt_javascript:
                             driver_9.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_type1)
+                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_goviral)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
-                    except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
+                    except (NoSuchWindowException, StaleElementReferenceException):
                         pass
                     event.wait(1)
                     driver_9.save_screenshot("screenshots/screenshot_proof.png")
@@ -1238,9 +1237,9 @@ def goviral_functions(req_dict: dict):
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_type1)
+                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_goviral)
                                 like_button.click()
-                        except (NoSuchWindowException, NoSuchElementException, StaleElementReferenceException):
+                        except (NoSuchWindowException, StaleElementReferenceException):
                             pass
                         event.wait(1)
                         driver_9.save_screenshot("screenshots/screenshot_proof.png")
