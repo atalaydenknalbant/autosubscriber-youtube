@@ -1271,7 +1271,7 @@ def goviral_functions(req_dict: dict):
                     event.wait(0.5)
                     # logging.info('Flag5')
                     c += 1
-                    if c == 120:
+                    if c == 150:
                         try:
                             driver_9.refresh()
                             logging.info('Goviral is not continuing its functions, refreshing the website 2')
