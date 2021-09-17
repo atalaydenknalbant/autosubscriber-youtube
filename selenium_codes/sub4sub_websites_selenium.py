@@ -1136,19 +1136,17 @@ def goviral_functions(req_dict: dict):
                 event.wait(0.5)
                 # logging.info('Flag1')
                 n += 1
-                if n >= 60:
+                if n >= 55:
                     try:
                         driver_9.refresh()
                         logging.info('Goviral is not continue its functions, refreshing the website 1')
                         break
-                        # driver_9.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
-                        # driver_9.find_element_by_class_name(skip_btn).click()
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
                         pass
                     event.wait(1)
                     continue
-            if n >= 60:
+            if n >= 55:
                 driver.switch_to.window(driver_9.window_handles[0])
                 continue
             x = 0
@@ -1156,10 +1154,10 @@ def goviral_functions(req_dict: dict):
                 event.wait(0.5)
                 # logging.info('Flag2')
                 x += 1
-                if x >= 120:
+                if x >= 100:
                     driver_9.refresh()
                     break
-            if x >= 120:
+            if x >= 100:
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
