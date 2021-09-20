@@ -266,11 +266,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 if yt_javascript:
                     driver.execute_script(yt_js_sub_button)
                 else:
-                    # try:
                     sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
                     ActionChains(driver).move_to_element(sub_button).click().perform()
-                    # except NoSuchElementException:
-                    #     pass
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
@@ -1274,9 +1271,6 @@ def goviral_functions(req_dict: dict):
                             driver_9.refresh()
                             logging.info('Goviral is not continuing its functions, refreshing the website 2')
                             break
-                            # driver_9.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
-                            # driver_9.switch_to.default_content()
-                            # driver_9.find_elements_by_class_name(skip_btn)[0].click()
 
                         except (ElementNotInteractableException,
                                 StaleElementReferenceException):
