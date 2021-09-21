@@ -48,11 +48,17 @@ yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
                     " ytd-toggle-button-renderer:nth-child(1)').click()"
 yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
                    ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()'
-yt_full_xpath_sub_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]' \
+yt_full_xpath_sub_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/' \
+                                            'div/div[9]' \
                                    '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer'
-yt_full_xpath_like_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]' \
+yt_full_xpath_like_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/' \
+                                             'div/div[8]' \
                                     '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/' \
                                     'ytd-toggle-button-renderer[1]/a'
+yt_full_xpath_sub_button_goviral_non_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]' \
+                                                '/div/div[7]/div[2]/ytd-video-secondary-info-renderer/div/div/div/' \
+                                                'ytd-subscribe-button-renderer'
+yt_full_xpath_like_button_goviral_non_headless = '//body/ytd-app[1]/div[1]/ytd-page-manager[1]/ytd-watch-flexy[1]/div[5]/div[1]/div[1]/div[8]/div[2]/ytd-video-primary-info-renderer[1]/div[1]/div[1]/div[3]/div[1]/ytd-menu-renderer[1]/div[1]/ytd-toggle-button-renderer[1]/a[1]'
 yt_javascript = False
 
 
@@ -1201,7 +1207,7 @@ def goviral_functions(req_dict: dict):
                         if yt_javascript:
                             driver_9.execute_script(yt_js_sub_button)
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button)
+                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_goviral_non_headless)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, StaleElementReferenceException):
                         pass
@@ -1232,8 +1238,8 @@ def goviral_functions(req_dict: dict):
                             if yt_javascript:
                                 driver_9.execute_script(yt_js_like_button)
                             else:
-                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button)
-                                like_button.click()
+                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_goviral_non_headless)
+                                ActionChains(driver_9).move_to_element(like_button).click().perform()
                         except (NoSuchWindowException, StaleElementReferenceException):
                             pass
                         event.wait(1)
