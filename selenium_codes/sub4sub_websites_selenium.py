@@ -1101,7 +1101,7 @@ def goviral_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6.5)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1294,7 +1294,7 @@ def goviral_functions(req_dict: dict):
                                 StaleElementReferenceException):
                             pass
             except StaleElementReferenceException:
-                event.wait(1.25)
+                event.wait(1)
                 continue
 
     for_loop_like(driver)
@@ -1310,7 +1310,7 @@ def tolikes_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6.25)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1368,7 +1368,7 @@ def tolikes_functions(req_dict: dict):
                         sub_button = driver.find_element_by_css_selector(yt_css_sub_button)
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
-                    event.wait(5)
+                    event.wait(4)
                     driver.close()
                     driver.switch_to.window(window_before)
                     logging.info("Subscribed To Channel")
