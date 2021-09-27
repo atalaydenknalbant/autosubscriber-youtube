@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 import os
 from threading import Event
-
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 event = Event()
@@ -123,6 +122,8 @@ def set_driver_opt(req_dict: dict,
         pass
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
@@ -368,7 +369,6 @@ def sonuker_functions(req_dict: dict):
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.implicitly_wait(5)
     driver.save_screenshot("screenshots/screenshot.png")
-    driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_css_selector("#core-wrapper > section > div > div > div > div > div > form >"
                                         " div:nth-child(2) > input").send_keys(req_dict['pw_sonuker'])
 
@@ -383,13 +383,6 @@ def sonuker_functions(req_dict: dict):
     except NoSuchElementException:
         logging.info("Couldn't find activate button ")
     driver.save_screenshot("screenshots/screenshot.png")
-    # try:
-    #     driver.find_element_by_xpath("//*[@id='core-wrapper']/section/div/div/div[2]/div/div/div[2]/div[2]/"
-    #                                  "div[1]/div/div[2]/div[2]/form/a").click()
-    #     event.wait(2)
-    # except NoSuchElementException:
-    #     logging.info("sonuker activate button passed 1")
-    #     pass
     try:
         activate_btn = driver.find_element_by_css_selector("#core-wrapper > section > div > div.dashboardBody >"
                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
@@ -446,7 +439,7 @@ def subscribersvideo_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -609,7 +602,7 @@ def submenow_functions(req_dict: dict):
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements_by_partial_link_text("Service Temporarily Unavailable")) > 0:
@@ -759,7 +752,7 @@ def ytmonster_functions(req_dict: dict):
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1212,7 +1205,9 @@ def goviral_functions(req_dict: dict):
                         else:
                             sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_goviral_headless)
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
-                    except (NoSuchWindowException, StaleElementReferenceException):
+                    except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
+                        if type(ex).__name__ == 'NoSuchElementException':
+                            logging.info('Subscribe button not found in youtube page, continuing next')
                         pass
                     event.wait(1)
                     driver_9.save_screenshot("screenshots/screenshot_proof.png")
@@ -1252,7 +1247,9 @@ def goviral_functions(req_dict: dict):
                                 event.wait(1)
                                 like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_goviral_headless)
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
-                        except (NoSuchWindowException, StaleElementReferenceException):
+                        except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException):
+                            if type(ex).__name__ == 'NoSuchElementException':
+                                logging.info('like button not found in youtube page, continuing next')
                             pass
                         event.wait(1)
                         driver_9.save_screenshot("screenshots/screenshot_proof.png")
