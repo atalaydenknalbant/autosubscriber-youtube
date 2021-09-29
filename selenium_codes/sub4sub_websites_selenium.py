@@ -1268,7 +1268,7 @@ def goviral_functions(req_dict: dict):
                     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
-                event.wait(1)
+                event.wait(4)
                 driver_9.find_element_by_id('verify-action-button').click()
                 logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
