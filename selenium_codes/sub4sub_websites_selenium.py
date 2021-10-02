@@ -137,7 +137,8 @@ def set_driver_opt(req_dict: dict,
 
 def google_login(driver: webdriver,
                  req_dict: dict,
-                 has_login_btn=True):
+                 has_login_btn=True,
+                 already_in_website=True):
     """ Logins to Google with given credentials.
     Args:
     - driver(webdriver): webdriver parameter.
@@ -147,6 +148,10 @@ def google_login(driver: webdriver,
     if has_login_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
+    if already_in_website:
+        pass
+    else:
+        driver.get("https://accounts.google.com/signin/v2/identifier")
     driver.save_screenshot("screenshots/screenshot.png")
     event.wait(1.25)
     email_area = driver.find_element_by_id("identifierId")
@@ -249,9 +254,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         event.wait(1.5)
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
-                # if i == 0:
-                #     i += 1
-                #     google_login(driver, req_dict)
                 if len(driver.find_elements_by_css_selector(
                         "#top-level-buttons > ytd-toggle-button-renderer."
                         "style-scope." "ytd-menu-renderer.force-icon-button"
