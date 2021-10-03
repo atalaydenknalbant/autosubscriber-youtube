@@ -1258,7 +1258,7 @@ def goviral_functions(req_dict: dict):
                                 event.wait(1)
                                 like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_goviral_headless)
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
-                        except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException):
+                        except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                             if type(ex).__name__ == 'NoSuchElementException':
                                 logging.info('like button not found in youtube page, continuing next')
                             pass
