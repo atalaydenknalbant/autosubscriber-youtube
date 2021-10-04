@@ -10,63 +10,78 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 import os
 from threading import Event
+# Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
+# Initializing event to enable event.wait() which is more effective than time.sleep()
 event = Event()
-yt_full_xpath_like_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/" \
-                 "ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/" \
-                 "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction"
-yt_full_xpath_sub_button = "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]" \
-                "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" \
-                "tp-yt-paper-button"
-yt_full_xpath_like_button_type1 = "/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/" \
-                                  "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/tp-yt-app-header/" \
-                                  "div[2]/div[2]/div/div[1]/div/div[2]/div[4]/ytd-subscribe-button-renderer/" \
-                                  "tp-yt-paper-button"
-yt_full_xpath_sub_button_type1 = "/html/body/ytd-app/ytd-popup-container/tp-yt-paper-dialog/" \
-                                 "yt-confirm-dialog-renderer/div[2]/div/yt-button-renderer[2]/a/tp-yt-paper-button"
-yt_css_like_button = 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)' \
-                     ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton' \
-                     ' div.style-scope.ytd-watch-flexy:nth-child(8)' \
-                     ' div.style-scope.ytd-watch-flexy:nth-child(1)' \
-                     ' div.style-scope.ytd-watch-flexy div.style-scope.ytd-watch-flexy:nth-child(11)' \
-                     ' div.style-scope.ytd-watch-flexy ytd-video-primary-info-renderer.style-scope.ytd-watch-flexy' \
-                     ' div.style-scope.ytd-video-primary-info-renderer' \
-                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(6)' \
-                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(3)' \
-                     ' div.style-scope.ytd-video-primary-info-renderer:nth-child(1)' \
-                     ' ytd-menu-renderer.style-scope.ytd-video-primary-info-renderer' \
-                     ' div.top-level-buttons.style-scope.ytd-menu-renderer > ' \
-                     'ytd-toggle-button' \
-                     '-renderer.style-scope.ytd-menu-renderer.force-icon-button.style-text:nth-child(1)'
-yt_css_sub_button = "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button"
-yt_js_like_button = "document.querySelector('#top-level-buttons-computed >" \
-                    " ytd-toggle-button-renderer:nth-child(1)').click()"
-yt_js_sub_button = 'document.querySelector("#subscribe-button >' \
-                   ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()'
-yt_full_xpath_sub_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/' \
-                                            'div/div[9]' \
-                                   '/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer'
-yt_full_xpath_like_button_goviral_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/' \
-                                             'div/div[8]' \
-                                    '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/' \
-                                    'ytd-toggle-button-renderer[1]/a'
-yt_full_xpath_sub_button_goviral_non_headless = '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]' \
-                                                '/div/div[7]/div[2]/ytd-video-secondary-info-renderer/div/div/div/' \
-                                                'ytd-subscribe-button-renderer'
-yt_full_xpath_like_button_goviral_non_headless = '//body/ytd-app[1]/div[1]/ytd-page-manager[1]/ytd-watch-flexy[1]' \
-                                                 '/div[5]/div[1]/div[1]/div[8]/div[2]/' \
-                                                 'ytd-video-primary-info-renderer[1]/div[1]/div[1]/div[3]/div[1]/' \
-                                                 'ytd-menu-renderer[1]/div[1]/ytd-toggle-button-renderer[1]/a[1]'
-yt_javascript = False
 
+yt_javascript = False
+# Locations For youtube button elements
+ytbutton_elements_location_dict = {
+    "yt_full_xpath_like_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/"
+                                 "div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/"
+                                 "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction",
+    "yt_full_xpath_sub_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]"
+                                "/div/div[9]/div[2]" 
+                                "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" 
+                                "tp-yt-paper-button",
+    "yt_full_xpath_like_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
+                                       "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/tp-yt-app-header/"
+                                       "div[2]/div[2]/div/div[1]/div/div[2]/div[4]/ytd-subscribe-button-renderer/"
+                                       "tp-yt-paper-button",
+    "yt_full_xpath_sub_button_type1": "/html/body/ytd-app/ytd-popup-container/tp-yt-paper-dialog/"
+                                      "yt-confirm-dialog-renderer/div[2]/div/yt-button-renderer[2]/a/"
+                                      "tp-yt-paper-button",
+    "yt_css_like_button": 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)'
+                          ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton'
+                          ' div.style-scope.ytd-watch-flexy:nth-child(8)'
+                          ' div.style-scope.ytd-watch-flexy:nth-child(1)'
+                          ' div.style-scope.ytd-watch-flexy div.style-scope.ytd-watch-flexy:nth-child(11)'
+                          ' div.style-scope.ytd-watch-flexy ytd-video-primary-info-renderer.style-scope.ytd-watch-flexy'
+                          ' div.style-scope.ytd-video-primary-info-renderer'
+                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(6)'
+                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(3)'
+                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(1)'
+                          ' ytd-menu-renderer.style-scope.ytd-video-primary-info-renderer'
+                          ' div.top-level-buttons.style-scope.ytd-menu-renderer > '
+                          'ytd-toggle-button'
+                          '-renderer.style-scope.ytd-menu-renderer.force-icon-button.style-text:nth-child(1)',
+    "yt_css_sub_button": "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button",
+    "yt_js_like_button": "document.querySelector('#top-level-buttons-computed >"
+                         " ytd-toggle-button-renderer:nth-child(1)').click()",
+    "yt_js_sub_button": 'document.querySelector("#subscribe-button >'
+                        ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()',
+    "yt_full_xpath_sub_button_goviral_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]'
+                                                 '/div[1]/'
+                                                 'div/div[9]'
+                                                 '/div[2]/ytd-video-secondary-info-renderer/div/div/div/'
+                                                 'ytd-subscribe-button-renderer',
+    "yt_full_xpath_like_button_goviral_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]'
+                                                  '/div[1]/'
+                                                  'div/div[8]'
+                                                  '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/'
+                                                  'ytd-menu-renderer/div/'
+                                                  'ytd-toggle-button-renderer[1]/a',
+    "yt_full_xpath_sub_button_goviral_non_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]'
+                                                     '/div/div[7]/div[2]/ytd-video-secondary-info-renderer/div/div/div/'
+                                                     'ytd-subscribe-button-renderer',
+    "yt_full_xpath_like_button_goviral_non_headless": '//body/ytd-app[1]/div[1]/ytd-page-manager[1]/ytd-watch-flexy[1]'
+                                                      '/div[5]/div[1]/div[1]/div[8]/div[2]/'
+                                                      'ytd-video-primary-info-renderer[1]/div[1]/div[1]/div[3]/div[1]/'
+                                                      'ytd-menu-renderer[1]/div[1]/ytd-toggle-button-renderer[1]/a[1]',
+
+
+
+
+}
 
 def get_clear_browsing_button(driver: webdriver):
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
     Args:
     - driver (webdriver): webdriver parameter.
 
-    Returns:
+    Return
     - WebElement: returns "* /deep/ #clearBrowsingDataConfirm" WebElement.
     """
     return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
@@ -263,9 +278,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     event.wait(1.25)
                     try:
                         if yt_javascript:
-                            driver.execute_script(yt_js_sub_button)
+                            driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button_type1)
+                            sub_button = driver.find_element_by_xpath\
+                                (ytbutton_elements_location_dict['yt_full_xpath_sub_button_type1'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                     except NoSuchElementException:
                         pass
@@ -273,10 +289,11 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 event.wait(1.25)
                 driver.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
-                    driver.execute_script(yt_js_like_button)
+                    driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                 else:
                     try:
-                        like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_type1)
+                        like_button = driver.find_element_by_xpath\
+                            (ytbutton_elements_location_dict['yt_full_xpath_like_button_type1'])
                         ActionChains(driver).move_to_element(like_button).click().perform()
                     except NoSuchElementException:
                         pass
@@ -555,16 +572,16 @@ def subscribersvideo_functions(req_dict: dict):
                             pass
                         else:
                             if yt_javascript:
-                                driver.execute_script(yt_js_like_button)
+                                driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
+                                like_button = driver.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_like_button'])
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
-                            driver.execute_script(yt_js_sub_button)
+                            driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
+                            sub_button = driver.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -671,7 +688,7 @@ def submenow_functions(req_dict: dict):
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
-                    if len(driver.find_elements_by_id("buttonPlan1")) > 0 or len(driver.find_elements_by_xpath(
+                    if len(driver.find_elements_by_id("buttonPlan1")) > 0 | len(driver.find_elements_by_xpath(
                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         break
                     try:
@@ -699,16 +716,17 @@ def submenow_functions(req_dict: dict):
                             pass
                         else:
                             if yt_javascript:
-                                driver.execute_script(yt_js_like_button)
+                                driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_element_by_xpath(yt_full_xpath_like_button)
+                                like_button = driver.find_element_by_xpath\
+                                    (ytbutton_elements_location_dict['yt_full_xpath_like_button'])
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
                         if yt_javascript:
-                            driver.execute_script(yt_js_sub_button)
+                            driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element_by_xpath(yt_full_xpath_sub_button)
+                            sub_button = driver.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -831,9 +849,9 @@ def ytmonster_functions(req_dict: dict):
                 driver_6.switch_to_default_content()
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
-                    driver_6.execute_script(yt_js_sub_button)
+                    driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
-                    sub_button = driver_6.find_element_by_css_selector(yt_css_sub_button)
+                    sub_button = driver_6.find_element_by_css_selector(ytbutton_elements_location_dict['yt_css_sub_button'])
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
@@ -979,9 +997,9 @@ def ytbpals_functions(req_dict: dict):
                     event.wait(2)
                     driver_7.switch_to_default_content()
                     if yt_javascript:
-                        driver_7.execute_script(yt_js_sub_button)
+                        driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_full_xpath_sub_button)
+                        sub_button = driver_7.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1070,9 +1088,10 @@ def ytbpals_functions(req_dict: dict):
                     driver_7.switch_to_default_content()
                     event.wait(1.25)
                     if yt_javascript:
-                        driver_7.execute_script(yt_js_sub_button)
+                        driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver_7.find_element_by_xpath(yt_full_xpath_sub_button)
+                        sub_button = driver_7.find_element_by_xpath\
+                            (ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1185,7 +1204,7 @@ def goviral_functions(req_dict: dict):
             try:
                 el = driver_9.find_element_by_css_selector("#kt_content > div > div.col-md-8 > div > form > div >"
                                                            " section > div > div.col-md-12 > div")
-                if el.is_displayed() and len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 and \
+                if el.is_displayed() & len(driver_9.find_elements_by_css_selector(subscribe_btn_available)) == 0 & \
                         len(driver_9.find_elements_by_css_selector(like_btn_available)) == 0:
                     driver_9.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
                     event.wait(0.5)
@@ -1212,9 +1231,9 @@ def goviral_functions(req_dict: dict):
                         pass
                     try:
                         if yt_javascript:
-                            driver_9.execute_script(yt_js_sub_button)
+                            driver_9.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver_9.find_element_by_xpath(yt_full_xpath_sub_button_goviral_headless)
+                            sub_button = driver_9.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_sub_button_goviral_headless'])
                             ActionChains(driver_9).move_to_element(sub_button).click().perform()
                     except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                         if type(ex).__name__ == 'NoSuchElementException':
@@ -1245,7 +1264,7 @@ def goviral_functions(req_dict: dict):
                         driver_9.save_screenshot("screenshots/screenshot.png")
                         try:
                             if yt_javascript:
-                                driver_9.execute_script(yt_js_like_button)
+                                driver_9.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 try:
                                     driver_9.find_element_by_xpath('/html/body/ytd-app/ytd-popup-container/'
@@ -1256,7 +1275,8 @@ def goviral_functions(req_dict: dict):
                                 except (NoSuchElementException):
                                     pass
                                 event.wait(1)
-                                like_button = driver_9.find_element_by_xpath(yt_full_xpath_like_button_goviral_headless)
+                                like_button = driver_9.find_element_by_xpath\
+                                    (ytbutton_elements_location_dict['yt_full_xpath_like_button_goviral_headless'])
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
                         except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                             if type(ex).__name__ == 'NoSuchElementException':
@@ -1371,9 +1391,9 @@ def tolikes_functions(req_dict: dict):
                     driver.save_screenshot("screenshots/screenshot.png")
                     event.wait(2)
                     if yt_javascript:
-                        driver.execute_script(yt_js_sub_button)
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver.find_element_by_css_selector(yt_css_sub_button)
+                        sub_button = driver.find_element_by_css_selector(ytbutton_elements_location_dict['yt_css_sub_button'])
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     event.wait(4)
@@ -1458,9 +1478,10 @@ def youtubviews_functions(req_dict: dict):
                     pass
                 else:
                     if yt_javascript:
-                        driver.execute_script(yt_js_like_button)
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
-                        yt_like_button = driver.find_element_by_xpath(yt_full_xpath_like_button_goviral_headless)
+                        yt_like_button = driver.find_element_by_xpath\
+                            (ytbutton_elements_location_dict['yt_full_xpath_like_button_goviral_headless'])
                         ActionChains(driver).move_to_element(yt_like_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
                 event.wait(5)
