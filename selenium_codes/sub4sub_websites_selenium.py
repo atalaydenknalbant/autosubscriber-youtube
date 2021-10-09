@@ -10,13 +10,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 import os
 from threading import Event
+
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
+
 # Initializing event to enable event.wait() which is more effective than time.sleep()
 event = Event()
 
+# Making Program to start with other locators instead of javascript locator
 yt_javascript = False
+
 # Locations For youtube button elements
 ytbutton_elements_location_dict = {
     "yt_full_xpath_like_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/"
@@ -63,7 +67,8 @@ ytbutton_elements_location_dict = {
                                                   '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/'
                                                   'ytd-menu-renderer/div/'
                                                   'ytd-toggle-button-renderer[1]/a',
-    "yt_full_xpath_sub_button_goviral_non_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]'
+    "yt_full_xpath_sub_button_goviral_non_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/'
+                                                     'div[5]/div[1]'
                                                      '/div/div[7]/div[2]/ytd-video-secondary-info-renderer/div/div/div/'
                                                      'ytd-subscribe-button-renderer',
     "yt_full_xpath_like_button_goviral_non_headless": '//body/ytd-app[1]/div[1]/ytd-page-manager[1]/ytd-watch-flexy[1]'
@@ -75,6 +80,7 @@ ytbutton_elements_location_dict = {
 
 
 }
+
 
 def get_clear_browsing_button(driver: webdriver):
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
@@ -200,7 +206,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     Returns:
     - None(NoneType)
     """
-    i = 0
 
     def sc_0():
         return driver.switch_to_frame(0)
