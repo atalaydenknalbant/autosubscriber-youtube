@@ -700,6 +700,7 @@ def submenow_functions(req_dict: dict):
                         while driver.find_element_by_css_selector("#marketStatus > span").text != \
                                 "Watch, Like & Subscribe":
                             event.wait(1.25)
+                            # logging.info("Flag1")
                     except StaleElementReferenceException:
                         logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
                         driver.quit()
@@ -731,7 +732,8 @@ def submenow_functions(req_dict: dict):
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element_by_xpath(ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
+                            sub_button = driver.find_element_by_xpath(ytbutton_elements_location_dict
+                                                                      ['yt_full_xpath_sub_button'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -743,6 +745,7 @@ def submenow_functions(req_dict: dict):
                         driver.save_screenshot("screenshots/screenshot.png")
                         while len(driver.find_elements_by_class_name("button buttonGray")) > 0:
                             event.wait(1.5)
+                            # logging.info("Flag2")
                         driver.save_screenshot("screenshots/screenshot.png")
                         el = \
                             WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
