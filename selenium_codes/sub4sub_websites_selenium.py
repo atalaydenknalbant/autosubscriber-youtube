@@ -648,8 +648,13 @@ def submenow_functions(req_dict: dict):
         logging.info("submenow" + str(ex))
         driver.quit()
         return
-    driver.find_element_by_css_selector("#header-wrapper > div.header-section.last-child >"
-                                        " div:nth-child(1) > div > button").click()
+    try:
+        driver.find_element_by_css_selector("#header-wrapper > div.header-section.last-child >"
+                                            " div:nth-child(1) > div > button")\
+            .click()
+    except NoSuchElementException:
+        logging.info("Website is not available closing the driver")
+        driver.quit()
     driver.find_element_by_id("inputEmail").send_keys(req_dict['email_submenow'])
     driver.find_element_by_id("inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element_by_id("buttonSignIn").click()
