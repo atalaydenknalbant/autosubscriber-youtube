@@ -12,7 +12,6 @@ Python Selenium-based automated subscribing, liking functions for youtube sub4su
 <img src="https://i.ibb.co/cyHK2vW/Artboard-1.png" width=100 height=100 >
 </a> 
 
-
 ## Usage
 1. Create a path in environment variables "CHROMEDRIVER_PATH" that matches with your chromedriver path.
 1. Try to use a newly created youtube account to avoid security questions and make that account simple.
@@ -26,7 +25,7 @@ Python Selenium-based automated subscribing, liking functions for youtube sub4su
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![GoViral](https://i.imgur.com/coZXiwg.png)](https://goviral.ai/) [![GoViral](https://i.imgur.com/jVSCRyb.png)](https://tolikes.com/) [![YoutubViews](https://i.imgur.com/FGlNFkd.png)](https://youtubviews.com/)
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![GoViral](https://i.imgur.com/coZXiwg.png)](https://goviral.ai/) [![YoutubViews](https://i.imgur.com/FGlNFkd.png)](https://youtubviews.com/)
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
