@@ -30,13 +30,8 @@ ytbutton_elements_location_dict = {
                                 "/div/div[9]/div[2]" 
                                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" 
                                 "tp-yt-paper-button",
-    "yt_full_xpath_like_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-browse/div[3]/"
-                                       "ytd-c4-tabbed-header-renderer/tp-yt-app-header-layout/div/tp-yt-app-header/"
-                                       "div[2]/div[2]/div/div[1]/div/div[2]/div[4]/ytd-subscribe-button-renderer/"
-                                       "tp-yt-paper-button",
-    "yt_full_xpath_sub_button_type1": "/html/body/ytd-app/ytd-popup-container/tp-yt-paper-dialog/"
-                                      "yt-confirm-dialog-renderer/div[2]/div/yt-button-renderer[2]/a/"
-                                      "tp-yt-paper-button",
+    "yt_full_xpath_like_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/ytd-toggle-button-renderer[1]/a",
+    "yt_full_xpath_sub_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/tp-yt-paper-button",
     "yt_css_like_button": 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)'
                           ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton'
                           ' div.style-scope.ytd-watch-flexy:nth-child(8)'
@@ -281,27 +276,28 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     pass
                 else:
                     event.wait(1.25)
-                    try:
-                        if yt_javascript:
-                            driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                        else:
-                            sub_button = driver.find_element_by_xpath\
-                                (ytbutton_elements_location_dict['yt_full_xpath_sub_button_type1'])
-                            ActionChains(driver).move_to_element(sub_button).click().perform()
-                    except NoSuchElementException:
-                        pass
-
+                    if yt_javascript:
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+                    else:
+                        try:
+                            like_button = driver.find_element_by_xpath \
+                                (ytbutton_elements_location_dict['yt_full_xpath_like_button_type1'])
+                            ActionChains(driver).move_to_element(like_button).click().perform()
+                        except NoSuchElementException:
+                            logging.info('Couldnt find like button in: ' + d)
+                            pass
                 event.wait(1.25)
                 driver.save_screenshot("screenshots/screenshot.png")
-                if yt_javascript:
-                    driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
-                else:
-                    try:
-                        like_button = driver.find_element_by_xpath\
-                            (ytbutton_elements_location_dict['yt_full_xpath_like_button_type1'])
-                        ActionChains(driver).move_to_element(like_button).click().perform()
-                    except NoSuchElementException:
-                        pass
+                try:
+                    if yt_javascript:
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                    else:
+                        sub_button = driver.find_element_by_xpath \
+                            (ytbutton_elements_location_dict['yt_full_xpath_sub_button_type1'])
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                except NoSuchElementException:
+                    logging.info('Couldnt find sub button in: ' + d)
+                    pass
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
