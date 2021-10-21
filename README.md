@@ -18,6 +18,7 @@ Python Selenium-based automated subscribing, liking functions for youtube sub4su
 1. Open that youtube account incognito mode on chrome before you use.
 1. [Allow Less Secure Apps](https://myaccount.google.com/lesssecureapps) on that youtube account 
 1. Edit config.ini file to match with your accounts.
+1. Whenever chrome updates, you need to change your user agent in your config file also download new driver for that new version of chrome.
 
 ## Included sub4sub Websites
 ### Type 1 Websites 
