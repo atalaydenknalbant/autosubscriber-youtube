@@ -30,8 +30,12 @@ ytbutton_elements_location_dict = {
                                 "/div/div[9]/div[2]" 
                                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" 
                                 "tp-yt-paper-button",
-    "yt_full_xpath_like_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/ytd-toggle-button-renderer[1]/a",
-    "yt_full_xpath_sub_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]/div[2]/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/tp-yt-paper-button",
+    "yt_full_xpath_like_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/"
+                                       "div[8]/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/"
+                                       "ytd-menu-renderer/div/ytd-toggle-button-renderer[1]/a",
+    "yt_full_xpath_sub_button_type1": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[9]"
+                                      "/div[2]/ytd-video-secondary-info-renderer/div/div/div/"
+                                      "ytd-subscribe-button-renderer/tp-yt-paper-button",
     "yt_css_like_button": 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)'
                           ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton'
                           ' div.style-scope.ytd-watch-flexy:nth-child(8)'
