@@ -50,6 +50,9 @@ ytbutton_elements_location_dict = {
                           ' div.top-level-buttons.style-scope.ytd-menu-renderer > '
                           'ytd-toggle-button'
                           '-renderer.style-scope.ytd-menu-renderer.force-icon-button.style-text:nth-child(1)',
+    "yt_css_like_button_active": "#top-level-buttons-computed > "
+                                 "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
+                                 "-default-active",
     "yt_css_sub_button": "#subscribe-button > ytd-subscribe-button-renderer > tp-yt-paper-button",
     "yt_js_like_button": "document.querySelector('#top-level-buttons-computed >"
                          " ytd-toggle-button-renderer:nth-child(1)').click()",
@@ -274,9 +277,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             if len(driver.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements_by_css_selector(
-                        "#top-level-buttons > ytd-toggle-button-renderer."
-                        "style-scope." "ytd-menu-renderer.force-icon-button"
-                        ".style-default-active")) > 0:
+                        ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                     pass
                 else:
                     event.wait(1.25)
@@ -571,9 +572,7 @@ def subscribersvideo_functions(req_dict: dict):
                             i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements_by_css_selector(
-                                "#top-level-buttons > ytd-toggle-button-renderer."
-                                "style-scope." "ytd-menu-renderer.force-icon-button"
-                                ".style-default-active")) > 0:
+                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
                             if yt_javascript:
@@ -721,9 +720,7 @@ def submenow_functions(req_dict: dict):
                             i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements_by_css_selector(
-                                "#top-level-buttons-computed >"
-                                " ytd-toggle-button-renderer.style-scope.ytd-menu-renderer."
-                                "force-icon-button.style-default-active")) > 0:
+                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
                             if yt_javascript:
@@ -1180,8 +1177,14 @@ def goviral_functions(req_dict: dict):
                 n += 1
                 if n >= 55:
                     try:
-                        driver_9.refresh()
-                        logging.info('Goviral is not continue its functions, refreshing the website 1')
+                        try:
+                            driver_9.switch_to_window(driver_9.window_handles[1])
+                            driver_9.close()
+                        except NoSuchWindowException:
+                            pass
+                        driver_9.switch_to_window(driver_9.window_handles[0])
+                        driver_9.get("https://members.goviral.ai/coins")
+                        # logging.info('Goviral is not continuing its functions, refreshing the website 1')
                         break
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
@@ -1266,10 +1269,8 @@ def goviral_functions(req_dict: dict):
                     driver_9.find_element_by_css_selector(like_btn).click()
                     event.wait(1)
                     driver_9.switch_to.window(driver_9.window_handles[1])
-                    if len(driver_9.find_elements_by_css_selector("#top-level-buttons >"
-                                                                  " ytd-toggle-button-renderer.style-scope."
-                                                                  "ytd-menu-renderer.force-icon-button"
-                                                                  ".style-default-active")) > 0:
+                    if len(driver_9.find_elements_by_css_selector(
+                            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                         pass
                     else:
                         driver_9.execute_script("window.scrollTo(0, 300)")
@@ -1293,12 +1294,12 @@ def goviral_functions(req_dict: dict):
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
                         except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                             if type(ex).__name__ == 'NoSuchElementException':
-                                logging.info('like button not found in youtube page, continuing next')
-                            pass
-                        event.wait(1)
-                        driver_9.save_screenshot("screenshots/screenshot_proof.png")
-                        driver_9.switch_to.window(window_before)
-                        logging.info("Liked Video")
+                                logging.info('like button not found in YouTube page, continuing next')
+                            else:
+                                event.wait(1)
+                                driver_9.save_screenshot("screenshots/screenshot_proof.png")
+                                driver_9.switch_to.window(window_before)
+                                logging.info("Liked Video")
                 except (ElementClickInterceptedException, ElementNotInteractableException):
                     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1327,7 +1328,13 @@ def goviral_functions(req_dict: dict):
                     c += 1
                     if c == 150:
                         try:
-                            driver_9.refresh()
+                            try:
+                                driver_9.switch_to_window(driver_9.window_handles[1])
+                                driver_9.close()
+                            except NoSuchWindowException:
+                                pass
+                            driver_9.switch_to_window(driver_9.window_handles[0])
+                            driver_9.get("https://members.goviral.ai/coins")
                             logging.info('Goviral is not continuing its functions, refreshing the website 2')
                             break
 
@@ -1402,9 +1409,7 @@ def youtubviews_functions(req_dict: dict):
                 driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(2)
                 if len(driver.find_elements_by_css_selector(
-                        "#top-level-buttons > ytd-toggle-button-renderer."
-                        "style-scope." "ytd-menu-renderer.force-icon-button"
-                        ".style-default-active")) > 0:
+                        ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                     pass
                 else:
                     if yt_javascript:
