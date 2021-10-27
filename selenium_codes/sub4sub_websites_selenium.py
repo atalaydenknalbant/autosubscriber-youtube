@@ -84,7 +84,7 @@ ytbutton_elements_location_dict = {
 }
 
 
-def get_clear_browsing_button(driver: webdriver):
+def get_clear_browsing_button(driver: webdriver) -> webdriver:
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -95,12 +95,13 @@ def get_clear_browsing_button(driver: webdriver):
     return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
 
 
-def clear_cache(driver: webdriver, timeout=60):
+def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     """Clear the cookies and cache for the ChromeDriver instance.
     Args:
     - driver (webdriver): webdriver parameter.
     - timeout (int): Parameter to stop program after reaches timeout.
-
+    Returns:
+    - None(NoneType)
     """
     driver.get('chrome://settings/clearBrowserData')
     wait = WebDriverWait(driver, timeout)
@@ -110,8 +111,8 @@ def clear_cache(driver: webdriver, timeout=60):
 
 
 def set_driver_opt(req_dict: dict,
-                   is_headless=True,
-                   website=""):
+                   is_headless: bool = True,
+                   website: str = "") -> webdriver:
     """Set driver options for chrome or firefox
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -160,13 +161,15 @@ def set_driver_opt(req_dict: dict,
 
 def google_login(driver: webdriver,
                  req_dict: dict,
-                 has_login_btn=True,
-                 already_in_website=True):
+                 has_login_btn: bool = True,
+                 already_in_website: bool = True) -> None:
     """ Logins to Google with given credentials.
     Args:
     - driver(webdriver): webdriver parameter.
     - req_dict(dict): dictionary object of required parameters
     - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
+    Returns:
+    - None(NoneType)
     """
     if has_login_btn:
         sign_in_button = driver.find_element_by_css_selector("#buttons > ytd-button-renderer > a")
@@ -194,10 +197,10 @@ def google_login(driver: webdriver,
 def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
                                  req_dict: dict,
-                                 special_condition=1,
-                                 confirm_btn_code="driver.find_elements_by_class_name('btn-step')[2]",
-                                 subscribe_btn_code="driver.find_elements_by_class_name('btn-step')[0]"
-                                 ):
+                                 special_condition: int = 1,
+                                 confirm_btn_code: str = "driver.find_elements_by_class_name('btn-step')[2]",
+                                 subscribe_btn_code: str = "driver.find_elements_by_class_name('btn-step')[0]"
+                                 ) -> None:
     """ Loop for like and sub, includes google login
     Args:
     - driver(webdriver): webdriver parameter.
@@ -209,16 +212,16 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     - None(NoneType)
     """
 
-    def sc_0():
+    def sc_0() -> webdriver:
         return driver.switch_to_frame(0)
 
-    def sc_1():
+    def sc_1() -> webdriver:
         return driver.switch_to.default_content()
 
-    def sc_2():
+    def sc_2() -> webdriver:
         return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
 
-    def sc_3():
+    def sc_3() -> webdriver:
         return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
     sc = {
         0: sc_0,
@@ -344,7 +347,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             continue
 
 
-def subpals_functions(req_dict: dict):
+def subpals_functions(req_dict: dict) -> None:
     """subpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -386,7 +389,7 @@ def subpals_functions(req_dict: dict):
     driver.quit()
 
 
-def sonuker_functions(req_dict: dict):
+def sonuker_functions(req_dict: dict) -> None:
     """sonuker login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -429,7 +432,7 @@ def sonuker_functions(req_dict: dict):
     driver.quit()
 
 
-def ytpals_functions(req_dict: dict):
+def ytpals_functions(req_dict: dict) -> None:
     """ytpals login and activate free plan then call outer subscribe loop function(for_loop_like_and_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -465,7 +468,7 @@ def ytpals_functions(req_dict: dict):
     driver.quit()
 
 
-def subscribersvideo_functions(req_dict: dict):
+def subscribersvideo_functions(req_dict: dict) -> None:
     """subscriber.video login and activate Free All-In-One plan then call inner subscribe loop function(for_loop)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -537,7 +540,7 @@ def subscribersvideo_functions(req_dict: dict):
     else:
         driver.switch_to.default_content()
 
-    def for_loop():
+    def for_loop() -> None:
         try:
             logging.info("subscribersvideo loop started")
             i = 0
@@ -624,7 +627,7 @@ def subscribersvideo_functions(req_dict: dict):
     driver.quit()
 
 
-def submenow_functions(req_dict: dict):
+def submenow_functions(req_dict: dict) -> None:
     """submenow login and activate Jet All-In-One plan then call inner subscribe loop function(for_loop)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -688,7 +691,7 @@ def submenow_functions(req_dict: dict):
         driver.quit()
         return
 
-    def for_loop():
+    def for_loop() -> None:
         i = 0
         try:
             logging.info("submenow loop started")
@@ -783,7 +786,7 @@ def submenow_functions(req_dict: dict):
     driver.quit()
 
 
-def ytmonster_functions(req_dict: dict):
+def ytmonster_functions(req_dict: dict) -> None:
     """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -804,15 +807,17 @@ def ytmonster_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     yt_javascript = True
 
-    def for_loop_sub(driver_6,
-                     sub_btn="subText",
-                     skip_btn="body > div.container-fluid > div > div.main > div.mainContent > div > div.col-md-9 >"
-                              " div.ct-full-wrap > div > div.ct-well.position-relative > div.row > div:nth-child(3) >"
-                              " a.subSkip > div",
-                     confirm_btn="body > div.container-fluid > div > div.main > div.mainContent > div >"
-                                 " div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                 " div.row > div:nth-child(3) > div > div",
-                     ):
+    def for_loop_sub(driver_6: webdriver,
+                     sub_btn: str = "subText",
+                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent "
+                                     "> div > div.col-md-9 >"
+                                     " div.ct-full-wrap > div > div.ct-well.position-relative "
+                                     "> div.row > div:nth-child(3) >"
+                                     " a.subSkip > div",
+                     confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div >"
+                                        " div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                        " div.row > div:nth-child(3) > div > div",
+                     ) -> None:
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
         for i in range(50):
@@ -937,7 +942,7 @@ def ytmonster_functions(req_dict: dict):
     driver.quit()
 
 
-def ytbpals_functions(req_dict: dict):
+def ytbpals_functions(req_dict: dict) -> None:
     """ytbpals login and then call inner subscribe loop function(for_loop_sub) finally activate free plan
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -955,13 +960,13 @@ def ytbpals_functions(req_dict: dict):
                                         " li:nth-child(5) > a").send_keys(Keys.ENTER)
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_7, sub_btn="#ytbpals-channels > div > div > div >"
-                                       " div.col-sm-4.text-center >"
-                                       " button.subscribe.yt-btn.ytb-subscribe",
-                     skip_btn="#ytbpals-channels > div > div > div > div.col-sm-4.text-center >"
-                              " button.skip.yt-btn.ytb-subscribe.ytb-skip",
-                     confirm_btn="ytbconfirm",
-                     ):
+    def for_loop_sub(driver_7: webdriver, sub_btn: str = "#ytbpals-channels > div > div > div >"
+                                                         " div.col-sm-4.text-center >"
+                                                         " button.subscribe.yt-btn.ytb-subscribe",
+                     skip_btn: str = "#ytbpals-channels > div > div > div > div.col-sm-4.text-center >"
+                                     " button.skip.yt-btn.ytb-subscribe.ytb-skip",
+                     confirm_btn: str = "ytbconfirm",
+                     ) -> None:
         current_remaining_time = 0
         current_remaining = ""
         for i in range(0, 10000):
@@ -1126,7 +1131,7 @@ def ytbpals_functions(req_dict: dict):
     for_loop_sub(driver)
 
 
-def goviral_functions(req_dict: dict):
+def goviral_functions(req_dict: dict) -> None:
     """goviral login and then earn credits by liking videos with inner like loop function(for_loop_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -1147,24 +1152,25 @@ def goviral_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     # yt_javascript = True
 
-    def for_loop_like(driver_9,
-                      like_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
-                                         " div.disabled-area.position-relative >"
-                                         " section.earn-likes.earning-box.position-relative.disabled",
-                      subscribe_btn_available="#kt_content > div > div.col-md-8 > div > form > div >"
-                                              " div.disabled-area.position-relative >"
-                                              " section.earn-subscribes.earning-box.position-relative.disabled",
-                      like_btn="#kt_content > div > div.col-md-8 > div > form > div >"
-                               " div.disabled-area.position-relative >"
-                               " section.earn-likes.earning-box.position-relative > div.row >"
-                               " div.col-4.text-right.mt-1.position-relative > button",
-                      subscribe_btn="#kt_content > div > div.col-md-8 > div > form > div >"
-                                    " div.disabled-area.position-relative >"
-                                    " section.earn-subscribes.earning-box.position-relative >"
-                                    " div.row > div.col-4.text-right.mt-1.position-relative > button",
-                      next_btn="/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]/button[1]",
-                      skip_btn='btn btn-secondary skip-video'
-                      ):
+    def for_loop_like(driver_9: webdriver,
+                      like_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
+                                                " div.disabled-area.position-relative >"
+                                                " section.earn-likes.earning-box.position-relative.disabled",
+                      subscribe_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
+                                                     " div.disabled-area.position-relative >"
+                                                     " section.earn-subscribes.earning-box.position-relative.disabled",
+                      like_btn: str = "#kt_content > div > div.col-md-8 > div > form > div >"
+                                      " div.disabled-area.position-relative >"
+                                      " section.earn-likes.earning-box.position-relative > div.row >"
+                                      " div.col-4.text-right.mt-1.position-relative > button",
+                      subscribe_btn: str = "#kt_content > div > div.col-md-8 > div > form > div >"
+                                           " div.disabled-area.position-relative >"
+                                           " section.earn-subscribes.earning-box.position-relative >"
+                                           " div.row > div.col-4.text-right.mt-1.position-relative > button",
+                      next_btn: str = "/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]"
+                                      "/button[1]",
+                      skip_btn: str = 'btn btn-secondary skip-video'
+                      ) -> None:
         logging.info("Loop Started")
         for i in range(100):
             driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1350,7 +1356,7 @@ def goviral_functions(req_dict: dict):
     driver.quit()
 
 
-def youtubviews_functions(req_dict: dict):
+def youtubviews_functions(req_dict: dict) -> None:
     """youtubviews login and then earn credits by liking videos with inner like loop function(for_loop_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -1375,9 +1381,9 @@ def youtubviews_functions(req_dict: dict):
     driver.save_screenshot("screenshots/screenshot.png")
     yt_javascript = True
 
-    def for_loop_like(driver,
-                      like_btn="followbutton"
-                      ):
+    def for_loop_like(driver: webdriver,
+                      like_btn: str = "followbutton"
+                      ) -> None:
         logging.info("Loop Started")
         for i in range(50):
             event.wait(4)
