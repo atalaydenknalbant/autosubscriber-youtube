@@ -1425,7 +1425,7 @@ def youtubviews_functions(req_dict: dict) -> None:
 
 
 def youlikehits_functions(req_dict: dict) -> None:
-    """youlikehits login and then earn credits by liking videos with inner like loop function(for_loop_sub)
+    """youlikehits login and then earn credits by subscribing videos with inner sub loop function(for_loop_sub)
     Args:
     - req_dict(dict): dictionary object of required parameters
     Returns:
@@ -1444,12 +1444,12 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_element_by_xpath("//tbody/tr[3]/td[1]/span[1]/input[1]").click()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element_by_xpath('/html/body/div/table[1]/tbody/tr[2]/td/table/tbody/tr/td/nav/ul/li[2]/a').click()
-    driver.find_element_by_xpath('/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]'
-                                 '/td/center/div[7]/div').click()
+    driver.find_element_by_xpath('/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]/'
+                                 'td/center/div[8]/div').click()
     driver.find_elements_by_class_name('followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_like(driver_10: webdriver,
+    def for_loop_sub(driver_10: webdriver,
                       like_btn: str = "followbutton"
                       ) -> None:
         logging.info("Loop Started")
@@ -1472,24 +1472,23 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver_10.find_elements_by_class_name('likebutton')[0].click()
             driver_10.switch_to.window(driver_10.window_handles[1])
             try:
-                if len(driver.find_elements_by_css_selector(
-                        ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    pass
+                if yt_javascript:
+                    driver_10.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
-                    if yt_javascript:
-                        driver_10.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
-                    else:
-                        event.wait(1)
-                        like_button = driver_10.find_elements_by_tag_name(
-                            ytbutton_elements_location_dict['yt_tag_like_button_type1'])[0]
-                        ActionChains(driver_10).move_to_element(like_button).click().perform()
+                    event.wait(1)
+                    sub_button = driver_10.find_elements_by_id(
+                        ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
+                    ActionChains(driver_10).move_to_element(sub_button).click().perform()
                 driver_10.save_screenshot("screenshots/screenshot_proof.png")
-                logging.info("Liked Video")
+                logging.info("Subscribed to Channel")
             except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                 if type(ex).__name__ == 'NoSuchElementException':
                     logging.info('like button not found in YouTube page, continuing next')
-            event.wait(7)
+            event.wait(10)
             driver_10.close()
             driver_10.switch_to.window(driver_10.window_handles[0])
-    for_loop_like(driver)
+            event.wait(2)
+            button = driver.find_element_by_tag_name('button')
+            ActionChains(driver_10).move_to_element(button).click().perform()
+    for_loop_sub(driver)
     driver.quit()
