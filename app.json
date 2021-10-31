@@ -112,6 +112,14 @@
     "youtubviews_password": {
       "value": "Enter YOUTUBVIEWS Password",
       "required": true
+    },
+    "youlikehits_username": {
+      "value": "Enter YOULIKEHITS Username",
+      "required": true
+    },
+    "youlikehits_password": {
+      "value": "Enter YOULIKEHITS Password",
+      "required": true
     }
   }
 
