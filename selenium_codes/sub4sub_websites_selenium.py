@@ -1431,7 +1431,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1462,14 +1462,14 @@ def youlikehits_functions(req_dict: dict) -> None:
                 .get_attribute("value")
             driver_10.save_screenshot("screenshots/screenshot.png")
             driver_10.switch_to.window(driver_10.window_handles[0])
-            event.wait(12)
+            event.wait(20)
             driver_10.save_screenshot("screenshots/screenshot.png")
             if i > 0 and video_name == driver.find_element_by_class_name('mainfocusheader').text:
                 driver_10.find_element_by_css_selector('#DoesLike > a').click()
                 logging.info("Same Video Skipping...")
                 continue
             video_name = driver.find_element_by_class_name('mainfocusheader').text
-            driver_10.find_elements_by_class_name('likebutton')[0].click()
+            driver_10.find_element_by_class_name('likebutton').send_keys(Keys.ENTER)
             driver_10.switch_to.window(driver_10.window_handles[1])
             try:
                 if yt_javascript:
