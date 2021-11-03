@@ -1454,6 +1454,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                       ) -> None:
         logging.info("Loop Started")
         video_name = driver.find_element_by_class_name('mainfocusheader').text
+        video_list = []
         for i in range(50):
             event.wait(3)
             WebDriverWait(driver_10, 100)\
@@ -1469,6 +1470,15 @@ def youlikehits_functions(req_dict: dict) -> None:
                 logging.info("Same Video Skipping...")
                 continue
             video_name = driver.find_element_by_class_name('mainfocusheader').text
+            if video_name in video_list:
+                driver_10.find_element_by_xpath('/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
+                                                'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
+                    .click()
+                event.wait(8)
+                driver.find_elements_by_class_name('followbutton')[0].click()
+                event.wait(3)
+                continue
+            video_list += video_name
             driver_10.find_element_by_class_name('likebutton').send_keys(Keys.ENTER)
             driver_10.switch_to.window(driver_10.window_handles[1])
             try:
