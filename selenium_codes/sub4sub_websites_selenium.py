@@ -228,7 +228,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
 
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
-        driver.switch_to_window(window_before)
+        driver.switch_to.window(window_before)
         driver.switch_to.default_content()
         sc[special_condition]()
         try:
@@ -255,7 +255,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             driver.save_screenshot("screenshots/screenshot.png")
             driver.quit()
             return
-        driver.switch_to_window(window_before)
+        driver.switch_to.window(window_before)
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         try:
@@ -818,7 +818,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver_6.save_screenshot("screenshots/screenshot.png")
         for i in range(50):
             window_before = driver_6.window_handles[0]
-            driver_6.switch_to_window(window_before)
+            driver_6.switch_to.window(window_before)
             driver_6.switch_to.default_content()
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
@@ -968,7 +968,7 @@ def ytbpals_functions(req_dict: dict) -> None:
         for i in range(0, 10000):
             logging.info("Loop Started")
             window_before = driver_7.window_handles[0]
-            driver_7.switch_to_window(window_before)
+            driver_7.switch_to.window(window_before)
             driver_7.switch_to.default_content()
             event.wait(5)
 
@@ -1044,7 +1044,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     continue
 
             else:
-                driver_7.switch_to_window(window_before)
+                driver_7.switch_to.window(window_before)
                 driver_7.switch_to.default_content()
                 event.wait(3)
                 try:
@@ -1180,11 +1180,11 @@ def goviral_functions(req_dict: dict) -> None:
                 if n >= 55:
                     try:
                         try:
-                            driver_9.switch_to_window(driver_9.window_handles[1])
+                            driver_9.switch_to.window(driver_9.window_handles[1])
                             driver_9.close()
                         except NoSuchWindowException:
                             pass
-                        driver_9.switch_to_window(driver_9.window_handles[0])
+                        driver_9.switch_to.window(driver_9.window_handles[0])
                         driver_9.get("https://members.goviral.ai/coins")
                         # logging.info('Goviral is not continuing its functions, refreshing the website 1')
                         break
@@ -1324,11 +1324,11 @@ def goviral_functions(req_dict: dict) -> None:
                     if c == 150:
                         try:
                             try:
-                                driver_9.switch_to_window(driver_9.window_handles[1])
+                                driver_9.switch_to.window(driver_9.window_handles[1])
                                 driver_9.close()
                             except NoSuchWindowException:
                                 pass
-                            driver_9.switch_to_window(driver_9.window_handles[0])
+                            driver_9.switch_to.window(driver_9.window_handles[0])
                             driver_9.get("https://members.goviral.ai/coins")
                             logging.info('Goviral is not continuing its functions, refreshing the website 2')
                             break
