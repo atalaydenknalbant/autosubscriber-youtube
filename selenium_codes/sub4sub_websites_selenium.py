@@ -215,10 +215,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         return driver.switch_to.default_content()
 
     def sc_2() -> webdriver:
-        return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])
+        return driver.switch_to.frame(driver.find_elements(By.TAG_NAME, "iframe")[1])
 
     def sc_3() -> webdriver:
-        return driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[0])
+        return driver.switch_to.frame(driver.find_elements(By.TAG_NAME, "iframe")[0])
     sc = {
         0: sc_0,
         1: sc_1,
@@ -229,8 +229,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
         driver.switch_to.window(window_before)
-        driver.switch_to.default_content()
-        sc[special_condition]()
+        # driver.switch_to.default_content()
+        # sc[special_condition]()
         try:
             while driver.find_element(By.ID, "seconds").text == "0":
                 continue
@@ -248,7 +248,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     pass
         try:
             remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
-                                                            "div/div/div/div/div[2]/div[1]/h2/span/div").text
+                                                             "div/div/div/div/div[2]/div[1]/h2/span/div").text
 
             logging.info(d+" Remaining Videos: " + remaining_videos)
         except NoSuchElementException:
@@ -265,7 +265,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Couldn't find subscribe_btn")
             break
         if driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
-                                        "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
+                                         "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
@@ -276,7 +276,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements(By.CSS_SELECTOR,
-                        ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                                            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                     pass
                 else:
                     event.wait(1.25)
@@ -284,8 +284,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
                         try:
-                            like_button = driver.find_elements_by_tag_name(
-                                ytbutton_elements_location_dict['yt_tag_like_button_type1'])[0]
+                            like_button = driver.find_elements(By.TAG_NAME,
+                                                               ytbutton_elements_location_dict
+                                                               ['yt_tag_like_button_type1'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except NoSuchElementException:
                             logging.info('Couldnt find like button in: ' + d)
@@ -297,7 +298,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         sub_button = driver.find_elements(By.ID,
-                            ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                 except NoSuchElementException:
                     logging.info('Couldnt find sub button in: ' + d)
@@ -320,17 +321,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
-        driver.switch_to.default_content()
-        sc[special_condition]()
+        # driver.switch_to.default_content()
+        # sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
             pass
         try:
-            try:
-                button_confirm = eval(confirm_btn_code)
-                WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, button_confirm)))
-            except TimeoutException:
-                pass
             button_confirm = eval(confirm_btn_code)
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
