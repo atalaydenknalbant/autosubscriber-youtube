@@ -209,7 +209,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     """
 
     def sc_0() -> webdriver:
-        return driver.switch_to_frame(0)
+        return driver.switch_to.frame(0)
 
     def sc_1() -> webdriver:
         return driver.switch_to.default_content()
@@ -350,7 +350,7 @@ def subpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict,False)
     driver.implicitly_wait(5)
     driver.get("https://accounts.google.com/signin/v2/identifier")
     google_login(driver, req_dict, has_login_btn=False)
