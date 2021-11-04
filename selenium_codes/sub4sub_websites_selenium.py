@@ -187,7 +187,7 @@ def google_login(driver: webdriver,
     driver.find_element_by_css_selector("#passwordNext > div > button").click()
     event.wait(1.25)
     driver.save_screenshot("screenshots/screenshot.png")
-    driver.switch_to_default_content()
+    driver.switch_to.default_content()
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
@@ -229,7 +229,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
         driver.switch_to_window(window_before)
-        driver.switch_to_default_content()
+        driver.switch_to.default_content()
         sc[special_condition]()
         try:
             while driver.find_element_by_id("seconds").text == "0":
@@ -320,7 +320,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
-        driver.switch_to_default_content()
+        driver.switch_to.default_content()
         sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         while driver.find_elements_by_id("seconds")[1].text != "":  # noqa
@@ -819,7 +819,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         for i in range(50):
             window_before = driver_6.window_handles[0]
             driver_6.switch_to_window(window_before)
-            driver_6.switch_to_default_content()
+            driver_6.switch_to.default_content()
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
@@ -857,7 +857,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             if len(driver_6.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                 event.wait(2)
                 driver_6.execute_script("window.scrollTo(0, 500);")
-                driver_6.switch_to_default_content()
+                driver_6.switch_to.default_content()
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 if yt_javascript:
                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
@@ -866,7 +866,7 @@ def ytmonster_functions(req_dict: dict) -> None:
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
-                driver_6.switch_to_default_content()
+                driver_6.switch_to.default_content()
                 logging.info("Subscribed To Channel")
                 for _ in range(50000):
                     if driver_6.find_element_by_css_selector("body > div.container-fluid > div > div.main >"
@@ -915,7 +915,7 @@ def ytmonster_functions(req_dict: dict) -> None:
 
             else:
                 driver_6.switch_to.window(window_before)
-                driver_6.switch_to_default_content()
+                driver_6.switch_to.default_content()
                 driver_6.find_element_by_css_selector(skip_btn).click()
                 i -= 1
                 while yt_channel_name == driver_6.find_element_by_css_selector("body > div.container-fluid > div >"
@@ -969,7 +969,7 @@ def ytbpals_functions(req_dict: dict) -> None:
             logging.info("Loop Started")
             window_before = driver_7.window_handles[0]
             driver_7.switch_to_window(window_before)
-            driver_7.switch_to_default_content()
+            driver_7.switch_to.default_content()
             event.wait(5)
 
             if i == 0:
@@ -1006,7 +1006,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                 if len(driver_7.find_elements_by_xpath("//*[@id='container']/h1/yt-formatted-string")) > 0:
                     driver_7.execute_script("window.scrollTo(0, 400);")
                     event.wait(2)
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     if yt_javascript:
                         driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
@@ -1015,9 +1015,9 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     logging.info("Subbed to Channel")
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     try:
                         event.wait(2)
                         driver_7.find_element_by_id(confirm_btn).click()
@@ -1037,7 +1037,7 @@ def ytbpals_functions(req_dict: dict) -> None:
 
                 else:
                     driver_7.switch_to.window(window_before)
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     driver_7.find_element_by_css_selector(skip_btn).send_keys(Keys.ENTER)
 
                     i += 1
@@ -1045,7 +1045,7 @@ def ytbpals_functions(req_dict: dict) -> None:
 
             else:
                 driver_7.switch_to_window(window_before)
-                driver_7.switch_to_default_content()
+                driver_7.switch_to.default_content()
                 event.wait(3)
                 try:
                     driver_7.find_element_by_css_selector(sub_btn).send_keys(Keys.ENTER)
@@ -1096,7 +1096,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver_7.execute_script("window.scrollTo(0, 600);")
                     event.wait(2)
                     driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     event.wait(1.25)
                     if yt_javascript:
                         driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
@@ -1107,9 +1107,9 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
                     driver_7.switch_to.window(window_before)
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     logging.info("Subbed to Channel")
-                    driver_7.switch_to_default_content()
+                    driver_7.switch_to.default_content()
                     try:
                         event.wait(2)
                         driver_7.find_element_by_id(confirm_btn).click()
@@ -1450,8 +1450,8 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(driver_10: webdriver,
-                      like_btn: str = "followbutton"
-                      ) -> None:
+                     like_btn: str = "followbutton"
+                     ) -> None:
         logging.info("Loop Started")
         video_name = driver.find_element_by_class_name('mainfocusheader').text
         video_list = []
@@ -1474,6 +1474,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver_10.find_element_by_xpath('/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
                                                 'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
                     .click()
+                logging.info("Same Video In Video List Skipping To New Videos...")
                 event.wait(8)
                 driver.find_elements_by_class_name('followbutton')[0].click()
                 event.wait(3)
@@ -1494,7 +1495,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                 if type(ex).__name__ == 'NoSuchElementException':
                     logging.info('like button not found in YouTube page, continuing next')
-            event.wait(10)
+            event.wait(11)
             driver_10.close()
             driver_10.switch_to.window(driver_10.window_handles[0])
             event.wait(2)
