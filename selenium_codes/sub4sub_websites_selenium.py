@@ -208,29 +208,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     - None(NoneType)
     """
 
-    def sc_0() -> webdriver:
-        return driver.switch_to.frame(0)
-
-    def sc_1() -> webdriver:
-        return driver.switch_to.default_content()
-
-    def sc_2() -> webdriver:
-        return driver.switch_to.frame(driver.find_elements(By.TAG_NAME, "iframe")[1])
-
-    def sc_3() -> webdriver:
-        return driver.switch_to.frame(driver.find_elements(By.TAG_NAME, "iframe")[0])
-    sc = {
-        0: sc_0,
-        1: sc_1,
-        2: sc_2,
-        3: sc_3
-    }
-
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
         driver.switch_to.window(window_before)
-        # driver.switch_to.default_content()
-        # sc[special_condition]()
         try:
             while driver.find_element(By.ID, "seconds").text == "0":
                 continue
@@ -256,7 +236,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             driver.quit()
             return
         driver.switch_to.window(window_before)
-        sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         try:
             button_subscribe = eval(subscribe_btn_code)
@@ -306,7 +285,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
-                sc[special_condition]()
                 while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                     pass
                 button_confirm = driver.find_elements(By.CLASS_NAME, 'btn-step')[2]
@@ -314,15 +292,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 continue
         except TimeoutException:
             driver.switch_to.window(window_before)
-            sc[special_condition]()
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 pass
             button_confirm = driver.find_elements(By.CLASS_NAME, 'btn-step')[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
-        # driver.switch_to.default_content()
-        # sc[special_condition]()
         driver.save_screenshot("screenshots/screenshot.png")
         while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
             pass
