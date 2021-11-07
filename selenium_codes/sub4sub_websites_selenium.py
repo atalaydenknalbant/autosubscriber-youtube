@@ -1420,7 +1420,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(driver_10: webdriver,
-                     like_btn: str = "followbutton"
+                     follow_btn: str = "followbutton"
                      ) -> None:
         logging.info("Loop Started")
         video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
@@ -1446,7 +1446,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     .click()
                 logging.info("Same Video In Video List Skipping To New Videos...")
                 event.wait(8)
-                driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
+                driver.find_elements(By.CLASS_NAME, follow_btn)[0].click()
                 event.wait(3)
                 continue
             video_list += video_name
