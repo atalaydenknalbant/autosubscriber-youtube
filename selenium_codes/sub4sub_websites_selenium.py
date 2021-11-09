@@ -1433,7 +1433,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 .get_attribute("value")
             driver_10.save_screenshot("screenshots/screenshot.png")
             driver_10.switch_to.window(driver_10.window_handles[0])
-            event.wait(20)
+            event.wait(15)
             driver_10.save_screenshot("screenshots/screenshot.png")
             if i > 0 and video_name == driver.find_element(By.CLASS_NAME, 'mainfocusheader').text:
                 driver_10.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
@@ -1445,7 +1445,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                  'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
                     .click()
                 logging.info("Same Video In Video List Skipping To New Videos...")
-                event.wait(8)
+                event.wait(7)
                 driver.find_elements(By.CLASS_NAME, follow_btn)[0].click()
                 event.wait(3)
                 continue
