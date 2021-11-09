@@ -173,7 +173,7 @@ def google_login(driver: webdriver,
     if already_in_website:
         pass
     else:
-        driver.get("https://accounts.google.com/signin/v2/identifier")
+        driver.get("https://accounts.google.com/signin")
     driver.save_screenshot("screenshots/screenshot.png")
     event.wait(1.25)
     email_area = driver.find_element(By.ID, "identifierId")
@@ -323,7 +323,7 @@ def subpals_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(5)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(3)
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
@@ -365,7 +365,7 @@ def sonuker_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(5)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(3)
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
@@ -407,13 +407,13 @@ def ytpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(5)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.implicitly_wait(6)
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(3)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div >"
-                                        " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
+                                         " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div > form > button").click()
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Activated")) > 0:
         driver.quit()
@@ -761,7 +761,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(6)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
@@ -1106,7 +1106,7 @@ def goviral_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(6.5)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
@@ -1324,7 +1324,7 @@ def youtubviews_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
@@ -1403,7 +1403,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(7)
-    driver.get("https://accounts.google.com/signin/v2/identifier")
+    driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(3)
@@ -1450,6 +1450,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 event.wait(3)
                 continue
             video_list += video_name
+            logging.info(video_list)
             driver_10.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
             driver_10.switch_to.window(driver_10.window_handles[1])
             try:
