@@ -1401,7 +1401,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1449,7 +1449,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.find_elements(By.CLASS_NAME, follow_btn)[0].click()
                 event.wait(3)
                 continue
-            video_list += video_name
+            video_list.append(video_name)
             logging.info(video_list)
             driver_10.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
             driver_10.switch_to.window(driver_10.window_handles[1])
