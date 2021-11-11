@@ -513,13 +513,13 @@ def subscribersvideo_functions(req_dict: dict) -> None:
             i = 0
             for _ in range(1, 10000000000):
                 if len(driver.find_elements(By.XPATH,
-                        "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
+                                            "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                     break
                 else:
                     window_before = driver.window_handles[0]
                     driver.save_screenshot("screenshots/screenshot.png")
                     if len(driver.find_elements(By.XPATH,
-                            "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
+                                                "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                         driver.quit()
                         break
                     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Please come later")) > 0:
@@ -1361,7 +1361,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                     driver.switch_to.window(driver.window_handles[0])
             except (NoSuchWindowException, IndexError):
                 pass
-            event.wait(20)
+            event.wait(18)
             try:
                 like_button = driver.find_elements(By.CLASS_NAME, like_btn)[i]
                 ActionChains(driver).move_to_element(like_button).click().send_keys(Keys.ENTER).perform()
@@ -1401,7 +1401,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict,False)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
