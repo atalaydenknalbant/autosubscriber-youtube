@@ -126,30 +126,30 @@ def set_driver_opt(req_dict: dict,
     else:
         pass
     chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
-    if website != "":
-        pass
-    else:
-        chrome_options.add_argument("--disable-extensions")
-        prefs = {"profile.managed_default_content_settings.images": 2,
-                 "disk-cache-size": 4096,
-                 "profile.password_manager_enabled": False,
-                 "credentials_enable_service": False}
-        chrome_options.add_experimental_option('prefs', prefs)
-        chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
-        pass
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option("useAutomationExtension", False)
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument('--disable-gpu')
+    # if website != "":
+    #     pass
+    # else:
+    #     chrome_options.add_argument("--disable-extensions")
+    #     prefs = {"profile.managed_default_content_settings.images": 2,
+    #              "disk-cache-size": 4096,
+    #              "profile.password_manager_enabled": False,
+    #              "credentials_enable_service": False}
+    #     chrome_options.add_experimental_option('prefs', prefs)
+    #     chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+    #     pass
+    # chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    # chrome_options.add_experimental_option("useAutomationExtension", False)
+    # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    # chrome_options.add_argument("--ignore-certificate-errors")
+    # chrome_options.add_argument("--disable-dev-shm-usage")
+    # chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--disable-notifications')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument("--proxy-server='direct://'")
-    chrome_options.add_argument("--proxy-bypass-list=*")
-    chrome_options.add_argument("--disable-web-security")
-    chrome_options.add_argument("--allow-running-insecure-content")
+    # chrome_options.add_argument('--no-sandbox')
+    # chrome_options.add_argument("--proxy-server='direct://'")
+    # chrome_options.add_argument("--proxy-bypass-list=*")
+    # chrome_options.add_argument("--disable-web-security")
+    # chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
@@ -267,7 +267,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                                                ytbutton_elements_location_dict
                                                                ['yt_tag_like_button_type1'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
-                        except NoSuchElementException:
+                        except (NoSuchElementException, IndexError):
                             logging.info('Couldnt find like button in: ' + d)
                             pass
                 event.wait(1.25)
@@ -278,6 +278,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     else:
                         sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                        sub_button = driver.find_elements(By.ID,
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                 except NoSuchElementException:
                     logging.info('Couldnt find sub button in: ' + d)
@@ -542,7 +545,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                             i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
-                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                               ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
                             if yt_javascript:
@@ -555,7 +558,9 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element(By.XPATH, ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
+                            sub_button = driver.find_element(By.XPATH,
+                                                             ytbutton_elements_location_dict
+                                                             ['yt_full_xpath_sub_button'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -1466,10 +1471,10 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                 if type(ex).__name__ == 'NoSuchElementException':
                     logging.info('like button not found in YouTube page, continuing next')
-            event.wait(11)
+            event.wait(15)
             driver_10.close()
             driver_10.switch_to.window(driver_10.window_handles[0])
-            event.wait(2)
+            event.wait(3)
             button = driver.find_element(By.TAG_NAME, 'button')
             ActionChains(driver_10).move_to_element(button).click().perform()
     for_loop_sub(driver)
