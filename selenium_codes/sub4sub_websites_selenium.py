@@ -282,7 +282,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
-                except NoSuchElementException:
+                except (NoSuchElementException, ElementNotInteractableException):
                     logging.info('Couldnt find sub button in: ' + d)
                     pass
                 driver.save_screenshot("screenshots/screenshot_proof.png")
