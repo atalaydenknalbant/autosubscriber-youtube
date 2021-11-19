@@ -389,9 +389,9 @@ def sonuker_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
     try:
         activate_btn = driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div.dashboardBody >"
-                                                           " div:nth-child(2) > div > div > div.userContent_pricing >"
-                                                           " div:nth-child(2) > div:nth-child(1) > div >"
-                                                           " div.panel-body > div.btn-holder > form > a")
+                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
+                                                            " div:nth-child(2) > div:nth-child(1) > div >"
+                                                            " div.panel-body > div.btn-holder > form > a")
         activate_btn.send_keys(Keys.ENTER)
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
@@ -410,23 +410,24 @@ def ytpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(3)
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div >"
                                          " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
-    driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div > form > button").click()
+    driver.find_element(By.CSS_SELECTOR,
+                        "#core-wrapper > section > div > div > div > div > div > form > button").click()
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Activated")) > 0:
         driver.quit()
         return
     driver.execute_script("window.scrollTo(0, 300);")
     try:
         activate_btn = driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div.dashboardBody >"
-                                                           " div:nth-child(2) > div > div > div.userContent_pricing >"
-                                                           " div:nth-child(2) > div:nth-child(1) >"
-                                                           " div > div.panel-body > div.btn-holder > form > a")
+                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
+                                                            " div:nth-child(2) > div:nth-child(1) >"
+                                                            " div > div.panel-body > div.btn-holder > form > a")
         activate_btn.send_keys(Keys.ENTER)
 
     except NoSuchElementException:
@@ -446,7 +447,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -609,7 +610,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -672,8 +673,10 @@ def submenow_functions(req_dict: dict) -> None:
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
-                    if len(driver.find_elements(By.ID, "buttonPlan1")) > 0 | len(driver.find_elements(By.XPATH,
-                            "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
+                    if len(driver.find_elements(By.ID, "buttonPlan1")) > 0 \
+                            | len(driver.find_elements(By.XPATH,
+                                                       "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) \
+                            > 0:
                         break
                     try:
                         while driver.find_element(By.CSS_SELECTOR, "#marketStatus > span").text != \
@@ -695,7 +698,7 @@ def submenow_functions(req_dict: dict) -> None:
                             i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
-                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                               ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
                             if yt_javascript:
