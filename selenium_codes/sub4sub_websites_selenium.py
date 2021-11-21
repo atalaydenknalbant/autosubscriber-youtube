@@ -552,7 +552,9 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                             if yt_javascript:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_element(By.XPATH, ytbutton_elements_location_dict['yt_full_xpath_like_button'])
+                                like_button = driver.find_elements(By.TAG_NAME,
+                                                                   ytbutton_elements_location_dict
+                                                                   ['yt_tag_like_button_type1'])[0]
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
@@ -704,7 +706,9 @@ def submenow_functions(req_dict: dict) -> None:
                             if yt_javascript:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_element(By.XPATH, ytbutton_elements_location_dict['yt_full_xpath_like_button'])
+                                like_button = driver.find_elements(By.TAG_NAME,
+                                                                   ytbutton_elements_location_dict
+                                                                   ['yt_tag_like_button_type1'])[0]
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(1.25)
@@ -801,24 +805,24 @@ def ytmonster_functions(req_dict: dict) -> None:
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                        " div.mainContent > div > div.col-md-9 >"
-                                                        " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                        " div.row > div:nth-child(2) > b") \
+                                                         " div.mainContent > div > div.col-md-9 >"
+                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                         " div.row > div:nth-child(2) > b") \
                     .text == "Loading...":
                 continue
             event.wait(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
             yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                                    " div.mainContent > div > div.col-md-9 >"
-                                                                    " div.ct-full-wrap > div >"
-                                                                    " div.ct-well.position-relative >"
-                                                                    " div.row > div:nth-child(2) > b") \
+                                                                     " div.mainContent > div > div.col-md-9 >"
+                                                                     " div.ct-full-wrap > div >"
+                                                                     " div.ct-well.position-relative >"
+                                                                     " div.row > div:nth-child(2) > b") \
                 .text
             event.wait(1.25)
             try:
                 driver_6.save_screenshot("screenshots/screenshot.png")
                 driver_6.find_element(By.CSS_SELECTOR, "#intercom-container > div > div > div > div >"
-                                                      " div.intercom-tour-step-header > span").click()
+                                                       " div.intercom-tour-step-header > span").click()
                 logging.info("Closed Notification")
             except NoSuchElementException:
                 pass
@@ -848,9 +852,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                 logging.info("Subscribed To Channel")
                 for _ in range(50000):
                     if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                             " div.mainContent > div > div.col-md-9 >"
-                                                             " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                             " div.row > div:nth-child(3) > div > div")\
+                                                              " div.mainContent > div > div.col-md-9 >"
+                                                              " div.ct-full-wrap > div >"
+                                                              " div.ct-well.position-relative >"
+                                                              " div.row > div:nth-child(3) > div > div")\
                             .text != "Verify Subscription":
                         event.wait(1)
                     else:
@@ -866,11 +871,12 @@ def ytmonster_functions(req_dict: dict) -> None:
                     i += 1
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                   " div.main > div.mainContent > div >"
-                                                                                   " div.col-md-9 > div.ct-full-wrap >"
-                                                                                   " div >"
-                                                                                   " div.ct-well.position-relative >"
-                                                                                   " div.row > div:nth-child(2) > b")\
+                                                                                    " div.main > div.mainContent >"
+                                                                                    " div >"
+                                                                                    " div.col-md-9 > div.ct-full-wrap >"
+                                                                                    " div >"
+                                                                                    " div.ct-well.position-relative >"
+                                                                                    " div.row > div:nth-child(2) > b")\
                             .text:
                         event.wait(1.25)
                         if driver_6.find_element(By.ID, "error").text == \
@@ -897,10 +903,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
                 i -= 1
                 while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                               " div.main > div.mainContent > div >"
-                                                                               " div.col-md-9 > div.ct-full-wrap >"
-                                                                               " div > div.ct-well.position-relative >"
-                                                                               " div.row > div:nth-child(2) > b") \
+                                                                                " div.main > div.mainContent > div >"
+                                                                                " div.col-md-9 > div.ct-full-wrap >"
+                                                                                " div > div.ct-well.position-relative >"
+                                                                                " div.row > div:nth-child(2) > b") \
                         .text:
                     event.wait(2)
                     if driver_6.find_element(By.ID, "error").text == \
@@ -931,7 +937,7 @@ def ytbpals_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_ytbpals'])
     driver.find_element(By.CSS_SELECTOR, "#form_login > div:nth-child(3) > button").send_keys(Keys.ENTER)
     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div > ul.navbar-nav >"
-                                        " li:nth-child(5) > a").send_keys(Keys.ENTER)
+                                         " li:nth-child(5) > a").send_keys(Keys.ENTER)
     driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(driver_7: webdriver, sub_btn: str = "#ytbpals-channels > div > div > div >"
@@ -1262,8 +1268,9 @@ def goviral_functions(req_dict: dict) -> None:
                             if yt_javascript:
                                 driver_9.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                event.wait(1)
-                                like_button = driver_9.find_element(By.XPATH, ytbutton_elements_location_dict['yt_full_xpath_like_button_goviral_headless'])
+                                like_button = driver_9.find_elements(By.TAG_NAME,
+                                                                     ytbutton_elements_location_dict
+                                                                     ['yt_tag_like_button_type1'])[0]
                                 ActionChains(driver_9).move_to_element(like_button).click().perform()
                         except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                             if type(ex).__name__ == 'NoSuchElementException':
@@ -1388,9 +1395,10 @@ def youtubviews_functions(req_dict: dict) -> None:
                     if yt_javascript:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
-                        yt_like_button = driver.find_element_by_xpath\
-                            (ytbutton_elements_location_dict['yt_full_xpath_like_button_goviral_headless'])
-                        ActionChains(driver).move_to_element(yt_like_button).click().perform()
+                        like_button = driver.find_elements(By.TAG_NAME,
+                                                           ytbutton_elements_location_dict
+                                                           ['yt_tag_like_button_type1'])[0]
+                        ActionChains(driver).move_to_element(like_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
                 event.wait(5)
                 logging.info("Liked the Video")
