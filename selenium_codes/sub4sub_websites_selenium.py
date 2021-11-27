@@ -277,9 +277,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
-                        ActionChains(driver).move_to_element(sub_button).click().perform()
-                        sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                 except (NoSuchElementException, ElementNotInteractableException):
