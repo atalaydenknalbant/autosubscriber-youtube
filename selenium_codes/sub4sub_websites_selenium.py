@@ -1115,7 +1115,7 @@ def goviral_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(4)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1136,8 +1136,8 @@ def goviral_functions(req_dict: dict) -> None:
                       subscribe_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
                                                      " div.disabled-area.position-relative >"
                                                      " section.earn-subscribes.earning-box.position-relative.disabled",
-                      like_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-likes.earning-box.position-relative > div.row > div.col-4.text-right.mt-1.position-relative > button",
-                      subscribe_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-subscribes.earning-box.position-relative > div.row > div.col-4.text-right.mt-1.position-relative > button",
+                      like_btn: str = "btn btn-md btn-success btn-bold action-button",
+                      subscribe_btn: str = "btn btn-md btn-danger btn-bold action-button",
                       next_btn: str = "/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]"
                                       "/button[1]",
                       skip_btn: str = 'btn btn-secondary skip-video'
@@ -1214,7 +1214,7 @@ def goviral_functions(req_dict: dict) -> None:
                 event.wait(0.5)
                 # logging.info('Flag3')
             try:
-                driver_9.find_element(By.CSS_SELECTOR, subscribe_btn).click()
+                driver_9.find_element(By.CLASS_NAME, subscribe_btn).click()
                 event.wait(0.25)
                 driver_9.switch_to.window(driver_9.window_handles[1])
                 try:
@@ -1238,12 +1238,12 @@ def goviral_functions(req_dict: dict) -> None:
                 driver_9.save_screenshot("screenshots/screenshot_proof.png")
                 driver_9.switch_to.window(window_before)
                 driver_9.save_screenshot("screenshots/screenshot.png")
-            except (ElementClickInterceptedException, ElementNotInteractableException):
+            except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException):
                 pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 driver_9.save_screenshot("screenshots/screenshot.png")
-                driver_9.find_element(By.CSS_SELECTOR, like_btn).click()
+                driver_9.find_element(By.CLASS_NAME, like_btn).click()
                 event.wait(1)
                 driver_9.switch_to.window(driver_9.window_handles[1])
                 if len(driver_9.find_elements(By.CSS_SELECTOR,
@@ -1269,7 +1269,7 @@ def goviral_functions(req_dict: dict) -> None:
                             event.wait(1)
                             driver_9.save_screenshot("screenshots/screenshot_proof.png")
                             driver_9.switch_to.window(window_before)
-            except (ElementClickInterceptedException, ElementNotInteractableException):
+            except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException):
                 pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
