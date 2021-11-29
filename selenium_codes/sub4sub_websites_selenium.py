@@ -1116,7 +1116,7 @@ def goviral_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(4)
+    driver.implicitly_wait(3)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1197,8 +1197,8 @@ def goviral_functions(req_dict: dict) -> None:
             try:
                 el = driver_9.find_element(By.CSS_SELECTOR, "#kt_content > div > div.col-md-8 > div > form > div >"
                                                             " section > div > div.col-md-12 > div")
-                if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR,subscribe_btn_available)) == 0 & \
-                        len(driver_9.find_elements(By.CSS_SELECTOR,like_btn_available)) == 0:
+                if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
+                        len(driver_9.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
                     driver_9.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
                     event.wait(0.5)
                     i -= 1
@@ -1215,8 +1215,11 @@ def goviral_functions(req_dict: dict) -> None:
                 # logging.info('Flag3')
             try:
                 driver_9.find_element(By.CLASS_NAME, subscribe_btn).click()
-                event.wait(0.25)
-                driver_9.switch_to.window(driver_9.window_handles[1])
+                event.wait(1)
+                try:
+                    driver_9.switch_to.window(driver_9.window_handles[2])
+                except NoSuchWindowException:
+                    driver_9.switch_to.window(driver_9.window_handles[1])
                 try:
                     driver_9.execute_script("window.scrollTo(0, 300)")
                 except TimeoutException:
@@ -1245,7 +1248,10 @@ def goviral_functions(req_dict: dict) -> None:
                 driver_9.save_screenshot("screenshots/screenshot.png")
                 driver_9.find_element(By.CLASS_NAME, like_btn).click()
                 event.wait(1)
-                driver_9.switch_to.window(driver_9.window_handles[1])
+                try:
+                    driver_9.switch_to.window(driver_9.window_handles[2])
+                except NoSuchWindowException:
+                    driver_9.switch_to.window(driver_9.window_handles[1])
                 if len(driver_9.find_elements(By.CSS_SELECTOR,
                        ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                     pass
@@ -1275,7 +1281,7 @@ def goviral_functions(req_dict: dict) -> None:
             try:
                 event.wait(2)
                 driver_9.find_element(By.ID, 'verify-action-button').click()
-                logging.info("Clicked Verify Action Button")
+                # logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
             except (ElementNotInteractableException, StaleElementReferenceException,
                     ElementClickInterceptedException, NoSuchElementException):
