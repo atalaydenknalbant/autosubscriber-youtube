@@ -1269,7 +1269,7 @@ def goviral_functions(req_dict: dict) -> None:
                 driver_9.switch_to.window(window_before)
                 driver_9.save_screenshot("screenshots/screenshot.png")
             except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
-                logging.info(f'Couldnt find subscribe_btn, {ex}')
+                # logging.info(f'Couldnt find subscribe_btn, {ex}')
                 pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
