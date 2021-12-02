@@ -1187,96 +1187,100 @@ def goviral_functions(req_dict: dict) -> None:
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
                 driver_9.refresh()
-                event.wait(1)
+                event.wait(4)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
                     TimeoutException,
                     StaleElementReferenceException):
                 pass
-            try:
-                el = driver_9.find_element(By.CSS_SELECTOR, "#kt_content > div > div.col-md-8 > div > form > div >"
-                                                            " section > div > div.col-md-12 > div")
-                if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
-                        len(driver_9.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
-                    driver_9.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
-                    event.wait(0.5)
-                    i -= 1
-                    continue
-
-            except (NoSuchElementException,
-                    ElementNotInteractableException,
-                    TimeoutException,
-                    StaleElementReferenceException):
-                pass
+            # try:
+            #     el = driver_9.find_element(By.CSS_SELECTOR, "#kt_content > div > div.col-md-8 > div > form > div >"
+            #                                                 " section > div > div.col-md-12 > div")
+            #     if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
+            #             len(driver_9.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
+            #         driver_9.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
+            #         event.wait(0.5)
+            #         i -= 1
+            #         continue
+            #
+            # except (NoSuchElementException,
+            #         ElementNotInteractableException,
+            #         TimeoutException,
+            #         StaleElementReferenceException):
+            #     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
             while int(driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text) > 19:
                 event.wait(0.5)
-                # logging.info('Flag3')
-            try:
-                driver_9.find_element(By.CLASS_NAME, subscribe_btn).click()
-                event.wait(1)
-                try:
-                    driver_9.switch_to.window(driver_9.window_handles[2])
-                except NoSuchWindowException:
-                    driver_9.switch_to.window(driver_9.window_handles[1])
-                try:
-                    driver_9.execute_script("window.scrollTo(0, 300)")
-                except TimeoutException:
-                    pass
-                try:
-                    if yt_javascript:
-                        driver_9.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                    else:
-                        sub_button = driver_9.find_elements(By.ID,
-                                                            ytbutton_elements_location_dict[
-                                                              'yt_id_sub_button_type1'])[0]
-                        ActionChains(driver_9).move_to_element(sub_button).click().perform()
-                    logging.info("Subscribed To Channel")
-                except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
-                    if type(ex).__name__ == 'NoSuchElementException':
-                        logging.info('Subscribe button not found in youtube page, continuing')
-                    pass
-                event.wait(1)
-                driver_9.save_screenshot("screenshots/screenshot_proof.png")
-                driver_9.switch_to.window(window_before)
-                driver_9.save_screenshot("screenshots/screenshot.png")
-            except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException):
-                pass
+                logging.info('Flag3')
+
+            # try:
+            #     driver_9.switch_to.window(driver_9.window_handles[0])
+            #     driver_9.find_element(By.XPATH, '/html[1]/body[1]/div[3]/div[1]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/section[1]/div[2]/div[3]/button[1]').send_keys(Keys.ENTER)
+            #     event.wait(1)
+            #     logging.info('Clicked subscribe_btn Button')
+            #     try:
+            #         driver_9.switch_to.window(driver_9.window_handles[2])
+            #     except NoSuchWindowException:
+            #         driver_9.switch_to.window(driver_9.window_handles[1])
+            #     try:
+            #         driver_9.execute_script("window.scrollTo(0, 300)")
+            #     except TimeoutException:
+            #         pass
+            #     try:
+            #         if yt_javascript:
+            #             driver_9.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+            #         else:
+            #             sub_button = driver_9.find_elements(By.ID,
+            #                                                 ytbutton_elements_location_dict[
+            #                                                   'yt_id_sub_button_type1'])[0]
+            #             ActionChains(driver_9).move_to_element(sub_button).click().perform()
+            #         logging.info("Subscribed To Channel")
+            #     except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
+            #         logging.info('Subscribe button not found in youtube page, continuing')
+            #         pass
+            #     event.wait(1)
+            #     driver_9.save_screenshot("screenshots/screenshot_proof.png")
+            #     driver_9.switch_to.window(window_before)
+            #     driver_9.save_screenshot("screenshots/screenshot.png")
+            # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
+            #     logging.info(f'Couldnt find subscribe_btn, {ex}')
+            #     pass
             driver_9.save_screenshot("screenshots/screenshot.png")
-            try:
-                driver_9.save_screenshot("screenshots/screenshot.png")
-                driver_9.find_element(By.CLASS_NAME, like_btn).click()
-                event.wait(1)
-                try:
-                    driver_9.switch_to.window(driver_9.window_handles[2])
-                except NoSuchWindowException:
-                    driver_9.switch_to.window(driver_9.window_handles[1])
-                if len(driver_9.find_elements(By.CSS_SELECTOR,
-                       ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    pass
-                else:
-                    driver_9.execute_script("window.scrollTo(0, 300)")
-                    event.wait(0.5)
-                    driver_9.save_screenshot("screenshots/screenshot.png")
-                    try:
-                        if yt_javascript:
-                            driver_9.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
-                        else:
-                            like_button = driver_9.find_elements(By.TAG_NAME,
-                                                                 ytbutton_elements_location_dict
-                                                                 ['yt_tag_like_button_type1'])[0]
-                            ActionChains(driver_9).move_to_element(like_button).click().perform()
-                        logging.info("Liked Video")
-                    except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
-                        if type(ex).__name__ == 'NoSuchElementException':
-                            logging.info('like button not found in YouTube page, continuing next')
-                        else:
-                            event.wait(1)
-                            driver_9.save_screenshot("screenshots/screenshot_proof.png")
-                            driver_9.switch_to.window(window_before)
-            except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException):
-                pass
+            # try:
+            #     driver_9.save_screenshot("screenshots/screenshot.png")
+            #     driver_9.find_element(By.CSS_SELECTOR, 'body.kt-quick-panel--right.kt-demo-panel--right.kt-offcanvas-panel--right.kt-header--fixed.kt-header-mobile--fixed.kt-subheader--fixed.kt-subheader--solid.kt-aside--enabled.kt-aside--fixed:nth-child(2) div.kt-grid.kt-grid--hor.kt-grid--root:nth-child(3) div.kt-grid__item.kt-grid__item--fluid.kt-grid.kt-grid--ver.kt-page div.kt-grid__item.kt-grid__item--fluid.kt-grid.kt-grid--hor.kt-wrapper div.kt-grid__item.kt-grid__item--fluid.kt-grid.kt-grid--hor div.kt-content.kt-grid__item.kt-grid__item--fluid div.row div.col-md-8 div.earn-coins-box.kt-portlet.h-100 form.kt-form div.kt-portlet__body.earn-coins-portlet div.disabled-area.position-relative section.earn-likes.earning-box.position-relative:nth-child(3) div.row div.col-4.text-right.mt-1.position-relative:nth-child(3) > button.btn.btn-md.btn-success.btn-bold.action-button:nth-child(1)').send_keys(Keys.ENTER)
+            #     event.wait(1)
+            #     try:
+            #         driver_9.switch_to.window(driver_9.window_handles[2])
+            #     except NoSuchWindowException:
+            #         driver_9.switch_to.window(driver_9.window_handles[1])
+            #     if len(driver_9.find_elements(By.CSS_SELECTOR,
+            #            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+            #         pass
+            #     else:
+            #         driver_9.execute_script("window.scrollTo(0, 300)")
+            #         event.wait(0.5)
+            #         driver_9.save_screenshot("screenshots/screenshot.png")
+            #         try:
+            #             if yt_javascript:
+            #                 driver_9.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+            #             else:
+            #                 like_button = driver_9.find_elements(By.TAG_NAME,
+            #                                                      ytbutton_elements_location_dict
+            #                                                      ['yt_tag_like_button_type1'])[0]
+            #                 ActionChains(driver_9).move_to_element(like_button).click().perform()
+            #             logging.info("Liked Video")
+            #         except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
+            #             if type(ex).__name__ == 'NoSuchElementException':
+            #                 logging.info('like button not found in YouTube page, continuing next')
+            #             else:
+            #                 event.wait(1)
+            #                 driver_9.save_screenshot("screenshots/screenshot_proof.png")
+            #                 driver_9.switch_to.window(window_before)
+            #                 logging.info('like button not found in YouTube page, continuing next')
+            # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
+            #     logging.info(f'Couldnt find like_btn, {ex}')
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 event.wait(2)
