@@ -1115,7 +1115,7 @@ def goviral_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict,False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(4)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
