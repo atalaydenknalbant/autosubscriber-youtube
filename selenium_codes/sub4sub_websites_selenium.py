@@ -668,7 +668,8 @@ def submenow_functions(req_dict: dict) -> None:
         try:
             logging.info("submenow loop started")
             for _ in range(1, 1000000000):
-                if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
+                if len(driver.find_elements(By.XPATH,
+                                            "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                     break
                 else:
                     window_before_5 = driver.window_handles[0]
@@ -841,7 +842,8 @@ def ytmonster_functions(req_dict: dict) -> None:
                 if yt_javascript:
                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
-                    sub_button = driver_6.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_sub_button'])
+                    sub_button = driver_6.find_element(By.CSS_SELECTOR,
+                                                       ytbutton_elements_location_dict['yt_css_sub_button'])
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
@@ -991,7 +993,8 @@ def ytbpals_functions(req_dict: dict) -> None:
                     if yt_javascript:
                         driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver_7.find_element(By.XPATH, ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
+                        sub_button = driver_7.find_element(By.XPATH,
+                                                           ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1059,7 +1062,8 @@ def ytbpals_functions(req_dict: dict) -> None:
                     event.wait(2)
                     try:
                         button = driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
-                                                                        " table > tbody > tr > td:nth-child(8) > button")
+                                                                        " table > tbody > tr >"
+                                                                        " td:nth-child(8) > button")
                         button.send_keys(Keys.ENTER)
                         event.wait(3)
                         button = driver_7.find_element(By.ID, "start-now")
@@ -1510,7 +1514,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             event.wait(15)
             driver_10.close()
             driver_10.switch_to.window(driver_10.window_handles[0])
-            event.wait(3)
+            event.wait(5)
             button = driver.find_element(By.TAG_NAME, 'button')
             ActionChains(driver_10).move_to_element(button).click().perform()
     for_loop_sub(driver)
