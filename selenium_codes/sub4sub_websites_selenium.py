@@ -1051,11 +1051,11 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver_7.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
                                                            " ul.navbar-nav > li:nth-child(4) > a")\
                         .send_keys(Keys.ENTER)
-                    event.wait(3)
+                    event.wait(2)
                     driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
                                                            " div.panel-options > a:nth-child(2)")\
                         .send_keys(Keys.ENTER)
-                    event.wait(2)
+                    event.wait(1)
                     driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
                                                            " div.panel-options > a:nth-child(2)") \
                         .send_keys(Keys.ENTER)
@@ -1216,7 +1216,7 @@ def goviral_functions(req_dict: dict) -> None:
                     .send_keys(Keys.ENTER)
                 logging.info("Enable button has been pressed")
                 driver_9.refresh()
-                event.wait(4)
+                event.wait(2)
                 continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
