@@ -1214,7 +1214,7 @@ def goviral_functions(req_dict: dict) -> None:
             try:
                 driver_9.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
-                logging.info("Enable button has been pressed")
+                # logging.info("Enable button has been pressed")
                 driver_9.refresh()
                 event.wait(2)
                 continue
