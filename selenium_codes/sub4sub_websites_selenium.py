@@ -179,7 +179,7 @@ def google_login(driver: webdriver,
     email_area = driver.find_element(By.ID, "identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
-    event.wait(2)
+    event.wait(1.25)
     driver.save_screenshot("screenshots/screenshot.png")
     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
@@ -248,7 +248,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             logging.info(d+" Website is not working properly, closing driver")
             driver.quit()
             return
-        event.wait(2)
+        event.wait(1.25)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         event.wait(1.5)
@@ -331,7 +331,7 @@ def subpals_functions(req_dict: dict) -> None:
     pw_place = driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div >"
                                                     " form > div:nth-child(2) > input")
     pw_place.send_keys(req_dict['pw_subpals'])
-    event.wait(2)
+    event.wait(1.25)
     driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div > form > button") \
         .send_keys(Keys.ENTER)
 
@@ -1391,7 +1391,7 @@ def youtubviews_functions(req_dict: dict) -> None:
         for i in range(50):
             event.wait(4)
             if i >= 1:
-                WebDriverWait(driver, 100)\
+                WebDriverWait(driver, 80)\
                  .until(ec.visibility_of_element_located((By.XPATH,
                                                          "/html/body/div[2]/div/div[2]/center/div/div")))\
                  .get_attribute("value")
