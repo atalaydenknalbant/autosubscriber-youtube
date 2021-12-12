@@ -558,9 +558,9 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element(By.XPATH,
-                                                             ytbutton_elements_location_dict
-                                                             ['yt_full_xpath_sub_button'])
+                            sub_button = driver.find_elements(By.ID,
+                                                              ytbutton_elements_location_dict
+                                                              ['yt_id_sub_button_type1'])[0]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -713,8 +713,9 @@ def submenow_functions(req_dict: dict) -> None:
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_element(By.XPATH, ytbutton_elements_location_dict
-                                                                      ['yt_full_xpath_sub_button'])
+                            sub_button = driver.find_elements(By.ID,
+                                                              ytbutton_elements_location_dict
+                                                              ['yt_id_sub_button_type1'])[0]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
