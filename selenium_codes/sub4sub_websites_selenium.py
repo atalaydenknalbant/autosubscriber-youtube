@@ -23,9 +23,7 @@ yt_javascript = False
 
 # Locations For youtube button elements
 ytbutton_elements_location_dict = {
-    "yt_full_xpath_like_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]/div/div[8]/"
-                                 "div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/ytd-menu-renderer/div/"
-                                 "ytd-toggle-button-renderer[1]/a/yt-icon-button/yt-interaction",
+
     "yt_full_xpath_sub_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]"
                                 "/div/div[9]/div[2]" 
                                 "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" 
@@ -994,8 +992,10 @@ def ytbpals_functions(req_dict: dict) -> None:
                     if yt_javascript:
                         driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver_7.find_element(By.XPATH,
-                                                           ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
+                        event.wait(1)
+                        sub_button = driver_7.find_elements(By.ID,
+                                                            ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
+                            0]
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver_7.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
@@ -1087,8 +1087,10 @@ def ytbpals_functions(req_dict: dict) -> None:
                     if yt_javascript:
                         driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        sub_button = driver_7.find_element_by_xpath\
-                            (ytbutton_elements_location_dict['yt_full_xpath_sub_button'])
+                        event.wait(1)
+                        sub_button = driver_7.find_elements(By.ID,
+                                                            ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
+                            0]
                         ActionChains(driver_7).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver_7.close()
