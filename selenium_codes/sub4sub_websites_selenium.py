@@ -1330,7 +1330,7 @@ def goviral_functions(req_dict: dict) -> None:
                     # logging.info('Flag4')
             except (StaleElementReferenceException, NoSuchElementException):
                 driver_9.refresh()
-                event.wait(2)
+                event.wait(1.5)
                 continue
             c = 0
             try:
