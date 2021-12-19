@@ -1316,7 +1316,7 @@ def goviral_functions(req_dict: dict) -> None:
             #     # logging.info(f'Couldnt find like_btn, {ex}')
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
-                event.wait(2)
+                event.wait(1.5)
                 driver_9.find_element(By.ID, 'verify-action-button').click()
                 # logging.info("Clicked Verify Action Button")
                 driver_9.save_screenshot("screenshots/screenshot.png")
@@ -1338,7 +1338,7 @@ def goviral_functions(req_dict: dict) -> None:
                     event.wait(0.5)
                     # logging.info('Flag5')
                     c += 1
-                    if c == 150:
+                    if c == 120:
                         try:
                             try:
                                 driver_9.switch_to.window(driver_9.window_handles[1])
