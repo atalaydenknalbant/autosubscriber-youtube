@@ -24,26 +24,8 @@ yt_javascript = False
 # Locations For youtube button elements
 ytbutton_elements_location_dict = {
 
-    "yt_full_xpath_sub_button": "/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]/div[1]"
-                                "/div/div[9]/div[2]" 
-                                "/ytd-video-secondary-info-renderer/div/div/div/ytd-subscribe-button-renderer/" 
-                                "tp-yt-paper-button",
     "yt_tag_like_button_type1": "ytd-toggle-button-renderer",
     "yt_id_sub_button_type1": "subscribe-button",
-    "yt_css_like_button": 'div.style-scope.ytd-app:nth-child(12) ytd-page-manager.style-scope.ytd-app:nth-child(4)'
-                          ' ytd-watch-flexy.style-scope.ytd-page-manager.hide-skeleton'
-                          ' div.style-scope.ytd-watch-flexy:nth-child(8)'
-                          ' div.style-scope.ytd-watch-flexy:nth-child(1)'
-                          ' div.style-scope.ytd-watch-flexy div.style-scope.ytd-watch-flexy:nth-child(11)'
-                          ' div.style-scope.ytd-watch-flexy ytd-video-primary-info-renderer.style-scope.ytd-watch-flexy'
-                          ' div.style-scope.ytd-video-primary-info-renderer'
-                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(6)'
-                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(3)'
-                          ' div.style-scope.ytd-video-primary-info-renderer:nth-child(1)'
-                          ' ytd-menu-renderer.style-scope.ytd-video-primary-info-renderer'
-                          ' div.top-level-buttons.style-scope.ytd-menu-renderer > '
-                          'ytd-toggle-button'
-                          '-renderer.style-scope.ytd-menu-renderer.force-icon-button.style-text:nth-child(1)',
     "yt_css_like_button_active": "#top-level-buttons-computed > "
                                  "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
                                  "-default-active",
@@ -52,28 +34,6 @@ ytbutton_elements_location_dict = {
                          " ytd-toggle-button-renderer:nth-child(1)').click()",
     "yt_js_sub_button": 'document.querySelector("#subscribe-button >'
                         ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()',
-    "yt_full_xpath_sub_button_goviral_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]'
-                                                 '/div[1]/'
-                                                 'div/div[9]'
-                                                 '/div[2]/ytd-video-secondary-info-renderer/div/div/div/'
-                                                 'ytd-subscribe-button-renderer',
-    "yt_full_xpath_like_button_goviral_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/div[5]'
-                                                  '/div[1]/'
-                                                  'div/div[8]'
-                                                  '/div[2]/ytd-video-primary-info-renderer/div/div/div[3]/div/'
-                                                  'ytd-menu-renderer/div/'
-                                                  'ytd-toggle-button-renderer[1]/a',
-    "yt_full_xpath_sub_button_goviral_non_headless": '/html/body/ytd-app/div/ytd-page-manager/ytd-watch-flexy/'
-                                                     'div[5]/div[1]'
-                                                     '/div/div[7]/div[2]/ytd-video-secondary-info-renderer/div/div/div/'
-                                                     'ytd-subscribe-button-renderer',
-    "yt_full_xpath_like_button_goviral_non_headless": '//body/ytd-app[1]/div[1]/ytd-page-manager[1]/ytd-watch-flexy[1]'
-                                                      '/div[5]/div[1]/div[1]/div[8]/div[2]/'
-                                                      'ytd-video-primary-info-renderer[1]/div[1]/div[1]/div[3]/div[1]/'
-                                                      'ytd-menu-renderer[1]/div[1]/ytd-toggle-button-renderer[1]/a[1]',
-
-
-
 
 }
 
@@ -841,8 +801,9 @@ def ytmonster_functions(req_dict: dict) -> None:
                 if yt_javascript:
                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
-                    sub_button = driver_6.find_element(By.CSS_SELECTOR,
-                                                       ytbutton_elements_location_dict['yt_css_sub_button'])
+                    sub_button = driver_6.find_elements(By.ID,
+                                                        ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
+                        0]
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
