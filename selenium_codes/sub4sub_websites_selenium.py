@@ -802,8 +802,7 @@ def ytmonster_functions(req_dict: dict) -> None:
                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
                     sub_button = driver_6.find_elements(By.ID,
-                                                        ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                        0]
+                                                        ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
                     ActionChains(driver_6).move_to_element(sub_button).click().perform()
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
@@ -1104,33 +1103,8 @@ def goviral_functions(req_dict: dict) -> None:
                       subscribe_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
                                                      " div.disabled-area.position-relative >"
                                                      " section.earn-subscribes.earning-box.position-relative.disabled",
-                      like_btn: str = "body.kt-quick-panel--right.kt-demo-panel--right.kt-offcanvas-panel"
-                                      "--right.kt-header--fixed.kt-header-mobile--fixed.kt-subheader"
-                                      "--fixed.kt-subheader--solid.kt-aside--enabled.kt-aside--fixed:nth-child(2)"
-                                      " div.kt-grid.kt-grid--hor.kt-grid--root:nth-child(3) div.kt-grid__item"
-                                      ".kt-grid__item--fluid.kt-grid.kt-grid--ver.kt-page div.kt-grid__item"
-                                      ".kt-grid__item--fluid.kt-grid.kt-grid--hor.kt-wrapper div.kt-grid__item"
-                                      ".kt-grid__item--fluid.kt-grid.kt-grid--hor div.kt-content.kt-grid__item"
-                                      ".kt-grid__item--fluid div.row div.col-md-8 div.earn-coins-box.kt-portlet"
-                                      ".h-100 form.kt-form div.kt-portlet__body.earn-coins-portlet"
-                                      " div.disabled-area.position-relative section.earn-likes"
-                                      ".earning-box.position-relative:nth-child(3) div.row div.col-4.text-right"
-                                      ".mt-1.position-relative:nth-child(3) > button.btn.btn-md.btn-success.btn-bold"
-                                      ".action-button:nth-child(1)",
-                      subscribe_btn: str = "body.kt-quick-panel--right.kt-demo-panel--right.kt-offcanvas-panel--right."
-                                           "kt-header--fixed.kt-header-mobile--fixed.kt-subheader--fixed.kt-subheader"
-                                           "--solid.kt-aside--enabled.kt-aside--fixed:nth-child(2) div.kt-grid."
-                                           "kt-grid--hor.kt-grid--root:nth-child(3) div.kt-grid__item."
-                                           "kt-grid__item--fluid.kt-grid.kt-grid--ver.kt-page div."
-                                           "kt-grid__item.kt-grid__item--fluid.kt-grid.kt-grid--hor."
-                                           "kt-wrapper div.kt-grid__item.kt-grid__item--fluid.kt-grid."
-                                           "kt-grid--hor div.kt-content.kt-grid__item.kt-grid__item--fluid div."
-                                           "row div.col-md-8 div.earn-coins-box.kt-portlet.h-100 form."
-                                           "kt-form div.kt-portlet__body.earn-coins-portlet div.disabled-area."
-                                           "position-relative section.earn-subscribes.earning-box.position-relative:"
-                                           "nth-child(2) div.row div.col-4.text-right.mt-1."
-                                           "position-relative:nth-child(3) > button.btn.btn-md.btn-danger.btn-bold."
-                                           "action-button:nth-child(1)",
+                      like_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-likes.earning-box.position-relative > div.row > div.col-4.text-right.mt-1.position-relative > button",
+                      subscribe_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-subscribes.earning-box.position-relative.disabled > div.row > div.col-4.text-right.mt-1.position-relative > span > button.btn.btn-md.btn-danger.btn-bold.action-button.mb-2",
                       next_btn: str = "/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]"
                                       "/button[1]",
                       skip_btn: str = 'btn btn-secondary skip-video'
@@ -1203,12 +1177,13 @@ def goviral_functions(req_dict: dict) -> None:
                     StaleElementReferenceException):
                 pass
             driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text) > 19:
-                event.wait(0.5)
+            while int(driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text) > 12:
+                event.wait(0.25)
                 # logging.info('Flag3')
 
             # try:
             #     driver_9.switch_to.window(driver_9.window_handles[0])
+            #     event.wait(1)
             #     driver_9.find_element(By.CSS_SELECTOR, subscribe_btn).send_keys(Keys.ENTER)
             #     event.wait(1)
             #     logging.info('Clicked subscribe_btn Button')
@@ -1237,7 +1212,7 @@ def goviral_functions(req_dict: dict) -> None:
             #     driver_9.switch_to.window(window_before)
             #     driver_9.save_screenshot("screenshots/screenshot.png")
             # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
-            #     # logging.info(f'Couldnt find subscribe_btn, {ex}')
+            #     logging.info(f'Couldnt find subscribe_btn, {ex}')
             #     pass
             # driver_9.save_screenshot("screenshots/screenshot.png")
             # try:
@@ -1274,7 +1249,7 @@ def goviral_functions(req_dict: dict) -> None:
             #                 logging.info('like button not found in YouTube page, continuing next')
             # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
             #     pass
-            #     # logging.info(f'Couldnt find like_btn, {ex}')
+            #     logging.info(f'Couldnt find like_btn, {ex}')
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
                 event.wait(1.5)
