@@ -1110,7 +1110,7 @@ def goviral_functions(req_dict: dict) -> None:
                       skip_btn: str = 'btn btn-secondary skip-video'
                       ) -> None:
         logging.info("Loop Started")
-        for i in range(100):
+        for i in range(200):
             driver_9.save_screenshot("screenshots/screenshot.png")
             if i == 0:
                 window_before = driver_9.window_handles[0]
@@ -1119,7 +1119,7 @@ def goviral_functions(req_dict: dict) -> None:
                 event.wait(0.5)
                 # logging.info('Flag1')
                 n += 1
-                if n >= 55:
+                if n >= 50:
                     try:
                         try:
                             driver_9.switch_to.window(driver_9.window_handles[1])
@@ -1133,7 +1133,7 @@ def goviral_functions(req_dict: dict) -> None:
                     except (ElementNotInteractableException,
                             StaleElementReferenceException):
                         pass
-                    event.wait(1)
+                    event.wait(0.25)
                     continue
             if n >= 55:
                 driver.switch_to.window(driver_9.window_handles[0])
@@ -1167,7 +1167,7 @@ def goviral_functions(req_dict: dict) -> None:
                 if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
                         len(driver_9.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
                     driver_9.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
-                    event.wait(0.5)
+                    event.wait(0.25)
                     i -= 1
                     continue
 
