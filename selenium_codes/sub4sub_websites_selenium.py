@@ -1103,8 +1103,8 @@ def goviral_functions(req_dict: dict) -> None:
                       subscribe_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
                                                      " div.disabled-area.position-relative >"
                                                      " section.earn-subscribes.earning-box.position-relative.disabled",
-                      like_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-likes.earning-box.position-relative > div.row > div.col-4.text-right.mt-1.position-relative > button",
-                      subscribe_btn: str = "#kt_content > div > div.col-md-8 > div > form > div > div.disabled-area.position-relative > section.earn-subscribes.earning-box.position-relative.disabled > div.row > div.col-4.text-right.mt-1.position-relative > span > button.btn.btn-md.btn-danger.btn-bold.action-button.mb-2",
+                      like_btn: str = "",
+                      subscribe_btn: str = "",
                       next_btn: str = "/html/body/div[3]/div/div[2]/div[2]/div/div/div[1]/div/form/div/div[2]"
                                       "/button[1]",
                       skip_btn: str = 'btn btn-secondary skip-video'
@@ -1112,8 +1112,6 @@ def goviral_functions(req_dict: dict) -> None:
         logging.info("Loop Started")
         for i in range(200):
             driver_9.save_screenshot("screenshots/screenshot.png")
-            if i == 0:
-                window_before = driver_9.window_handles[0]
             n = 0
             while len(driver_9.find_elements(By.CLASS_NAME, "time-remaining-amount")) == 0:
                 event.wait(0.5)
