@@ -84,30 +84,30 @@ def set_driver_opt(req_dict: dict,
     else:
         pass
     chrome_options.add_argument('--user-agent=' + req_dict['yt_useragent'])
-    # if website != "":
-    #     pass
-    # else:
-    #     chrome_options.add_argument("--disable-extensions")
-    #     prefs = {"profile.managed_default_content_settings.images": 2,
-    #              "disk-cache-size": 4096,
-    #              "profile.password_manager_enabled": False,
-    #              "credentials_enable_service": False}
-    #     chrome_options.add_experimental_option('prefs', prefs)
-    #     chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
-    #     pass
-    # chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    # chrome_options.add_experimental_option("useAutomationExtension", False)
-    # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    # chrome_options.add_argument("--ignore-certificate-errors")
-    # chrome_options.add_argument("--disable-dev-shm-usage")
-    # chrome_options.add_argument('--disable-gpu')
+    if website != "":
+        pass
+    else:
+        chrome_options.add_argument("--disable-extensions")
+        prefs = {"profile.managed_default_content_settings.images": 2,
+                 "disk-cache-size": 4096,
+                 "profile.password_manager_enabled": False,
+                 "credentials_enable_service": False}
+        chrome_options.add_experimental_option('prefs', prefs)
+        chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
+        pass
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument('--disable-notifications')
-    # chrome_options.add_argument('--no-sandbox')
-    # chrome_options.add_argument("--proxy-server='direct://'")
-    # chrome_options.add_argument("--proxy-bypass-list=*")
-    # chrome_options.add_argument("--disable-web-security")
-    # chrome_options.add_argument("--allow-running-insecure-content")
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument("--proxy-server='direct://'")
+    chrome_options.add_argument("--proxy-bypass-list=*")
+    chrome_options.add_argument("--disable-web-security")
+    chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
     return driver
@@ -1401,7 +1401,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_10: webdriver,
+    def for_loop_sub(driver_11: webdriver,
                      follow_btn: str = "followbutton"
                      ) -> None:
         logging.info("Loop Started")
@@ -1409,21 +1409,21 @@ def youlikehits_functions(req_dict: dict) -> None:
         video_list = []
         for i in range(50):
             event.wait(3)
-            WebDriverWait(driver_10, 100)\
+            WebDriverWait(driver_11, 100)\
                 .until(ec.visibility_of_element_located((By.CLASS_NAME,
                                                          "likebutton")))\
                 .get_attribute("value")
-            driver_10.save_screenshot("screenshots/screenshot.png")
-            driver_10.switch_to.window(driver_10.window_handles[0])
+            driver_11.save_screenshot("screenshots/screenshot.png")
+            driver_11.switch_to.window(driver_11.window_handles[0])
             event.wait(20)
-            driver_10.save_screenshot("screenshots/screenshot.png")
+            driver_11.save_screenshot("screenshots/screenshot.png")
             if i > 0 and video_name == driver.find_element(By.CLASS_NAME, 'mainfocusheader').text:
-                driver_10.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
+                driver_11.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
                 logging.info("Same Video Skipping...")
                 continue
             video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
             if video_name in video_list:
-                driver_10.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
+                driver_11.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
                                                  'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
                     .click()
                 logging.info("Same Video In Video List Skipping To New Videos...")
@@ -1433,26 +1433,113 @@ def youlikehits_functions(req_dict: dict) -> None:
                 continue
             video_list.append(video_name)
             logging.info(video_list)
-            driver_10.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
-            driver_10.switch_to.window(driver_10.window_handles[1])
+            driver_11.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
+            driver_11.switch_to.window(driver_11.window_handles[1])
             try:
                 if yt_javascript:
-                    driver_10.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                    driver_11.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
                     event.wait(1)
-                    sub_button = driver_10.find_elements(By.ID,
+                    sub_button = driver_11.find_elements(By.ID,
                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
-                    ActionChains(driver_10).move_to_element(sub_button).click().perform()
-                driver_10.save_screenshot("screenshots/screenshot_proof.png")
+                    ActionChains(driver_11).move_to_element(sub_button).click().perform()
+                driver_11.save_screenshot("screenshots/screenshot_proof.png")
                 logging.info("Subscribed to Channel")
             except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                 if type(ex).__name__ == 'NoSuchElementException':
                     logging.info('like button not found in YouTube page, continuing next')
             event.wait(15)
-            driver_10.close()
-            driver_10.switch_to.window(driver_10.window_handles[0])
+            driver_11.close()
+            driver_11.switch_to.window(driver_11.window_handles[0])
             event.wait(5)
             button = driver.find_element(By.TAG_NAME, 'button')
-            ActionChains(driver_10).move_to_element(button).click().perform()
+            ActionChains(driver_11).move_to_element(button).click().perform()
     for_loop_sub(driver)
+    driver.quit()
+
+
+def like4like_functions(req_dict: dict) -> None:
+    """like4like login and then earn credits by liking videos with inner like loop function(for_loop_like)
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict, False)
+    driver.implicitly_wait(7)
+    driver.get("https://accounts.google.com/signin")
+    google_login(driver, req_dict, has_login_btn=False)
+    logging.info("youtube login completed")
+    event.wait(3)
+    driver.get("https://www.like4like.org/login/")  # Type_Undefined
+    driver.save_screenshot("screenshots/screenshot.png")
+    driver.find_element(By.ID, "username").send_keys(req_dict['username_like4like'])
+    driver.find_element(By.ID, "password").send_keys(req_dict['pw_like4like'])
+    driver.find_element(By.XPATH, "/html/body/div[6]/form/fieldset/table/tbody/tr[8]/td/span").click()
+    driver.save_screenshot("screenshots/screenshot.png")
+    event.wait(3)
+    driver.get("https://www.like4like.org/user/earn-youtube.php")
+    driver.save_screenshot("screenshots/screenshot.png")
+
+    def for_loop_like(driver_12: webdriver,
+                      like_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
+                                        "/div[1]/div[2]/div[1]/div/div[3]/div/div/a",
+                      like_btn_2: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
+                                        "/div[1]/div[2]/div[2]/div/div[3]/div/div/a",
+                      confirm_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]"
+                                           "/div[4]/div[1]/div[2]/div[1]/div/div[1]/a",
+                      confirm_btn_2: str = "/html/body/div[6]/div/div[1]/div/div[2]"
+                                           "/div[4]/div[1]/div[2]/div[2]/div/div[1]/a"
+
+                      ) -> None:
+        logging.info("Loop Started")
+        for i in range(60):
+            driver_12.save_screenshot("screenshots/screenshot.png")
+            if i % 2 == 0:
+                driver_12.find_element(By.XPATH, like_btn_1).click()
+            else:
+                driver_12.find_element(By.XPATH, like_btn_2).click()
+            while len(driver_12.window_handles) == 1:
+                event.wait(2)
+                continue
+            event.wait(1)
+            driver_12.switch_to.window(driver_12.window_handles[1])
+            try:
+                event.wait(5)
+                if len(driver_12.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+                    if len(driver_12.find_elements(By.CSS_SELECTOR,
+                                                   ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                        pass
+                    else:
+                        event.wait(1.25)
+                        if yt_javascript:
+                            driver_12.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+                        else:
+                            try:
+                                like_button = driver_12.find_elements(By.TAG_NAME,
+                                                                      ytbutton_elements_location_dict
+                                                                      ['yt_tag_like_button_type1'])[0]
+                                ActionChains(driver_12).move_to_element(like_button).click().perform()
+                                logging.info("Liked the Video")
+                                driver_12.save_screenshot("screenshots/screenshot_proof.png")
+                            except (NoSuchElementException, IndexError):
+                                logging.info('Couldnt find like button')
+                                pass
+                    event.wait(1.25)
+                else:
+                    pass
+            except TimeoutException:
+                pass
+            event.wait(4)
+            driver_12.close()
+            event.wait(4)
+            driver_12.switch_to.window(driver_12.window_handles[0])
+            if i % 2 == 0:
+                driver_12.find_element(By.XPATH, confirm_btn_1).click()
+            else:
+                driver_12.find_element(By.XPATH, confirm_btn_2).click()
+            event.wait(8)
+            driver_12.save_screenshot("screenshots/screenshot.png")
+
+    for_loop_like(driver)
     driver.quit()

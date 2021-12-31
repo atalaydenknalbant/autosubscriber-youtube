@@ -120,7 +120,14 @@
     "youlikehits_password": {
       "value": "Enter YOULIKEHITS Password",
       "required": true
+    },
+    "like4like_username": {
+      "value": "Enter YOULIKEHITS Username",
+      "required": true
+    },
+    "like4like_password": {
+      "value": "Enter YOULIKEHITS Password",
+      "required": true
     }
   }
-
 }
