@@ -1495,6 +1495,7 @@ def like4like_functions(req_dict: dict) -> None:
         logging.info("Loop Started")
         for i in range(60):
             driver_12.save_screenshot("screenshots/screenshot.png")
+            event.wait(4)
             if i % 2 == 0:
                 driver_12.find_element(By.XPATH, like_btn_1).click()
             else:
@@ -1530,9 +1531,9 @@ def like4like_functions(req_dict: dict) -> None:
                     pass
             except TimeoutException:
                 pass
-            event.wait(4)
+            event.wait(5)
             driver_12.close()
-            event.wait(4)
+            event.wait(5)
             driver_12.switch_to.window(driver_12.window_handles[0])
             if i % 2 == 0:
                 driver_12.find_element(By.XPATH, confirm_btn_1).click()
