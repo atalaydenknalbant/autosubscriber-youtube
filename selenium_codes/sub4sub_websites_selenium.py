@@ -280,7 +280,7 @@ def subpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(4.75)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(3)
