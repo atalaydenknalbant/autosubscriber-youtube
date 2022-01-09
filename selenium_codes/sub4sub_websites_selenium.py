@@ -567,7 +567,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(4.75)
+    driver.implicitly_wait(6)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
