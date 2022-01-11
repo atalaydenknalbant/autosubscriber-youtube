@@ -567,7 +567,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(6)
+    driver.implicitly_wait(5)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -688,7 +688,7 @@ def submenow_functions(req_dict: dict) -> None:
                             # logging.info("Flag2")
                         driver.save_screenshot("screenshots/screenshot.png")
                         el = \
-                            WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                            WebDriverWait(driver, 8).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                         el.click()
                     except ElementNotInteractableException:
                         logging.info("submenow Found Element Not Interact able Exception, Quitting")
@@ -794,7 +794,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             window_after = driver_6.window_handles[1]
             driver_6.switch_to.window(window_after)
             if len(driver_6.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                event.wait(2)
+                event.wait(1.75)
                 driver_6.execute_script("window.scrollTo(0, 500);")
                 driver_6.switch_to.default_content()
                 driver_6.save_screenshot("screenshots/screenshot.png")
@@ -1328,7 +1328,7 @@ def youtubviews_functions(req_dict: dict) -> None:
         for i in range(50):
             event.wait(4)
             if i >= 1:
-                WebDriverWait(driver, 80)\
+                WebDriverWait(driver, 75)\
                  .until(ec.visibility_of_element_located((By.XPATH,
                                                          "/html/body/div[2]/div/div[2]/center/div/div")))\
                  .get_attribute("value")
@@ -1409,7 +1409,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         video_list = []
         for i in range(50):
             event.wait(3)
-            WebDriverWait(driver_11, 100)\
+            WebDriverWait(driver_11, 90)\
                 .until(ec.visibility_of_element_located((By.CLASS_NAME,
                                                          "likebutton")))\
                 .get_attribute("value")
