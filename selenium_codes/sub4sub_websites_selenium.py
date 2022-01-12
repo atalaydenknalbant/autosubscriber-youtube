@@ -132,19 +132,19 @@ def google_login(driver: webdriver,
         pass
     else:
         driver.get("https://accounts.google.com/signin")
-    driver.save_screenshot("screenshots/screenshot.png")
+    driver.save_screenshot("screenshots/g_screenshot.png")
     event.wait(1.25)
     email_area = driver.find_element(By.ID, "identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
     event.wait(1.25)
-    driver.save_screenshot("screenshots/screenshot.png")
+    driver.save_screenshot("screenshots/g_screenshot.png")
     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
     event.wait(1.25)
     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
     event.wait(1.25)
-    driver.save_screenshot("screenshots/screenshot.png")
+    driver.save_screenshot("screenshots/g_screenshot.png")
     driver.switch_to.default_content()
 
 
