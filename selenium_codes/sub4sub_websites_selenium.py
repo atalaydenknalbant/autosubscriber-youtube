@@ -143,7 +143,7 @@ def google_login(driver: webdriver,
     pw_area.send_keys(req_dict['yt_pw'])
     event.wait(1.25)
     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
-    event.wait(1.25)
+    event.wait(3)
     driver.save_screenshot("screenshots/g_screenshot.png")
     driver.switch_to.default_content()
 
@@ -728,7 +728,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -744,14 +744,12 @@ def ytmonster_functions(req_dict: dict) -> None:
 
     def for_loop_sub(driver_6: webdriver,
                      sub_btn: str = "subText",
-                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent "
-                                     "> div > div.col-md-9 >"
-                                     " div.ct-full-wrap > div > div.ct-well.position-relative "
-                                     "> div.row > div:nth-child(3) >"
-                                     " a.subSkip > div",
-                     confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div >"
-                                        " div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                        " div.row > div:nth-child(3) > div > div",
+                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.ctOverlay >"
+                                     " div > div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                     " div.row > div:nth-child(3) > a.subSkip > div",
+                     confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent >"
+                                        " div.ctOverlay > div > div.col-md-9 > div.ct-full-wrap > div >"
+                                        " div.ct-well.position-relative > div.row > div:nth-child(3) > div > div",
                      ) -> None:
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
@@ -762,7 +760,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
             while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                         " div.mainContent > div > div.col-md-9 >"
+                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
                                                          " div.ct-full-wrap > div > div.ct-well.position-relative >"
                                                          " div.row > div:nth-child(2) > b") \
                     .text == "Loading...":
@@ -770,10 +768,9 @@ def ytmonster_functions(req_dict: dict) -> None:
             event.wait(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
             yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                                     " div.mainContent > div > div.col-md-9 >"
-                                                                     " div.ct-full-wrap > div >"
-                                                                     " div.ct-well.position-relative >"
-                                                                     " div.row > div:nth-child(2) > b") \
+                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
+                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                         " div.row > div:nth-child(2) > b") \
                 .text
             event.wait(1.25)
             try:
@@ -810,10 +807,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                 logging.info("Subscribed To Channel")
                 for _ in range(50000):
                     if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                              " div.mainContent > div > div.col-md-9 >"
+                                                              " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
                                                               " div.ct-full-wrap > div >"
-                                                              " div.ct-well.position-relative >"
-                                                              " div.row > div:nth-child(3) > div > div")\
+                                                              " div.ct-well.position-relative > div.row >"
+                                                              " div:nth-child(3) > div > div")\
                             .text != "Verify Subscription":
                         event.wait(1)
                     else:
@@ -829,12 +826,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                     i += 1
                     driver_6.save_screenshot("screenshots/screenshot.png")
                     while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                    " div.main > div.mainContent >"
-                                                                                    " div >"
-                                                                                    " div.col-md-9 > div.ct-full-wrap >"
-                                                                                    " div >"
-                                                                                    " div.ct-well.position-relative >"
-                                                                                    " div.row > div:nth-child(2) > b")\
+                                                                                    " div.main >"
+                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
+                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                         " div.row > div:nth-child(2) > b") \
                             .text:
                         event.wait(1.25)
                         if driver_6.find_element(By.ID, "error").text == \
@@ -861,10 +856,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
                 i -= 1
                 while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                " div.main > div.mainContent > div >"
-                                                                                " div.col-md-9 > div.ct-full-wrap >"
-                                                                                " div > div.ct-well.position-relative >"
-                                                                                " div.row > div:nth-child(2) > b") \
+                                                                                " div.main >"
+                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
+                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
+                                                         " div.row > div:nth-child(2) > b") \
                         .text:
                     event.wait(2)
                     if driver_6.find_element(By.ID, "error").text == \
