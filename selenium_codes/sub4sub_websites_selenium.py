@@ -402,7 +402,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(4.75)
+    driver.implicitly_wait(8)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -567,7 +567,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(8)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -738,18 +738,16 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, 'inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element(By.ID, 'inputPassword').send_keys(req_dict['pw_ytmonster'])
     driver.find_element(By.CSS_SELECTOR, "#formLogin > button").send_keys(Keys.ENTER)
-    driver.get("https://www.ytmonster.net/exchange/subscribers")
+    driver.get("https://www.ytmonster.net/exchange/likes")
     driver.save_screenshot("screenshots/screenshot.png")
     yt_javascript = True
 
     def for_loop_sub(driver_6: webdriver,
-                     sub_btn: str = "subText",
-                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.ctOverlay >"
-                                     " div > div.col-md-9 > div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                     " div.row > div:nth-child(3) > a.subSkip > div",
+                     like_btn: str = "likeText",
+                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.row >"
+                                     " div.col-md-9 > div > div:nth-child(7) > div > a.likeSkip > div",
                      confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent >"
-                                        " div.ctOverlay > div > div.col-md-9 > div.ct-full-wrap > div >"
-                                        " div.ct-well.position-relative > div.row > div:nth-child(3) > div > div",
+                                        " div.row > div.col-md-9 > div > div:nth-child(7) > div > div > div",
                      ) -> None:
         """ Loop for liking videos"""
         driver_6.save_screenshot("screenshots/screenshot.png")
@@ -759,18 +757,18 @@ def ytmonster_functions(req_dict: dict) -> None:
             driver_6.switch_to.default_content()
             event.wait(2)
             driver_6.save_screenshot("screenshots/screenshot.png")
-            while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
-                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                         " div.row > div:nth-child(2) > b") \
+            while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+                                                         "div.mainContent > div.row > "
+                                                         "div.col-md-9 > div > div:nth-child(4) > "
+                                                         "div.col-md-10.campaignData > b") \
                     .text == "Loading...":
                 continue
             event.wait(1.25)
             driver_6.save_screenshot("screenshots/screenshot.png")
-            yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
-                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                         " div.row > div:nth-child(2) > b") \
+            yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+                                                         "div.mainContent > div.row > "
+                                                         "div.col-md-9 > div > div:nth-child(4) > "
+                                                         "div.col-md-10.campaignData > b") \
                 .text
             event.wait(1.25)
             try:
@@ -782,7 +780,7 @@ def ytmonster_functions(req_dict: dict) -> None:
                 pass
             try:
                 driver_6.save_screenshot("screenshots/screenshot.png")
-                driver_6.find_element(By.ID, sub_btn).click()
+                driver_6.find_element(By.ID, like_btn).click()
                 logging.info("Clicked Subscribe Button")
             except NoSuchElementException:
                 logging.info("Couldn't Find Subscribe Button")
@@ -795,23 +793,30 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver_6.execute_script("window.scrollTo(0, 500);")
                 driver_6.switch_to.default_content()
                 driver_6.save_screenshot("screenshots/screenshot.png")
-                if yt_javascript:
-                    driver_6.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                if len(driver.find_elements(By.CSS_SELECTOR,
+                                            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                    pass
                 else:
-                    sub_button = driver_6.find_elements(By.ID,
-                                                        ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
-                    ActionChains(driver_6).move_to_element(sub_button).click().perform()
+                    if yt_javascript:
+                        driver_6.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+                    else:
+                        try:
+                            like_button = driver_6.find_elements(By.TAG_NAME,
+                                                               ytbutton_elements_location_dict
+                                                               ['yt_tag_like_button_type1'])[0]
+                            ActionChains(driver_6).move_to_element(like_button).click().perform()
+                        except (NoSuchElementException, IndexError):
+                            logging.info("Couldnt find like button")
+                            pass
                 driver_6.save_screenshot("screenshots/screenshot_proof.png")
                 driver_6.switch_to.window(window_before)
                 driver_6.switch_to.default_content()
                 logging.info("Subscribed To Channel")
                 for _ in range(50000):
                     if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                              " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
-                                                              " div.ct-full-wrap > div >"
-                                                              " div.ct-well.position-relative > div.row >"
-                                                              " div:nth-child(3) > div > div")\
-                            .text != "Verify Subscription":
+                                                              " div.mainContent > div.row > div.col-md-9 > div >"
+                                                              " div:nth-child(7) > div > div > div")\
+                            .text != "Verify Like":
                         event.wait(1)
                     else:
                         logging.info("confirm button is clickable")
@@ -825,11 +830,11 @@ def ytmonster_functions(req_dict: dict) -> None:
                     logging.info("confirm button was clicked")
                     i += 1
                     driver_6.save_screenshot("screenshots/screenshot.png")
-                    while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                    " div.main >"
-                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
-                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                         " div.row > div:nth-child(2) > b") \
+                    while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid >"
+                                                                                    " div > div.main > "
+                                                         "div.mainContent > div.row > "
+                                                         "div.col-md-9 > div > div:nth-child(4) > "
+                                                         "div.col-md-10.campaignData > b") \
                             .text:
                         event.wait(1.25)
                         if driver_6.find_element(By.ID, "error").text == \
@@ -856,10 +861,10 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
                 i -= 1
                 while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                " div.main >"
-                                                         " div.mainContent > div.ctOverlay > div > div.col-md-9 >"
-                                                         " div.ct-full-wrap > div > div.ct-well.position-relative >"
-                                                         " div.row > div:nth-child(2) > b") \
+                                                                                " div.main > "
+                                                         "div.mainContent > div.row > "
+                                                         "div.col-md-9 > div > div:nth-child(4) > "
+                                                         "div.col-md-10.campaignData > b") \
                         .text:
                     event.wait(2)
                     if driver_6.find_element(By.ID, "error").text == \
