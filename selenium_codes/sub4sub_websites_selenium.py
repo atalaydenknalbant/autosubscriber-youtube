@@ -674,7 +674,10 @@ def submenow_functions(req_dict: dict) -> None:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
                                                               ['yt_id_sub_button_type1'])[0]
-                            ActionChains(driver).move_to_element(sub_button).click().perform()
+                            try:
+                                ActionChains(driver).move_to_element(sub_button).click().perform()
+                            except ElementNotInteractableException:
+                                pass
                         driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before_5)
