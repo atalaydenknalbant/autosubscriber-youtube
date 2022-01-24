@@ -1144,10 +1144,10 @@ def goviral_functions(req_dict: dict) -> None:
                 event.wait(0.5)
                 # logging.info('Flag2')
                 x += 1
-                if x >= 100:
+                if x >= 90:
                     driver_9.refresh()
                     break
-            if x >= 100:
+            if x >= 90:
                 continue
             driver_9.save_screenshot("screenshots/screenshot.png")
             try:
