@@ -1115,7 +1115,6 @@ def goviral_functions(req_dict: dict) -> None:
         logging.info("Loop Started")
         for i in range(200):
             n = 0
-            driver_9.save_screenshot("screenshots/screenshot.png")
             while len(driver_9.find_elements(By.CLASS_NAME, "time-remaining-amount")) == 0:
                 event.wait(0.5)
                 # logging.info('Flag1')
