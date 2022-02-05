@@ -1115,6 +1115,17 @@ def goviral_functions(req_dict: dict) -> None:
         logging.info("Loop Started")
         for i in range(200):
             n = 0
+            try:
+                driver_9.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                    .send_keys(Keys.ENTER)
+                # logging.info("Enable button has been pressed")
+                event.wait(2)
+                continue
+            except (NoSuchElementException,
+                    ElementNotInteractableException,
+                    TimeoutException,
+                    StaleElementReferenceException):
+                pass
             while len(driver_9.find_elements(By.CLASS_NAME, "time-remaining-amount")) == 0:
                 event.wait(0.5)
                 # logging.info('Flag1')
