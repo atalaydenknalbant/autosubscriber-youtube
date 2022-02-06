@@ -1113,7 +1113,7 @@ def goviral_functions(req_dict: dict) -> None:
                       skip_btn: str = 'btn btn-secondary skip-video'
                       ) -> None:
         logging.info("Loop Started")
-        for i in range(200):
+        for i in range(400):
             n = 0
             try:
                 driver_9.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
