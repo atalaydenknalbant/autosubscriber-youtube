@@ -1086,7 +1086,7 @@ def goviral_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(10)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1120,7 +1120,6 @@ def goviral_functions(req_dict: dict) -> None:
                     .send_keys(Keys.ENTER)
                 # logging.info("Enable button has been pressed")
                 event.wait(2)
-                continue
             except (NoSuchElementException,
                     ElementNotInteractableException,
                     TimeoutException,
