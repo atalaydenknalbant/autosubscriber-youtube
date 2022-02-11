@@ -1134,7 +1134,7 @@ def goviral_functions(req_dict: dict) -> None:
                         try:
                             driver_9.switch_to.window(driver_9.window_handles[1])
                             driver_9.close()
-                        except NoSuchWindowException or IndexError:
+                        except (NoSuchWindowException, IndexError):
                             pass
                         driver_9.switch_to.window(driver_9.window_handles[0])
                         driver_9.get("https://members.goviral.ai/coins")
