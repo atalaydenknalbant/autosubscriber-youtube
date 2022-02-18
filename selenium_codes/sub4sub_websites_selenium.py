@@ -1306,7 +1306,7 @@ def goviral_functions(req_dict: dict) -> None:
                 continue
 
     for_loop_like(driver)
-    logging.info("Channels were liked and subscribed successfully, quitting driver")
+    logging.info("Channels were engaged successfully, quitting driver")
     driver.quit()
 
 
