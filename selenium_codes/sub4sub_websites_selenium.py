@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 import os
 from threading import Event
+from datetime import datetime, timedelta
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -735,7 +736,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -745,145 +746,174 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, 'inputUsername').send_keys(req_dict['username_ytmonster'])
     driver.find_element(By.ID, 'inputPassword').send_keys(req_dict['pw_ytmonster'])
     driver.find_element(By.CSS_SELECTOR, "#formLogin > button").send_keys(Keys.ENTER)
-    driver.get("https://www.ytmonster.net/exchange/likes")
+    driver.get("https://www.ytmonster.net/exchange/views")
+    try:
+        driver.find_element(By.CSS_SELECTOR, '#client-session > div.settings-fix > div > div > div > svg').click()
+        driver.find_element(By.ID, 'endClient').click()
+    except NoSuchElementException:
+        pass
+    driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
     driver.save_screenshot("screenshots/screenshot.png")
-    yt_javascript = True
+    driver.set_window_size(1200, 900)
+    event.wait(3)
+    driver.execute_script("document.querySelector('#startBtn').click()")
+    # yt_javascript = True
 
-    def for_loop_sub(driver_6: webdriver,
-                     like_btn: str = "likeText",
-                     skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.row >"
-                                     " div.col-md-9 > div > div:nth-child(7) > div > a.likeSkip > div",
-                     confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent >"
-                                        " div.row > div.col-md-9 > div > div:nth-child(7) > div > div > div",
-                     ) -> None:
-        """ Loop for liking videos"""
-        driver_6.save_screenshot("screenshots/screenshot.png")
-        for i in range(50):
-            window_before = driver_6.window_handles[0]
-            driver_6.switch_to.window(window_before)
-            driver_6.switch_to.default_content()
-            event.wait(2)
-            driver_6.save_screenshot("screenshots/screenshot.png")
-            while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
-                                                         "div.mainContent > div.row > "
-                                                         "div.col-md-9 > div > div:nth-child(4) > "
-                                                         "div.col-md-10.campaignData > b") \
-                    .text == "Loading...":
-                continue
-            event.wait(1.25)
-            driver_6.save_screenshot("screenshots/screenshot.png")
-            yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
-                                                         "div.mainContent > div.row > "
-                                                         "div.col-md-9 > div > div:nth-child(4) > "
-                                                         "div.col-md-10.campaignData > b") \
-                .text
-            event.wait(1.25)
-            try:
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                driver_6.find_element(By.CSS_SELECTOR, "#intercom-container > div > div > div > div >"
-                                                       " div.intercom-tour-step-header > span").click()
-                logging.info("Closed Notification")
-            except NoSuchElementException:
-                pass
-            try:
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                driver_6.find_element(By.ID, like_btn).click()
-                logging.info("Clicked Subscribe Button")
-            except NoSuchElementException:
-                logging.info("Couldn't Find Subscribe Button")
-                driver_6.quit()
-                break
-            window_after = driver_6.window_handles[1]
-            driver_6.switch_to.window(window_after)
-            if len(driver_6.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                event.wait(1.75)
-                driver_6.execute_script("window.scrollTo(0, 500);")
-                driver_6.switch_to.default_content()
-                driver_6.save_screenshot("screenshots/screenshot.png")
-                if len(driver.find_elements(By.CSS_SELECTOR,
-                                            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    pass
-                else:
-                    if yt_javascript:
-                        driver_6.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
-                    else:
-                        try:
-                            like_button = driver_6.find_elements(By.TAG_NAME,
-                                                               ytbutton_elements_location_dict
-                                                               ['yt_tag_like_button_type1'])[0]
-                            ActionChains(driver_6).move_to_element(like_button).click().perform()
-                        except (NoSuchElementException, IndexError):
-                            logging.info("Couldnt find like button")
-                            pass
-                driver_6.save_screenshot("screenshots/screenshot_proof.png")
-                driver_6.switch_to.window(window_before)
-                driver_6.switch_to.default_content()
-                logging.info("Subscribed To Channel")
-                for _ in range(50000):
-                    if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
-                                                              " div.mainContent > div.row > div.col-md-9 > div >"
-                                                              " div:nth-child(7) > div > div > div")\
-                            .text != "Verify Like":
-                        event.wait(1)
-                    else:
-                        logging.info("confirm button is clickable")
-                        break
-                try:
-                    event.wait(2.5)
-                    confirm_el = WebDriverWait(driver_6, 5)\
-                        .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
-                    ActionChains(driver_6).move_to_element(confirm_el).click().perform()
+    def timer(hours_time: int) -> None:
+        """closes the program after given time
+        Args:
+        - hours_time(int): int object for checking time in hours.
+        Returns:
+        - None(NoneType)
+        """
+        now = datetime.now()
+        hours_added = timedelta(hours=hours_time)
+        future = now + hours_added
+        while future > datetime.now():
+            event.wait(60)
+            driver.save_screenshot("screenshots/screenshot.png")
+            pass
 
-                    logging.info("confirm button was clicked")
-                    i += 1
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-                    while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid >"
-                                                                                    " div > div.main > "
-                                                         "div.mainContent > div.row > "
-                                                         "div.col-md-9 > div > div:nth-child(4) > "
-                                                         "div.col-md-10.campaignData > b") \
-                            .text:
-                        event.wait(1.25)
-                        if driver_6.find_element(By.ID, "error").text == \
-                           "We failed to verify your like as we did not find an increase in the number" \
-                           " of likes. Try verifying again, or skip the video.":
+    # Determines How Many Hours Program Will Run
+    timer(5)
 
-                            driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
-                            logging.info("Skip button has been pressed")
-                        continue
-                    continue
-                except NoSuchElementException:
-                    event.wait(2)
-                    window_after = driver_6.window_handles[1]
-                    driver_6.switch_to.window(window_after)
-                    driver_6.close()
-                    driver_6.switch_to.window(window_before)
-                    logging.info("couldn't find confirm button")
-                    i += 1
-                    continue
-
-            else:
-                driver_6.switch_to.window(window_before)
-                driver_6.switch_to.default_content()
-                driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
-                i -= 1
-                while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
-                                                                                " div.main > "
-                                                         "div.mainContent > div.row > "
-                                                         "div.col-md-9 > div > div:nth-child(4) > "
-                                                         "div.col-md-10.campaignData > b") \
-                        .text:
-                    event.wait(2)
-                    if driver_6.find_element(By.ID, "error").text == \
-                            "We failed to verify your like as we did not find an increase in the number of likes." \
-                            " Try verifying again, or skip the video.":
-                        driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
-                        logging.info("Skip button has been pressed")
-                    driver_6.save_screenshot("screenshots/screenshot.png")
-                    continue
-
-    for_loop_sub(driver)
-    logging.info("Channels liked successfully, quitting driver")
+    # def for_loop_sub(driver_6: webdriver,
+    #                  like_btn: str = "likeText",
+    #                  skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.row >"
+    #                                  " div.col-md-9 > div > div:nth-child(7) > div > a.likeSkip > div",
+    #                  confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent >"
+    #                                     " div.row > div.col-md-9 > div > div:nth-child(7) > div > div > div",
+    #                  ) -> None:
+    #     """ Loop for liking videos"""
+    #     driver_6.save_screenshot("screenshots/screenshot.png")
+    #     for i in range(50):
+    #         window_before = driver_6.window_handles[0]
+    #         driver_6.switch_to.window(window_before)
+    #         driver_6.switch_to.default_content()
+    #         event.wait(2)
+    #         driver_6.save_screenshot("screenshots/screenshot.png")
+    #         while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+    #                                                      "div.mainContent > div.row > "
+    #                                                      "div.col-md-9 > div > div:nth-child(4) > "
+    #                                                      "div.col-md-10.campaignData > b") \
+    #                 .text == "Loading...":
+    #             continue
+    #         event.wait(1.25)
+    #         driver_6.save_screenshot("screenshots/screenshot.png")
+    #         yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+    #                                                                  "div.mainContent > div.row > "
+    #                                                                  "div.col-md-9 > div > div:nth-child(4) > "
+    #                                                                  "div.col-md-10.campaignData > b") \
+    #             .text
+    #         event.wait(1.25)
+    #         try:
+    #             driver_6.save_screenshot("screenshots/screenshot.png")
+    #             driver_6.find_element(By.CSS_SELECTOR, "#intercom-container > div > div > div > div >"
+    #                                                    " div.intercom-tour-step-header > span").click()
+    #             logging.info("Closed Notification")
+    #         except NoSuchElementException:
+    #             pass
+    #         try:
+    #             driver_6.save_screenshot("screenshots/screenshot.png")
+    #             driver_6.find_element(By.ID, like_btn).click()
+    #             logging.info("Clicked Subscribe Button")
+    #         except NoSuchElementException:
+    #             logging.info("Couldn't Find Subscribe Button")
+    #             driver_6.quit()
+    #             break
+    #         window_after = driver_6.window_handles[1]
+    #         driver_6.switch_to.window(window_after)
+    #         if len(driver_6.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+    #             event.wait(1.75)
+    #             driver_6.execute_script("window.scrollTo(0, 500);")
+    #             driver_6.switch_to.default_content()
+    #             driver_6.save_screenshot("screenshots/screenshot.png")
+    #             if len(driver.find_elements(By.CSS_SELECTOR,
+    #                                         ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+    #                 pass
+    #             else:
+    #                 if yt_javascript:
+    #                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+    #                 else:
+    #                     try:
+    #                         like_button = driver_6.find_elements(By.TAG_NAME,
+    #                                                            ytbutton_elements_location_dict
+    #                                                            ['yt_tag_like_button_type1'])[0]
+    #                         ActionChains(driver_6).move_to_element(like_button).click().perform()
+    #                     except (NoSuchElementException, IndexError):
+    #                         logging.info("Couldnt find like button")
+    #                         pass
+    #             driver_6.save_screenshot("screenshots/screenshot_proof.png")
+    #             driver_6.switch_to.window(window_before)
+    #             driver_6.switch_to.default_content()
+    #             logging.info("Subscribed To Channel")
+    #             for _ in range(50000):
+    #                 if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
+    #                                                           " div.mainContent > div.row > div.col-md-9 > div >"
+    #                                                           " div:nth-child(7) > div > div > div")\
+    #                         .text != "Verify Like":
+    #                     event.wait(1)
+    #                 else:
+    #                     logging.info("confirm button is clickable")
+    #                     break
+    #             try:
+    #                 event.wait(2.5)
+    #                 confirm_el = WebDriverWait(driver_6, 5)\
+    #                     .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
+    #                 ActionChains(driver_6).move_to_element(confirm_el).click().perform()
+    #
+    #                 logging.info("confirm button was clicked")
+    #                 i += 1
+    #                 driver_6.save_screenshot("screenshots/screenshot.png")
+    #                 while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid >"
+    #                                                                                 " div > div.main > "
+    #                                                                                 "div.mainContent > div.row > "
+    #                                                                                 "div.col-md-9 > div "
+    #                                                                                 "> div:nth-child(4) > "
+    #                                                                                 "div.col-md-10.campaignData > b") \
+    #                         .text:
+    #                     event.wait(1.25)
+    #                     if driver_6.find_element(By.ID, "error").text == \
+    #                        "We failed to verify your like as we did not find an increase in the number" \
+    #                        " of likes. Try verifying again, or skip the video.":
+    #
+    #                         driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #                         logging.info("Skip button has been pressed")
+    #                     continue
+    #                 continue
+    #             except NoSuchElementException:
+    #                 event.wait(2)
+    #                 window_after = driver_6.window_handles[1]
+    #                 driver_6.switch_to.window(window_after)
+    #                 driver_6.close()
+    #                 driver_6.switch_to.window(window_before)
+    #                 logging.info("couldn't find confirm button")
+    #                 i += 1
+    #                 continue
+    #
+    #         else:
+    #             driver_6.switch_to.window(window_before)
+    #             driver_6.switch_to.default_content()
+    #             driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #             i -= 1
+    #             while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
+    #                                                                             " div.main > "
+    #                                                                             "div.mainContent > div.row > "
+    #                                                                             "div.col-md-9 > div >"
+    #                                                                             " div:nth-child(4) > "
+    #                                                                             "div.col-md-10.campaignData > b") \
+    #                     .text:
+    #                 event.wait(2)
+    #                 if driver_6.find_element(By.ID, "error").text == \
+    #                         "We failed to verify your like as we did not find an increase in the number of likes." \
+    #                         " Try verifying again, or skip the video.":
+    #                     driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #                     logging.info("Skip button has been pressed")
+    #                 driver_6.save_screenshot("screenshots/screenshot.png")
+    #                 continue
+    #
+    # for_loop_sub(driver)
+    # logging.info("Channels liked successfully, quitting driver")
     driver.quit()
 
 
@@ -1101,7 +1131,6 @@ def goviral_functions(req_dict: dict) -> None:
     driver.find_element(By.CSS_SELECTOR, "#loginForm > div.kt-login__actions.justify-content-around > button").click()
     driver.find_element(By.CSS_SELECTOR, "#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
     driver.save_screenshot("screenshots/screenshot.png")
-    # yt_javascript = True
 
     def for_loop_like(driver_9: webdriver,
                       like_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
