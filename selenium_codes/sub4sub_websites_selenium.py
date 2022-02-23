@@ -760,7 +760,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     # yt_javascript = True
 
     def timer(hours_time: int) -> None:
-        """closes the program after given time
+        """closes the program after given time in hours
         Args:
         - hours_time(int): int object for checking time in hours.
         Returns:
@@ -773,6 +773,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             event.wait(60)
             driver.save_screenshot("screenshots/screenshot.png")
             pass
+        driver.quit()
 
     # Determines How Many Hours Program Will Run
     timer(5)
@@ -914,7 +915,6 @@ def ytmonster_functions(req_dict: dict) -> None:
     #
     # for_loop_sub(driver)
     # logging.info("Channels liked successfully, quitting driver")
-    driver.quit()
 
 
 def ytbpals_functions(req_dict: dict) -> None:
