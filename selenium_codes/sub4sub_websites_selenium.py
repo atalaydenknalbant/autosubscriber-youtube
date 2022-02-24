@@ -778,78 +778,77 @@ def ytmonster_functions(req_dict: dict) -> None:
     # Determines How Many Hours Program Will Run
     timer(5)
 
-    # def for_loop_sub(driver_6: webdriver,
-    #                  like_btn: str = "likeText",
+    # def for_loop_sub(like_btn: str = "likeText",
     #                  skip_btn: str = "body > div.container-fluid > div > div.main > div.mainContent > div.row >"
     #                                  " div.col-md-9 > div > div:nth-child(7) > div > a.likeSkip > div",
     #                  confirm_btn: str = "body > div.container-fluid > div > div.main > div.mainContent >"
     #                                     " div.row > div.col-md-9 > div > div:nth-child(7) > div > div > div",
     #                  ) -> None:
     #     """ Loop for liking videos"""
-    #     driver_6.save_screenshot("screenshots/screenshot.png")
+    #     driver.save_screenshot("screenshots/screenshot.png")
     #     for i in range(50):
-    #         window_before = driver_6.window_handles[0]
-    #         driver_6.switch_to.window(window_before)
-    #         driver_6.switch_to.default_content()
+    #         window_before = driver.window_handles[0]
+    #         driver.switch_to.window(window_before)
+    #         driver.switch_to.default_content()
     #         event.wait(2)
-    #         driver_6.save_screenshot("screenshots/screenshot.png")
-    #         while driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+    #         driver.save_screenshot("screenshots/screenshot.png")
+    #         while driver.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
     #                                                      "div.mainContent > div.row > "
     #                                                      "div.col-md-9 > div > div:nth-child(4) > "
     #                                                      "div.col-md-10.campaignData > b") \
     #                 .text == "Loading...":
     #             continue
     #         event.wait(1.25)
-    #         driver_6.save_screenshot("screenshots/screenshot.png")
-    #         yt_channel_name = driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
+    #         driver.save_screenshot("screenshots/screenshot.png")
+    #         yt_channel_name = driver.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main > "
     #                                                                  "div.mainContent > div.row > "
     #                                                                  "div.col-md-9 > div > div:nth-child(4) > "
     #                                                                  "div.col-md-10.campaignData > b") \
     #             .text
     #         event.wait(1.25)
     #         try:
-    #             driver_6.save_screenshot("screenshots/screenshot.png")
-    #             driver_6.find_element(By.CSS_SELECTOR, "#intercom-container > div > div > div > div >"
+    #             driver.save_screenshot("screenshots/screenshot.png")
+    #             driver.find_element(By.CSS_SELECTOR, "#intercom-container > div > div > div > div >"
     #                                                    " div.intercom-tour-step-header > span").click()
     #             logging.info("Closed Notification")
     #         except NoSuchElementException:
     #             pass
     #         try:
-    #             driver_6.save_screenshot("screenshots/screenshot.png")
-    #             driver_6.find_element(By.ID, like_btn).click()
+    #             driver.save_screenshot("screenshots/screenshot.png")
+    #             driver.find_element(By.ID, like_btn).click()
     #             logging.info("Clicked Subscribe Button")
     #         except NoSuchElementException:
     #             logging.info("Couldn't Find Subscribe Button")
-    #             driver_6.quit()
+    #             driver.quit()
     #             break
-    #         window_after = driver_6.window_handles[1]
-    #         driver_6.switch_to.window(window_after)
-    #         if len(driver_6.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+    #         window_after = driver.window_handles[1]
+    #         driver.switch_to.window(window_after)
+    #         if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
     #             event.wait(1.75)
-    #             driver_6.execute_script("window.scrollTo(0, 500);")
-    #             driver_6.switch_to.default_content()
-    #             driver_6.save_screenshot("screenshots/screenshot.png")
+    #             driver.execute_script("window.scrollTo(0, 500);")
+    #             driver.switch_to.default_content()
+    #             driver.save_screenshot("screenshots/screenshot.png")
     #             if len(driver.find_elements(By.CSS_SELECTOR,
     #                                         ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
     #                 pass
     #             else:
     #                 if yt_javascript:
-    #                     driver_6.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+    #                     driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
     #                 else:
     #                     try:
-    #                         like_button = driver_6.find_elements(By.TAG_NAME,
+    #                         like_button = driver.find_elements(By.TAG_NAME,
     #                                                            ytbutton_elements_location_dict
     #                                                            ['yt_tag_like_button_type1'])[0]
-    #                         ActionChains(driver_6).move_to_element(like_button).click().perform()
+    #                         ActionChains(driver).move_to_element(like_button).click().perform()
     #                     except (NoSuchElementException, IndexError):
     #                         logging.info("Couldnt find like button")
     #                         pass
-    #             driver_6.save_screenshot("screenshots/screenshot_proof.png")
-    #             driver_6.switch_to.window(window_before)
-    #             driver_6.switch_to.default_content()
+    #             driver.save_screenshot("screenshots/screenshot_proof.png")
+    #             driver.switch_to.window(window_before)
+    #             driver.switch_to.default_content()
     #             logging.info("Subscribed To Channel")
     #             for _ in range(50000):
-    #                 if driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
+    #                 if driver.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div > div.main >"
     #                                                           " div.mainContent > div.row > div.col-md-9 > div >"
     #                                                           " div:nth-child(7) > div > div > div")\
     #                         .text != "Verify Like":
@@ -859,14 +858,14 @@ def ytmonster_functions(req_dict: dict) -> None:
     #                     break
     #             try:
     #                 event.wait(2.5)
-    #                 confirm_el = WebDriverWait(driver_6, 5)\
+    #                 confirm_el = WebDriverWait(driver, 5)\
     #                     .until(ec.element_to_be_clickable((By.CSS_SELECTOR, confirm_btn)))
-    #                 ActionChains(driver_6).move_to_element(confirm_el).click().perform()
+    #                 ActionChains(driver).move_to_element(confirm_el).click().perform()
     #
     #                 logging.info("confirm button was clicked")
     #                 i += 1
-    #                 driver_6.save_screenshot("screenshots/screenshot.png")
-    #                 while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid >"
+    #                 driver.save_screenshot("screenshots/screenshot.png")
+    #                 while yt_channel_name == driver.find_element(By.CSS_SELECTOR, "body > div.container-fluid >"
     #                                                                                 " div > div.main > "
     #                                                                                 "div.mainContent > div.row > "
     #                                                                                 "div.col-md-9 > div "
@@ -874,30 +873,30 @@ def ytmonster_functions(req_dict: dict) -> None:
     #                                                                                 "div.col-md-10.campaignData > b") \
     #                         .text:
     #                     event.wait(1.25)
-    #                     if driver_6.find_element(By.ID, "error").text == \
+    #                     if driver.find_element(By.ID, "error").text == \
     #                        "We failed to verify your like as we did not find an increase in the number" \
     #                        " of likes. Try verifying again, or skip the video.":
     #
-    #                         driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #                         driver.find_element(By.CSS_SELECTOR, skip_btn).click()
     #                         logging.info("Skip button has been pressed")
     #                     continue
     #                 continue
     #             except NoSuchElementException:
     #                 event.wait(2)
-    #                 window_after = driver_6.window_handles[1]
-    #                 driver_6.switch_to.window(window_after)
-    #                 driver_6.close()
-    #                 driver_6.switch_to.window(window_before)
+    #                 window_after = driver.window_handles[1]
+    #                 driver.switch_to.window(window_after)
+    #                 driver.close()
+    #                 driver.switch_to.window(window_before)
     #                 logging.info("couldn't find confirm button")
     #                 i += 1
     #                 continue
     #
     #         else:
-    #             driver_6.switch_to.window(window_before)
-    #             driver_6.switch_to.default_content()
-    #             driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #             driver.switch_to.window(window_before)
+    #             driver.switch_to.default_content()
+    #             driver.find_element(By.CSS_SELECTOR, skip_btn).click()
     #             i -= 1
-    #             while yt_channel_name == driver_6.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
+    #             while yt_channel_name == driver.find_element(By.CSS_SELECTOR, "body > div.container-fluid > div >"
     #                                                                             " div.main > "
     #                                                                             "div.mainContent > div.row > "
     #                                                                             "div.col-md-9 > div >"
@@ -905,15 +904,15 @@ def ytmonster_functions(req_dict: dict) -> None:
     #                                                                             "div.col-md-10.campaignData > b") \
     #                     .text:
     #                 event.wait(2)
-    #                 if driver_6.find_element(By.ID, "error").text == \
+    #                 if driver.find_element(By.ID, "error").text == \
     #                         "We failed to verify your like as we did not find an increase in the number of likes." \
     #                         " Try verifying again, or skip the video.":
-    #                     driver_6.find_element(By.CSS_SELECTOR, skip_btn).click()
+    #                     driver.find_element(By.CSS_SELECTOR, skip_btn).click()
     #                     logging.info("Skip button has been pressed")
-    #                 driver_6.save_screenshot("screenshots/screenshot.png")
+    #                 driver.save_screenshot("screenshots/screenshot.png")
     #                 continue
     #
-    # for_loop_sub(driver)
+    # for_loop_sub()
     # logging.info("Channels liked successfully, quitting driver")
 
 
@@ -935,9 +934,9 @@ def ytbpals_functions(req_dict: dict) -> None:
                                          " li:nth-child(5) > a").send_keys(Keys.ENTER)
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_7: webdriver, sub_btn: str = "#ytbpals-channels > div > div > div >"
-                                                         " div.col-sm-4.text-center >"
-                                                         " button.subscribe.yt-btn.ytb-subscribe",
+    def for_loop_sub(sub_btn: str = "#ytbpals-channels > div > div > div >"
+                                    " div.col-sm-4.text-center >"
+                                    " button.subscribe.yt-btn.ytb-subscribe",
                      skip_btn: str = "#ytbpals-channels > div > div > div > div.col-sm-4.text-center >"
                                      " button.skip.yt-btn.ytb-subscribe.ytb-skip",
                      confirm_btn: str = "ytbconfirm",
@@ -946,170 +945,170 @@ def ytbpals_functions(req_dict: dict) -> None:
         current_remaining = ""
         for i in range(0, 10000):
             logging.info("Loop Started")
-            window_before = driver_7.window_handles[0]
-            driver_7.switch_to.window(window_before)
-            driver_7.switch_to.default_content()
+            window_before = driver.window_handles[0]
+            driver.switch_to.window(window_before)
+            driver.switch_to.default_content()
             event.wait(5)
 
             if i == 0:
                 i += 1
                 try:
-                    driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
+                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
                     logging.info("clicked Subscribe btn")
                 except NoSuchElementException:
                     logging.info("No such Element Exception(sub_btn)")
-                    driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
+                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
                                                            " ul.navbar-nav > li:nth-child(4) > a") \
                         .send_keys(Keys.ENTER)
                     try:
-                        driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table > table >"
+                        driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table > table >"
                                                                " tbody > tr > td:nth-child(8) > button")\
                             .send_keys(Keys.ENTER)
 
-                        driver_7.find_element(By.ID, "start-now")\
+                        driver.find_element(By.ID, "start-now")\
                             .send_keys(Keys.ENTER)
                         logging.info("Started plan successfully")
 
                     except Exception as ex:
                         logging.info("Error: Exception: " + str(ex))
-                        driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.quit()
+                        driver.save_screenshot("screenshots/screenshot.png")
+                    driver.quit()
                     break
                 event.wait(2)
-                window_after = driver_7.window_handles[1]
-                driver_7.switch_to.window(window_after)
-                google_login(driver_7, req_dict)
+                window_after = driver.window_handles[1]
+                driver.switch_to.window(window_after)
+                google_login(driver, req_dict)
                 logging.info("login completed")
-                if len(driver_7.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    driver_7.execute_script("window.scrollTo(0, 400);")
+                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+                    driver.execute_script("window.scrollTo(0, 400);")
                     event.wait(2)
-                    driver_7.switch_to.default_content()
+                    driver.switch_to.default_content()
                     if yt_javascript:
-                        driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         event.wait(1)
-                        sub_button = driver_7.find_elements(By.ID,
+                        sub_button = driver.find_elements(By.ID,
                                                             ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
                             0]
-                        ActionChains(driver_7).move_to_element(sub_button).click().perform()
-                    driver_7.save_screenshot("screenshots/screenshot_proof.png")
-                    driver_7.close()
-                    driver_7.switch_to.window(window_before)
-                    driver_7.switch_to.default_content()
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                    driver.save_screenshot("screenshots/screenshot_proof.png")
+                    driver.close()
+                    driver.switch_to.window(window_before)
+                    driver.switch_to.default_content()
                     logging.info("Subbed to Channel")
-                    driver_7.switch_to.default_content()
+                    driver.switch_to.default_content()
                     try:
                         event.wait(2)
-                        driver_7.find_element(By.ID, confirm_btn).click()
+                        driver.find_element(By.ID, confirm_btn).click()
 
                         logging.info("confirm button was clicked")
                         i += 1
                         continue
                     except NoSuchElementException:
                         event.wait(2)
-                        window_after = driver_7.window_handles[1]
-                        driver_7.switch_to.window(window_after)
-                        driver_7.close()
-                        driver_7.switch_to.window(window_before)
+                        window_after = driver.window_handles[1]
+                        driver.switch_to.window(window_after)
+                        driver.close()
+                        driver.switch_to.window(window_before)
                         logging.info("couldn't find confirm button")
                         i += 1
                         continue
 
                 else:
-                    driver_7.switch_to.window(window_before)
-                    driver_7.switch_to.default_content()
-                    driver_7.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
+                    driver.switch_to.window(window_before)
+                    driver.switch_to.default_content()
+                    driver.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
 
                     i += 1
                     continue
 
             else:
-                driver_7.switch_to.window(window_before)
-                driver_7.switch_to.default_content()
+                driver.switch_to.window(window_before)
+                driver.switch_to.default_content()
                 event.wait(3)
                 try:
-                    driver_7.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
-                    logging.info("Remaining Videos:" + driver_7.find_element(By.ID, "ytbbal").text)
-                    if driver_7.find_element(By.ID, "ytbbal").text == current_remaining:
+                    driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
+                    logging.info("Remaining Videos:" + driver.find_element(By.ID, "ytbbal").text)
+                    if driver.find_element(By.ID, "ytbbal").text == current_remaining:
                         current_remaining_time += 1
                         if current_remaining_time > 3:
                             logging.info("same remaining videos 4 times, resetting to begin function")
-                            driver_7.quit()
+                            driver.quit()
                             ytbpals_functions(req_dict)
                             break
                     else:
-                        current_remaining = driver_7.find_element(By.ID, "ytbbal").text
+                        current_remaining = driver.find_element(By.ID, "ytbbal").text
                         current_remaining_time = 0
 
                 except NoSuchElementException:
                     logging.info("All channels were subscribed, activating free plan")
-                    driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
+                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
                                                            " ul.navbar-nav > li:nth-child(4) > a")\
                         .send_keys(Keys.ENTER)
                     event.wait(2)
-                    driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
+                    driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
                                                            " div.panel-options > a:nth-child(2)")\
                         .send_keys(Keys.ENTER)
                     event.wait(1)
-                    driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
+                    driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
                                                            " div.panel-options > a:nth-child(2)") \
                         .send_keys(Keys.ENTER)
                     event.wait(2)
                     try:
-                        button = driver_7.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
+                        button = driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
                                                                         " table > tbody > tr >"
                                                                         " td:nth-child(8) > button")
                         button.send_keys(Keys.ENTER)
                         event.wait(3)
-                        button = driver_7.find_element(By.ID, "start-now")
-                        ActionChains(driver_7).move_to_element(button).click(button).perform()
+                        button = driver.find_element(By.ID, "start-now")
+                        ActionChains(driver).move_to_element(button).click(button).perform()
 
                         logging.info("Started plan successfully")
                     except Exception as ex:
                         logging.info("Error:" + str(ex))
-                    driver_7.quit()
+                    driver.quit()
                     break
                 event.wait(3)
-                window_after = driver_7.window_handles[1]
-                driver_7.switch_to.window(window_after)
+                window_after = driver.window_handles[1]
+                driver.switch_to.window(window_after)
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    driver_7.execute_script("window.scrollTo(0, 600);")
+                    driver.execute_script("window.scrollTo(0, 600);")
                     event.wait(2)
-                    driver_7.save_screenshot("screenshots/screenshot.png")
-                    driver_7.switch_to.default_content()
+                    driver.save_screenshot("screenshots/screenshot.png")
+                    driver.switch_to.default_content()
                     event.wait(1.25)
                     if yt_javascript:
-                        driver_7.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         event.wait(1)
-                        sub_button = driver_7.find_elements(By.ID,
+                        sub_button = driver.find_elements(By.ID,
                                                             ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
                             0]
-                        ActionChains(driver_7).move_to_element(sub_button).click().perform()
+                        ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
-                    driver_7.close()
-                    driver_7.switch_to.window(window_before)
-                    driver_7.switch_to.default_content()
+                    driver.close()
+                    driver.switch_to.window(window_before)
+                    driver.switch_to.default_content()
                     logging.info("Subbed to Channel")
-                    driver_7.switch_to.default_content()
+                    driver.switch_to.default_content()
                     try:
                         event.wait(2)
-                        driver_7.find_element(By.ID, confirm_btn).click()
+                        driver.find_element(By.ID, confirm_btn).click()
                         logging.info("confirm button was clicked")
                         continue
                     except NoSuchElementException:
                         event.wait(2)
-                        window_after = driver_7.window_handles[1]
-                        driver_7.switch_to.window(window_after)
-                        driver_7.close()
-                        driver_7.switch_to.window(window_before)
+                        window_after = driver.window_handles[1]
+                        driver.switch_to.window(window_after)
+                        driver.close()
+                        driver.switch_to.window(window_before)
                         logging.info("couldn't find confirm button")
                         continue
 
-    for_loop_sub(driver)
+    for_loop_sub()
 
 
 def goviral_functions(req_dict: dict) -> None:
@@ -1132,8 +1131,7 @@ def goviral_functions(req_dict: dict) -> None:
     driver.find_element(By.CSS_SELECTOR, "#kt_aside_menu > ul > li:nth-child(4) > a > span.kt-menu__link-text").click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_like(driver_9: webdriver,
-                      like_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
+    def for_loop_like(like_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
                                                 " div.disabled-area.position-relative >"
                                                 " section.earn-likes.earning-box.position-relative.disabled",
                       subscribe_btn_available: str = "#kt_content > div > div.col-md-8 > div > form > div >"
@@ -1149,7 +1147,7 @@ def goviral_functions(req_dict: dict) -> None:
         for i in range(400):
             n = 0
             try:
-                driver_9.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                driver.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
                 # logging.info("Enable button has been pressed")
                 event.wait(2)
@@ -1158,19 +1156,19 @@ def goviral_functions(req_dict: dict) -> None:
                     TimeoutException,
                     StaleElementReferenceException):
                 pass
-            while len(driver_9.find_elements(By.CLASS_NAME, "time-remaining-amount")) == 0:
+            while len(driver.find_elements(By.CLASS_NAME, "time-remaining-amount")) == 0:
                 event.wait(0.5)
                 # logging.info('Flag1')
                 n += 1
                 if n >= 50:
                     try:
                         try:
-                            driver_9.switch_to.window(driver_9.window_handles[1])
-                            driver_9.close()
+                            driver.switch_to.window(driver.window_handles[1])
+                            driver.close()
                         except (NoSuchWindowException, IndexError):
                             pass
-                        driver_9.switch_to.window(driver_9.window_handles[0])
-                        driver_9.get("https://members.goviral.ai/coins")
+                        driver.switch_to.window(driver.window_handles[0])
+                        driver.get("https://members.goviral.ai/coins")
                         logging.info('Goviral is not continuing its functions, refreshing the website 1')
                         break
                     except (ElementNotInteractableException,
@@ -1179,23 +1177,23 @@ def goviral_functions(req_dict: dict) -> None:
                     event.wait(0.25)
                     continue
             if n >= 55:
-                driver.switch_to.window(driver_9.window_handles[0])
+                driver.switch_to.window(driver.window_handles[0])
                 continue
             x = 0
-            while len(driver_9.window_handles) == 1:
+            while len(driver.window_handles) == 1:
                 event.wait(0.5)
                 # logging.info('Flag2')
                 x += 1
                 if x >= 85:
-                    driver_9.refresh()
+                    driver.refresh()
                     break
             if x >= 85:
                 continue
-            driver_9.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             try:
-                driver_9.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
+                driver.find_element(By.XPATH, "//*[@id='kt_content']/div/div[1]/div/form/div/div[1]/div/div/button")\
                     .send_keys(Keys.ENTER)
-                driver_9.refresh()
+                driver.refresh()
                 event.wait(2)
                 continue
             except (NoSuchElementException,
@@ -1204,11 +1202,11 @@ def goviral_functions(req_dict: dict) -> None:
                     StaleElementReferenceException):
                 pass
             try:
-                el = driver_9.find_element(By.CSS_SELECTOR, "#kt_content > div > div.col-md-8 > div > form > div >"
+                el = driver.find_element(By.CSS_SELECTOR, "#kt_content > div > div.col-md-8 > div > form > div >"
                                                             " section > div > div.col-md-12 > div")
-                if el.is_displayed() & len(driver_9.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
-                        len(driver_9.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
-                    driver_9.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
+                if el.is_displayed() & len(driver.find_elements(By.CSS_SELECTOR, subscribe_btn_available)) == 0 & \
+                        len(driver.find_elements(By.CSS_SELECTOR, like_btn_available)) == 0:
+                    driver.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
                     event.wait(0.25)
                     i -= 1
                     continue
@@ -1218,112 +1216,112 @@ def goviral_functions(req_dict: dict) -> None:
                     TimeoutException,
                     StaleElementReferenceException):
                 pass
-            driver_9.save_screenshot("screenshots/screenshot.png")
-            while int(driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text) > 12:
+            driver.save_screenshot("screenshots/screenshot.png")
+            while int(driver.find_element(By.CLASS_NAME, "time-remaining-amount").text) > 12:
                 event.wait(0.25)
                 # logging.info('Flag3')
 
             # try:
-            #     driver_9.switch_to.window(driver_9.window_handles[0])
+            #     driver.switch_to.window(driver.window_handles[0])
             #     event.wait(1)
-            #     driver_9.find_element(By.CSS_SELECTOR, subscribe_btn).send_keys(Keys.ENTER)
+            #     driver.find_element(By.CSS_SELECTOR, subscribe_btn).send_keys(Keys.ENTER)
             #     event.wait(1)
             #     logging.info('Clicked subscribe_btn Button')
             #     try:
-            #         driver_9.switch_to.window(driver_9.window_handles[2])
+            #         driver.switch_to.window(driver.window_handles[2])
             #     except NoSuchWindowException:
-            #         driver_9.switch_to.window(driver_9.window_handles[1])
+            #         driver.switch_to.window(driver.window_handles[1])
             #     try:
-            #         driver_9.execute_script("window.scrollTo(0, 300)")
+            #         driver.execute_script("window.scrollTo(0, 300)")
             #     except TimeoutException:
             #         pass
             #     try:
             #         if yt_javascript:
-            #             driver_9.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+            #             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
             #         else:
-            #             sub_button = driver_9.find_elements(By.ID,
+            #             sub_button = driver.find_elements(By.ID,
             #                                                 ytbutton_elements_location_dict[
             #                                                   'yt_id_sub_button_type1'])[0]
-            #             ActionChains(driver_9).move_to_element(sub_button).click().perform()
+            #             ActionChains(driver).move_to_element(sub_button).click().perform()
             #         logging.info("Subscribed To Channel")
             #     except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
             #         logging.info('Subscribe button not found in youtube page, continuing')
             #         pass
             #     event.wait(1)
-            #     driver_9.save_screenshot("screenshots/screenshot_proof.png")
-            #     driver_9.switch_to.window(window_before)
-            #     driver_9.save_screenshot("screenshots/screenshot.png")
+            #     driver.save_screenshot("screenshots/screenshot_proof.png")
+            #     driver.switch_to.window(window_before)
+            #     driver.save_screenshot("screenshots/screenshot.png")
             # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
             #     logging.info(f'Couldnt find subscribe_btn, {ex}')
             #     pass
-            # driver_9.save_screenshot("screenshots/screenshot.png")
+            # driver.save_screenshot("screenshots/screenshot.png")
             # try:
-            #     driver_9.save_screenshot("screenshots/screenshot.png")
-            #     driver_9.find_element(By.CSS_SELECTOR, like_btn).send_keys(Keys.ENTER)
+            #     driver.save_screenshot("screenshots/screenshot.png")
+            #     driver.find_element(By.CSS_SELECTOR, like_btn).send_keys(Keys.ENTER)
             #     event.wait(1)
             #     try:
-            #         driver_9.switch_to.window(driver_9.window_handles[2])
+            #         driver.switch_to.window(driver.window_handles[2])
             #     except NoSuchWindowException:
-            #         driver_9.switch_to.window(driver_9.window_handles[1])
-            #     if len(driver_9.find_elements(By.CSS_SELECTOR,
+            #         driver.switch_to.window(driver.window_handles[1])
+            #     if len(driver.find_elements(By.CSS_SELECTOR,
             #            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
             #         pass
             #     else:
-            #         driver_9.execute_script("window.scrollTo(0, 300)")
+            #         driver.execute_script("window.scrollTo(0, 300)")
             #         event.wait(0.5)
-            #         driver_9.save_screenshot("screenshots/screenshot.png")
+            #         driver.save_screenshot("screenshots/screenshot.png")
             #         try:
             #             if yt_javascript:
-            #                 driver_9.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+            #                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
             #             else:
-            #                 like_button = driver_9.find_elements(By.TAG_NAME,
+            #                 like_button = driver.find_elements(By.TAG_NAME,
             #                                                      ytbutton_elements_location_dict
             #                                                      ['yt_tag_like_button_type1'])[0]
-            #                 ActionChains(driver_9).move_to_element(like_button).click().perform()
+            #                 ActionChains(driver).move_to_element(like_button).click().perform()
             #             logging.info("Liked Video")
             #         except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
             #             if type(ex).__name__ == 'NoSuchElementException':
             #                 logging.info('like button not found in YouTube page, continuing next')
             #             else:
             #                 event.wait(1)
-            #                 driver_9.save_screenshot("screenshots/screenshot_proof.png")
-            #                 driver_9.switch_to.window(window_before)
+            #                 driver.save_screenshot("screenshots/screenshot_proof.png")
+            #                 driver.switch_to.window(window_before)
             #                 logging.info('like button not found in YouTube page, continuing next')
             # except (ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException) as ex:
             #     pass
             #     logging.info(f'Couldnt find like_btn, {ex}')
-            driver_9.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             try:
                 event.wait(1.5)
-                driver_9.find_element(By.ID, 'verify-action-button').click()
-                driver_9.save_screenshot("screenshots/screenshot.png")
+                driver.find_element(By.ID, 'verify-action-button').click()
+                driver.save_screenshot("screenshots/screenshot.png")
             except (ElementNotInteractableException, StaleElementReferenceException,
                     ElementClickInterceptedException, NoSuchElementException):
                 pass
-            driver_9.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             try:
-                while driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text != "0":
+                while driver.find_element(By.CLASS_NAME, "time-remaining-amount").text != "0":
                     event.wait(0.5)
                     # logging.info('Flag4')
             except (StaleElementReferenceException, NoSuchElementException):
-                driver_9.refresh()
+                driver.refresh()
                 event.wait(1.5)
                 continue
             c = 0
             try:
-                while driver_9.find_element(By.CLASS_NAME, "time-remaining-amount").text == "0":
+                while driver.find_element(By.CLASS_NAME, "time-remaining-amount").text == "0":
                     event.wait(0.5)
                     # logging.info('Flag5')
                     c += 1
                     if c == 120:
                         try:
                             try:
-                                driver_9.switch_to.window(driver_9.window_handles[1])
-                                driver_9.close()
+                                driver.switch_to.window(driver.window_handles[1])
+                                driver.close()
                             except NoSuchWindowException:
                                 pass
-                            driver_9.switch_to.window(driver_9.window_handles[0])
-                            driver_9.get("https://members.goviral.ai/coins")
+                            driver.switch_to.window(driver.window_handles[0])
+                            driver.get("https://members.goviral.ai/coins")
                             logging.info('Goviral is not continuing its functions, refreshing the website 2')
                             break
 
@@ -1334,7 +1332,7 @@ def goviral_functions(req_dict: dict) -> None:
                 event.wait(1)
                 continue
 
-    for_loop_like(driver)
+    for_loop_like()
     logging.info("Channels were engaged successfully, quitting driver")
     driver.quit()
 
@@ -1364,8 +1362,7 @@ def youtubviews_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
     yt_javascript = True
 
-    def for_loop_like(driver: webdriver,
-                      like_btn: str = "followbutton"
+    def for_loop_like(like_btn: str = "followbutton"
                       ) -> None:
         logging.info("Loop Started")
         for i in range(50):
@@ -1415,7 +1412,7 @@ def youtubviews_functions(req_dict: dict) -> None:
             driver.switch_to.window(driver.window_handles[0])
         logging.info("Channels were successfully Liked, quitting driver")
 
-    for_loop_like(driver)
+    for_loop_like()
     driver.quit()
 
 
@@ -1444,29 +1441,28 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(driver_11: webdriver,
-                     follow_btn: str = "followbutton"
+    def for_loop_sub(follow_btn: str = "followbutton"
                      ) -> None:
         logging.info("Loop Started")
         video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
         video_list = []
         for i in range(50):
             event.wait(3)
-            WebDriverWait(driver_11, 90)\
+            WebDriverWait(driver, 90)\
                 .until(ec.visibility_of_element_located((By.CLASS_NAME,
                                                          "likebutton")))\
                 .get_attribute("value")
-            driver_11.save_screenshot("screenshots/screenshot.png")
-            driver_11.switch_to.window(driver_11.window_handles[0])
+            driver.save_screenshot("screenshots/screenshot.png")
+            driver.switch_to.window(driver.window_handles[0])
             event.wait(20)
-            driver_11.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             if i > 0 and video_name == driver.find_element(By.CLASS_NAME, 'mainfocusheader').text:
-                driver_11.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
+                driver.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
                 logging.info("Same Video Skipping...")
                 continue
             video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
             if video_name in video_list:
-                driver_11.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
+                driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
                                                  'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
                     .click()
                 logging.info("Same Video In Video List Skipping To New Videos...")
@@ -1476,28 +1472,28 @@ def youlikehits_functions(req_dict: dict) -> None:
                 continue
             video_list.append(video_name)
             logging.info(video_list)
-            driver_11.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
-            driver_11.switch_to.window(driver_11.window_handles[1])
+            driver.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
+            driver.switch_to.window(driver.window_handles[1])
             try:
                 if yt_javascript:
-                    driver_11.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                    driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
                     event.wait(1)
-                    sub_button = driver_11.find_elements(By.ID,
+                    sub_button = driver.find_elements(By.ID,
                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
-                    ActionChains(driver_11).move_to_element(sub_button).click().perform()
-                driver_11.save_screenshot("screenshots/screenshot_proof.png")
+                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                driver.save_screenshot("screenshots/screenshot_proof.png")
                 logging.info("Subscribed to Channel")
             except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
                 if type(ex).__name__ == 'NoSuchElementException':
                     logging.info('like button not found in YouTube page, continuing next')
             event.wait(15)
-            driver_11.close()
-            driver_11.switch_to.window(driver_11.window_handles[0])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
             event.wait(5)
             button = driver.find_element(By.TAG_NAME, 'button')
-            ActionChains(driver_11).move_to_element(button).click().perform()
-    for_loop_sub(driver)
+            ActionChains(driver).move_to_element(button).click().perform()
+    for_loop_sub()
     driver.quit()
 
 
@@ -1524,8 +1520,7 @@ def like4like_functions(req_dict: dict) -> None:
     driver.get("https://www.like4like.org/user/earn-youtube.php")
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_like(driver_12: webdriver,
-                      like_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
+    def for_loop_like(like_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
                                         "/div[1]/div[2]/div[1]/div/div[3]/div/div/a",
                       like_btn_2: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
                                         "/div[1]/div[2]/div[2]/div/div[3]/div/div/a",
@@ -1537,35 +1532,35 @@ def like4like_functions(req_dict: dict) -> None:
                       ) -> None:
         logging.info("Loop Started")
         for i in range(60):
-            driver_12.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             event.wait(4)
             if i % 2 == 0:
-                driver_12.find_element(By.XPATH, like_btn_1).click()
+                driver.find_element(By.XPATH, like_btn_1).click()
             else:
-                driver_12.find_element(By.XPATH, like_btn_2).click()
-            while len(driver_12.window_handles) == 1:
+                driver.find_element(By.XPATH, like_btn_2).click()
+            while len(driver.window_handles) == 1:
                 event.wait(2)
                 continue
             event.wait(1)
-            driver_12.switch_to.window(driver_12.window_handles[1])
+            driver.switch_to.window(driver.window_handles[1])
             try:
                 event.wait(5)
-                if len(driver_12.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    if len(driver_12.find_elements(By.CSS_SELECTOR,
+                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+                    if len(driver.find_elements(By.CSS_SELECTOR,
                                                    ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                         pass
                     else:
                         event.wait(1.25)
                         if yt_javascript:
-                            driver_12.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
+                            driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
                             try:
-                                like_button = driver_12.find_elements(By.TAG_NAME,
+                                like_button = driver.find_elements(By.TAG_NAME,
                                                                       ytbutton_elements_location_dict
                                                                       ['yt_tag_like_button_type1'])[0]
-                                ActionChains(driver_12).move_to_element(like_button).click().perform()
+                                ActionChains(driver).move_to_element(like_button).click().perform()
                                 logging.info("Liked the Video")
-                                driver_12.save_screenshot("screenshots/screenshot_proof.png")
+                                driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
                                 logging.info('Couldnt find like button')
                                 pass
@@ -1575,15 +1570,15 @@ def like4like_functions(req_dict: dict) -> None:
             except TimeoutException:
                 pass
             event.wait(5)
-            driver_12.close()
+            driver.close()
             event.wait(5)
-            driver_12.switch_to.window(driver_12.window_handles[0])
+            driver.switch_to.window(driver.window_handles[0])
             if i % 2 == 0:
-                driver_12.find_element(By.XPATH, confirm_btn_1).click()
+                driver.find_element(By.XPATH, confirm_btn_1).click()
             else:
-                driver_12.find_element(By.XPATH, confirm_btn_2).click()
+                driver.find_element(By.XPATH, confirm_btn_2).click()
             event.wait(8)
-            driver_12.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
 
-    for_loop_like(driver)
+    for_loop_like()
     driver.quit()
