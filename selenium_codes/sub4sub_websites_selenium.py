@@ -909,21 +909,21 @@ def ytbpals_functions(req_dict: dict) -> None:
                     logging.info("All channels were subscribed, activating free plan")
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
-                                                           " ul.navbar-nav > li:nth-child(4) > a")\
+                                                         " ul.navbar-nav > li:nth-child(4) > a")\
                         .send_keys(Keys.ENTER)
                     event.wait(2)
                     driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
-                                                           " div.panel-options > a:nth-child(2)")\
+                                                         " div.panel-options > a:nth-child(2)")\
                         .send_keys(Keys.ENTER)
                     event.wait(1)
                     driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
-                                                           " div.panel-options > a:nth-child(2)") \
+                                                         " div.panel-options > a:nth-child(2)") \
                         .send_keys(Keys.ENTER)
                     event.wait(2)
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
-                                                                        " table > tbody > tr >"
-                                                                        " td:nth-child(8) > button")
+                                                                      " table > tbody > tr >"
+                                                                      " td:nth-child(8) > button")
                         button.send_keys(Keys.ENTER)
                         event.wait(3)
                         button = driver.find_element(By.ID, "start-now")
@@ -948,7 +948,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     else:
                         event.wait(1)
                         sub_button = driver.find_elements(By.ID,
-                                                            ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
                             0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
