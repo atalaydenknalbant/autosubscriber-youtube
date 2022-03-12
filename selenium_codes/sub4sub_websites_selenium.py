@@ -114,6 +114,19 @@ def set_driver_opt(req_dict: dict,
     return driver
 
 
+def youtube_too_many_controller() -> int:
+    """ Checks user's google account if there are too many subscriptions or likes for the given google account and
+    returns integer that represents condition
+        Args:
+        - driver(webdriver): webdriver parameter.
+        - req_dict(dict): dictionary object of required parameters
+        - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
+        Returns:
+        - None(NoneType)
+        """
+    pass
+
+
 def google_login(driver: webdriver,
                  req_dict: dict,
                  has_login_btn: bool = True,
@@ -749,7 +762,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.get("https://www.ytmonster.net/exchange/views")
     try:
         driver.find_element(By.CSS_SELECTOR, '#client-session > div.settings-fix > div > div > div > svg').click()
-        driver.find_element(By.ID, 'endClient').click()
+        driver.find_element(By.ID, 'endClient').send_keys(Keys.ENTER)
     except NoSuchElementException:
         pass
     driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
