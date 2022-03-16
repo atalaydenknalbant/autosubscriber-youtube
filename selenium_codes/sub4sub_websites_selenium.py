@@ -12,6 +12,7 @@ import os
 from threading import Event
 from datetime import datetime, timedelta
 
+
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -223,7 +224,12 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         event.wait(1.25)
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
+        try:
+            driver.find_elements(By.TAG_NAME, 'ytd-grid-video-renderer')[0].click()
+        except (NoSuchElementException, IndexError):
+            pass
         event.wait(1.5)
+        driver.save_screenshot("screenshots/screenshot.png")
         try:
             if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements(By.CSS_SELECTOR,
@@ -249,7 +255,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                 except (NoSuchElementException, ElementNotInteractableException):
                     logging.info('Couldnt find sub button in: ' + d)
@@ -532,7 +538,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         else:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[0]
+                                                              ['yt_id_sub_button_type1'])[1]
                             try:
                                 ActionChains(driver).move_to_element(sub_button).click().perform()
                             except ElementNotInteractableException:
@@ -691,7 +697,7 @@ def submenow_functions(req_dict: dict) -> None:
                         else:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[0]
+                                                              ['yt_id_sub_button_type1'])[1]
                             try:
                                 ActionChains(driver).move_to_element(sub_button).click().perform()
                             except ElementNotInteractableException:
@@ -867,7 +873,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         event.wait(1)
                         sub_button = driver.find_elements(By.ID,
                                                             ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            0]
+                            1]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
@@ -962,7 +968,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         event.wait(1)
                         sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            0]
+                            1]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
@@ -1356,7 +1362,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 else:
                     event.wait(1)
                     sub_button = driver.find_elements(By.ID,
-                                                         ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
+                                                         ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
                     ActionChains(driver).move_to_element(sub_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
                 logging.info("Subscribed to Channel")
