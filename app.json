@@ -89,14 +89,6 @@
       "value": "Enter ViewGrip Password",
       "required": true
     },
-    "goviral_email": {
-      "value": "Enter GoViral Email",
-      "required": true
-    },
-    "goviral_password": {
-      "value": "Enter GoViral Password",
-      "required": true
-    },
     "tolikes_username": {
       "value": "Enter TOLikes Username",
       "required": true
