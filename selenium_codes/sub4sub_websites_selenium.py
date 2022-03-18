@@ -538,7 +538,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         else:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[1]
+                                                              ['yt_id_sub_button_type1'])[0]
                             try:
                                 ActionChains(driver).move_to_element(sub_button).click().perform()
                             except ElementNotInteractableException:
@@ -697,7 +697,7 @@ def submenow_functions(req_dict: dict) -> None:
                         else:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[1]
+                                                              ['yt_id_sub_button_type1'])[0]
                             try:
                                 ActionChains(driver).move_to_element(sub_button).click().perform()
                             except ElementNotInteractableException:
@@ -874,7 +874,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         event.wait(secrets.choice(range(1, 4)))
                         sub_button = driver.find_elements(By.ID,
                                                             ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            1]
+                            0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
@@ -969,7 +969,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         event.wait(secrets.choice(range(1, 4)))
                         sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            1]
+                            0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
@@ -1137,7 +1137,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 else:
                     event.wait(secrets.choice(range(1, 4)))
                     sub_button = driver.find_elements(By.ID,
-                                                         ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
+                                                         ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
                     ActionChains(driver).move_to_element(sub_button).click().perform()
                 driver.save_screenshot("screenshots/screenshot_proof.png")
                 logging.info("Subscribed to Channel")
