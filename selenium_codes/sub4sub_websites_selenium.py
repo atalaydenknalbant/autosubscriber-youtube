@@ -767,16 +767,15 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.find_element(By.CSS_SELECTOR, "#formLogin > button").send_keys(Keys.ENTER)
     driver.get("https://www.ytmonster.net/exchange/views")
     try:
-        driver.find_element(By.CSS_SELECTOR, '#client-session > div.settings-fix > div > div > div > svg').click()
-        driver.find_element(By.ID, 'endClient').send_keys(Keys.ENTER)
+        driver.execute_script("document.querySelector('#endAll').click()")
     except NoSuchElementException:
         pass
     driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
     driver.save_screenshot("screenshots/screenshot.png")
     driver.set_window_size(1200, 900)
     event.wait(secrets.choice(range(1, 4)))
-    event.wait(secrets.choice(range(1, 4)))
     driver.execute_script("document.querySelector('#startBtn').click()")
+    event.wait(secrets.choice(range(1, 4)))
     driver.execute_script("document.querySelector('#startBtn').click()")
     # yt_javascript = True
 
