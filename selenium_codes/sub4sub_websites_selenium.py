@@ -245,7 +245,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                                                ytbutton_elements_location_dict
                                                                ['yt_tag_like_button_type1'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
-                        except (NoSuchElementException, IndexError):
+                        except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info('Couldnt find like button in: ' + d)
                             pass
                 event.wait(secrets.choice(range(1, 4)))
