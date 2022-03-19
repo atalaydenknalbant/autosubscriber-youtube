@@ -673,6 +673,7 @@ def submenow_functions(req_dict: dict) -> None:
                     except (StaleElementReferenceException, NoSuchElementException):
                         logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
                         driver.quit()
+                        return
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.ID, "btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after = driver.window_handles[1]
