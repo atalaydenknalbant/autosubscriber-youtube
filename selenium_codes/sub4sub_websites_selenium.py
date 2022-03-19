@@ -437,7 +437,12 @@ def subscribersvideo_functions(req_dict: dict) -> None:
         logging.info("subscribersvideo"+str(ex))
         driver.quit()
         return
-    driver.find_element(By.CSS_SELECTOR, "#main-nav > ul > li:nth-child(4) > button").click()
+    try:
+        driver.find_element(By.CSS_SELECTOR, "#main-nav > ul > li:nth-child(4) > button").click()
+    except NoSuchElementException:
+        logging.info("subscribersvideo Website Temporarily Unavailable, closing driver")
+        driver.quit()
+        return
     driver.find_element(By.ID, "inputEmail").send_keys(req_dict['email_subscribersvideo'])
     driver.find_element(By.ID, "inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element(By.ID, "buttonSignIn").click()
