@@ -778,7 +778,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         pass
 
     def open_tabs(total_tabs: int = 3) -> None:
-        for i in range(3):
+        for i in range(total_tabs):
             if i == 0:
                 pass
             else:
