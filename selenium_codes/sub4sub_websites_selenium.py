@@ -776,14 +776,22 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver.execute_script("document.querySelector('#endAll').click()")
     except NoSuchElementException:
         pass
-    driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
-    driver.save_screenshot("screenshots/screenshot.png")
-    driver.set_window_size(1200, 900)
-    event.wait(secrets.choice(range(1, 4)))
-    driver.execute_script("document.querySelector('#startBtn').click()")
-    event.wait(secrets.choice(range(1, 4)))
-    driver.execute_script("document.querySelector('#startBtn').click()")
-    # yt_javascript = True
+
+    def open_tabs(total_tabs: int = 3) -> None:
+        for i in range(3):
+            if i == 0:
+                pass
+            else:
+                driver.execute_script("window.open('');")
+                driver.switch_to.window(driver.window_handles[i])
+            driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
+            driver.save_screenshot("screenshots/screenshot.png")
+            driver.set_window_size(1200, 900)
+            event.wait(secrets.choice(range(1, 4)))
+            driver.execute_script("document.querySelector('#startBtn').click()")
+            event.wait(secrets.choice(range(1, 4)))
+            driver.execute_script("document.querySelector('#startBtn').click()")
+    open_tabs()
 
     def timer(hours_time: int) -> None:
         """closes the program after given time in hours
