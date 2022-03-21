@@ -776,7 +776,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver.execute_script("document.querySelector('#endAll').click()")
     except NoSuchElementException:
         pass
-
+    event.wait(secrets.choice(range(1, 4)))
     def open_tabs(total_tabs: int = 3) -> None:
         for i in range(total_tabs):
             if i == 0:
@@ -810,7 +810,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver.quit()
 
     # Determines How Many Hours Program Will Run
-    timer(5)
+    timer(6)
 
 
 def ytbpals_functions(req_dict: dict) -> None:
