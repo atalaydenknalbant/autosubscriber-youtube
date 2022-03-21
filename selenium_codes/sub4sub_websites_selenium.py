@@ -777,6 +777,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     except NoSuchElementException:
         pass
     event.wait(secrets.choice(range(1, 4)))
+
     def open_tabs(total_tabs: int = 3) -> None:
         for i in range(total_tabs):
             if i == 0:
