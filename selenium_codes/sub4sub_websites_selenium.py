@@ -862,7 +862,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         .send_keys(Keys.ENTER)
                     try:
                         driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table > table >"
-                                                               " tbody > tr > td:nth-child(8) > button")\
+                                                             " tbody > tr > td:nth-child(8) > button")\
                             .send_keys(Keys.ENTER)
 
                         driver.find_element(By.ID, "start-now")\
@@ -888,7 +888,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     else:
                         event.wait(secrets.choice(range(1, 4)))
                         sub_button = driver.find_elements(By.ID,
-                                                            ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
                             0]
                         ActionChains(driver).move_to_element(sub_button).click().perform()
                     driver.save_screenshot("screenshots/screenshot_proof.png")
@@ -1219,7 +1219,7 @@ def like4like_functions(req_dict: dict) -> None:
                 event.wait(secrets.choice(range(1, 4)))
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     if len(driver.find_elements(By.CSS_SELECTOR,
-                                                   ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
+                                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                         pass
                     else:
                         event.wait(secrets.choice(range(1, 4)))
