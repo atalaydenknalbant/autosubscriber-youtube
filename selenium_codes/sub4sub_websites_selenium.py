@@ -811,7 +811,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver.quit()
 
     # Determines How Many Hours Program Will Run
-    timer(6)
+    timer(16)
 
 
 def ytbpals_functions(req_dict: dict) -> None:
@@ -858,7 +858,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     logging.info("No such Element Exception(sub_btn)")
                     driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
-                                                           " ul.navbar-nav > li:nth-child(4) > a") \
+                                                         " ul.navbar-nav > li:nth-child(4) > a") \
                         .send_keys(Keys.ENTER)
                     try:
                         driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table > table >"
@@ -1228,8 +1228,8 @@ def like4like_functions(req_dict: dict) -> None:
                         else:
                             try:
                                 like_button = driver.find_elements(By.TAG_NAME,
-                                                                      ytbutton_elements_location_dict
-                                                                      ['yt_tag_like_button_type1'])[0]
+                                                                   ytbutton_elements_location_dict
+                                                                   ['yt_tag_like_button_type1'])[0]
                                 ActionChains(driver).move_to_element(like_button).click().perform()
                                 logging.info("Liked the Video")
                                 driver.save_screenshot("screenshots/screenshot_proof.png")
