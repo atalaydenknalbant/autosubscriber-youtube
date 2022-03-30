@@ -192,7 +192,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 event.wait(secrets.choice(range(1, 4)))
                 while driver.find_element(By.ID, "seconds").text == "0":
                     continue
-            except NoSuchElementException:
+            except (StaleElementReferenceException, NoSuchElementException):
                 driver.save_screenshot("screenshots/screenshot.png")
                 if driver.find_elements(By.ID, "remainingHint") == 0:
                     driver.quit()
