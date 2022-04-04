@@ -1135,7 +1135,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
             if video_name in video_list:
                 driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
-                                                 'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
+                                              'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
                     .click()
                 logging.info("Same Video In Video List Skipping To New Videos...")
                 event.wait(7)
