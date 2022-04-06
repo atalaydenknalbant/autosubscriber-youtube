@@ -165,8 +165,6 @@ def google_login(driver: webdriver,
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
-                                 req_dict: dict,
-                                 special_condition: int = 1,
                                  confirm_btn_code: str = "driver.find_elements(By.CLASS_NAME, 'btn-step')[2]",
                                  subscribe_btn_code: str = "driver.find_elements(By.CLASS_NAME, 'btn-step')[0]"
                                  ) -> None:
@@ -330,7 +328,7 @@ def subpals_functions(req_dict: dict) -> None:
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    type_1_for_loop_like_and_sub(driver, "subpals", req_dict)
+    type_1_for_loop_like_and_sub(driver, "subpals")
     driver.quit()
 
 
@@ -373,7 +371,7 @@ def sonuker_functions(req_dict: dict) -> None:
         pass
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
-    type_1_for_loop_like_and_sub(driver, "sonuker", req_dict)
+    type_1_for_loop_like_and_sub(driver, "sonuker")
     driver.quit()
 
 
@@ -410,7 +408,7 @@ def ytpals_functions(req_dict: dict) -> None:
         pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
-    type_1_for_loop_like_and_sub(driver, "ytpals", req_dict)
+    type_1_for_loop_like_and_sub(driver, "ytpals")
     driver.quit()
 
 
