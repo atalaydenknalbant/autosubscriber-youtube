@@ -214,11 +214,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
             break
-        if driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
-                                         "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
-            logging.info(d+" Website is not working properly, closing driver")
-            driver.quit()
-            return
+        try:
+            if driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
+                                             "div/div/div/div/div[2]/div[1]/h2/span/div").text == "-":
+                logging.info(d+" Website is not working properly, closing driver")
+                driver.quit()
+                return
+        except Exception:
+            pass
         event.wait(secrets.choice(range(1, 4)))
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
