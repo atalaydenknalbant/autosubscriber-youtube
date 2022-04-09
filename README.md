@@ -5,7 +5,7 @@
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/atalaydenknalbant/autosubscriber-youtube) **<- Don't Suggest. Use Local Instead**
 # autosubscriber-youtube 
-Python Selenium-based automated subscribing, liking functions for youtube sub4sub websites.
+Python Selenium-based automated subscribing, liking, viewing functions for youtube sub4sub websites.
 
 ## Pre-requisites
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) <a href="https://chromedriver.chromium.org/">
