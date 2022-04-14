@@ -278,7 +278,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             continue
         driver.switch_to.window(window_before)
         driver.save_screenshot("screenshots/screenshot.png")
-        while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
+        try:
+            while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
+                pass
+        except Exception:
             pass
         try:
             button_confirm = eval(confirm_btn_code)
