@@ -759,7 +759,7 @@ def submenow_functions(req_dict: dict) -> None:
 
 
 def ytmonster_functions(req_dict: dict) -> None:
-    """ytmonster login and then earn credits by liking videos with inner like loop function(for_loop_sub)
+    """ytmonster login and then earn credits by watching videos
     Args:
     - req_dict(dict): dictionary object of required parameters
     Returns:
@@ -1093,18 +1093,18 @@ def youtubviews_functions(req_dict: dict) -> None:
 
 
 def youlikehits_functions(req_dict: dict) -> None:
-    """youlikehits login and then earn credits by subscribing videos with inner sub loop function(for_loop_sub)
+    """youlikehits login and then earn credits by watching videos with inner sub loop function(for_loop_watch)
     Args:
     - req_dict(dict): dictionary object of required parameters
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict,False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
-    event.wait(secrets.choice(range(1, 4)))
+    event.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element(By.ID, "username").send_keys(req_dict['username_youlikehits'])
@@ -1113,63 +1113,45 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element(By.XPATH, '/html/body/div/table[1]/tbody/tr[2]/td/table/tbody/tr/td/nav/ul/li[2]/a').click()
     driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]/'
-                                  'td/center/div[8]/div').click()
+                                  'td/center/div[6]/div').click()
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_sub(follow_btn: str = "followbutton"
-                     ) -> None:
+    def for_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
-        video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
-        video_list = []
-        for i in range(50):
-            event.wait(secrets.choice(range(1, 4)))
-            WebDriverWait(driver, 90)\
-                .until(ec.visibility_of_element_located((By.CLASS_NAME,
-                                                         "likebutton")))\
+        video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+        now = datetime.now()
+        hours_added = timedelta(hours=hours_time)
+        future = now + hours_added
+        while True:
+            if datetime.now() > future:
+                break
+            event.wait(secrets.choice(range(6, 10)))
+            driver.save_screenshot("screenshots/g_screenshot.png")
+            WebDriverWait(driver, 200)\
+                .until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/'
+                                                                   'tr/td/center/table/tbody/tr[2]/td/center/div[1]'
+                                                                   '/table/tbody/tr[2]/td/center/b')))\
                 .get_attribute("value")
-            driver.save_screenshot("screenshots/screenshot.png")
-            driver.switch_to.window(driver.window_handles[0])
-            event.wait(20)
-            driver.save_screenshot("screenshots/screenshot.png")
-            if i > 0 and video_name == driver.find_element(By.CLASS_NAME, 'mainfocusheader').text:
-                driver.find_element(By.CSS_SELECTOR, '#DoesLike > a').click()
-                logging.info("Same Video Skipping...")
-                continue
-            video_name = driver.find_element(By.CLASS_NAME, 'mainfocusheader').text
-            if video_name in video_list:
-                driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/center/'
-                                              'table/tbody/tr[2]/td/center/div[2]/center/a/img')\
-                    .click()
-                logging.info("Same Video In Video List Skipping To New Videos...")
-                event.wait(7)
-                driver.find_elements(By.CLASS_NAME, follow_btn)[0].click()
-                event.wait(secrets.choice(range(1, 4)))
-                continue
-            video_list.append(video_name)
-            logging.info(video_list)
-            driver.find_element(By.CLASS_NAME, 'likebutton').send_keys(Keys.ENTER)
-            driver.switch_to.window(driver.window_handles[1])
-            try:
-                if yt_javascript:
-                    driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                else:
-                    event.wait(secrets.choice(range(1, 4)))
-                    sub_button = driver.find_elements(By.ID,
-                                                         ytbutton_elements_location_dict['yt_id_sub_button_type1'])[0]
-                    ActionChains(driver).move_to_element(sub_button).click().perform()
-                driver.save_screenshot("screenshots/screenshot_proof.png")
-                logging.info("Subscribed to Channel")
-            except (NoSuchWindowException, StaleElementReferenceException, NoSuchElementException) as ex:
-                if type(ex).__name__ == 'NoSuchElementException':
-                    logging.info('like button not found in YouTube page, continuing next')
-            event.wait(15)
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-            event.wait(secrets.choice(range(1, 4)))
-            button = driver.find_element(By.TAG_NAME, 'button')
-            ActionChains(driver).move_to_element(button).click().perform()
-    for_loop_sub()
+            event.wait(secrets.choice(range(6, 10)))
+            while video_name != driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/'
+                                                              'tbody/'
+                                                              'tr/td/center/table/tbody/tr[2]/td/center/'
+                                                              'div[1]'
+                                                              '/table/tbody/tr[2]/'
+                                                              'td/center/b').text.split('"')[1::2][0]:
+                event.wait(3)
+            event.wait(secrets.choice(range(6, 10)))
+            video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            while len(driver.window_handles) == 1:
+                # print("window_handles: ", len(driver.window_handles))
+                button = driver.find_element(By.CLASS_NAME, 'followbutton')
+                ActionChains(driver).move_to_element(button).click().perform()
+                event.wait(secrets.choice(range(5, 7)))
+            event.wait(secrets.choice(range(5, 7)))
+
+
+    for_loop_watch(16)
     driver.quit()
 
 
