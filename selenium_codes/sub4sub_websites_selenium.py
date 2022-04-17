@@ -1099,7 +1099,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, False)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1134,13 +1134,23 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                                    '/table/tbody/tr[2]/td/center/b')))\
                 .get_attribute("value")
             event.wait(secrets.choice(range(6, 10)))
-            while video_name != driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/'
+            driver.save_screenshot("screenshots/g_screenshot.png")
+
+            try:
+                c = 0
+                while video_name != driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/'
                                                               'tbody/'
                                                               'tr/td/center/table/tbody/tr[2]/td/center/'
                                                               'div[1]'
                                                               '/table/tbody/tr[2]/'
                                                               'td/center/b').text.split('"')[1::2][0]:
-                event.wait(3)
+                    event.wait(2)
+                    # logging.info('flag1')
+                    c += 1
+                    if c == 75:
+                        break
+            except NoSuchElementException:
+                pass
             event.wait(secrets.choice(range(6, 10)))
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             while len(driver.window_handles) == 1:
@@ -1148,6 +1158,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 button = driver.find_element(By.CLASS_NAME, 'followbutton')
                 ActionChains(driver).move_to_element(button).click().perform()
                 event.wait(secrets.choice(range(5, 7)))
+                # logging.info('Flag2')
             event.wait(secrets.choice(range(5, 7)))
 
 
