@@ -1127,11 +1127,14 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
-            WebDriverWait(driver, 200)\
-                .until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/'
+            # driver.save_screenshot("screenshots/g_screenshot.png")
+            try:
+                WebDriverWait(driver, 200).until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/'
                                                                    'tr/td/center/table/tbody/tr[2]/td/center/div[1]'
-                                                                   '/table/tbody/tr[2]/td/center/b')))\
-                .get_attribute("value")
+                                                                   '/table/tbody/tr[2]/td/center/b'))).get_attribute("value")
+
+            except TimeoutException:
+                pass
             event.wait(secrets.choice(range(6, 10)))
             try:
                 c = 0
@@ -1154,6 +1157,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # print("window_handles: ", len(driver.window_handles))
                 button = driver.find_element(By.CLASS_NAME, 'followbutton')
                 ActionChains(driver).move_to_element(button).click().perform()
+                try:
+                    button.send_keys(Keys.ENTER)
+                except (StaleElementReferenceException, ElementNotInteractableException,
+                        NoSuchElementException):
+                    pass
+
                 event.wait(secrets.choice(range(5, 7)))
                 # logging.info('Flag2')
             event.wait(secrets.choice(range(5, 7)))
