@@ -1099,7 +1099,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, False)
+    driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1127,15 +1127,12 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
-            driver.save_screenshot("screenshots/g_screenshot.png")
             WebDriverWait(driver, 200)\
                 .until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/'
                                                                    'tr/td/center/table/tbody/tr[2]/td/center/div[1]'
                                                                    '/table/tbody/tr[2]/td/center/b')))\
                 .get_attribute("value")
             event.wait(secrets.choice(range(6, 10)))
-            driver.save_screenshot("screenshots/g_screenshot.png")
-
             try:
                 c = 0
                 while video_name != driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/'
