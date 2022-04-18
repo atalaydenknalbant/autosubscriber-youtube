@@ -1123,27 +1123,23 @@ def youlikehits_functions(req_dict: dict) -> None:
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
+        i = 0
         while True:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
             # driver.save_screenshot("screenshots/g_screenshot.png")
             try:
-                WebDriverWait(driver, 200).until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/'
-                                                                   'tr/td/center/table/tbody/tr[2]/td/center/div[1]'
-                                                                   '/table/tbody/tr[2]/td/center/b'))).get_attribute("value")
+                WebDriverWait(driver, 200).until(ec.visibility_of_element_located((By.XPATH, '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.format(i)))).get_attribute("value")
 
-            except TimeoutException:
+            except (TimeoutException, IndexError):
+                if IndexError:
+                    i -= 1
                 pass
             event.wait(secrets.choice(range(6, 10)))
             try:
                 c = 0
-                while video_name != driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/'
-                                                              'tbody/'
-                                                              'tr/td/center/table/tbody/tr[2]/td/center/'
-                                                              'div[1]'
-                                                              '/table/tbody/tr[2]/'
-                                                              'td/center/b').text.split('"')[1::2][0]:
+                while video_name != driver.find_element(By.XPATH, '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.format(i)).text.split('"')[1::2][0]:
                     event.wait(2)
                     # logging.info('flag1')
                     c += 1
@@ -1153,17 +1149,18 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             event.wait(secrets.choice(range(6, 10)))
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            z = 0
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
-                button = driver.find_element(By.CLASS_NAME, 'followbutton')
-                ActionChains(driver).move_to_element(button).click().perform()
-                try:
-                    button.send_keys(Keys.ENTER)
-                except (StaleElementReferenceException, ElementNotInteractableException,
-                        NoSuchElementException):
-                    pass
-
+                driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 event.wait(secrets.choice(range(5, 7)))
+                z += 1
+                if z == 15:
+                    driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
+                    event.wait(secrets.choice(range(5, 7)))
+                    driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                    if z == 15:
+                        i += 1
                 # logging.info('Flag2')
             event.wait(secrets.choice(range(5, 7)))
 
