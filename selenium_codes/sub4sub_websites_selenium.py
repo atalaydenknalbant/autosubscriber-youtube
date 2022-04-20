@@ -1128,9 +1128,12 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
-            # driver.save_screenshot("screenshots/g_screenshot.png")
+            # driver.save_screenshot("screenshots/screenshot.png")
             try:
-                WebDriverWait(driver, 200).until(ec.visibility_of_element_located((By.XPATH, '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.format(i)))).get_attribute("value")
+                WebDriverWait(driver, 100).until(ec.visibility_of_element_located((By.XPATH,
+                                                                                   '//*[@id="showresult"]/table/tbody/'
+                                                                                   'tr[{}]/td/center/b'.format(i))))\
+                    .get_attribute("value")
 
             except (TimeoutException, IndexError):
                 if IndexError:
@@ -1159,9 +1162,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
                     event.wait(secrets.choice(range(5, 7)))
                     driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                    # logging.info('Flag2')
                     if z == 15:
                         i += 1
-                # logging.info('Flag2')
+                # logging.info('Flag3')
             event.wait(secrets.choice(range(5, 7)))
 
 
