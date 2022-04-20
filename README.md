@@ -27,7 +27,7 @@ Python Selenium-based automated subscribing, liking, viewing functions for youtu
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YoutubViews](https://i.imgur.com/FGlNFkd.png)](https://youtubviews.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](https://www.youlikehits.com/) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YoutubViews](https://i.imgur.com/FGlNFkd.png)](https://youtubviews.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) 
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
