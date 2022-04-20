@@ -1130,7 +1130,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             event.wait(secrets.choice(range(6, 10)))
             # driver.save_screenshot("screenshots/screenshot.png")
             try:
-                WebDriverWait(driver, 100).until(ec.visibility_of_element_located((By.XPATH,
+                WebDriverWait(driver, 120).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
                                                                                    'tr[{}]/td/center/b'.format(i))))\
                     .get_attribute("value")
