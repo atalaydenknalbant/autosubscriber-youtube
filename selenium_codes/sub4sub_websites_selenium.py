@@ -1151,6 +1151,14 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 pass
             event.wait(secrets.choice(range(6, 10)))
+            # driver.save_screenshot("screenshots/screenshot.png")
+            try:
+                if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
+                        'There are no videos available to view at this time. Try coming back or refreshing.':
+                    logging.info('No videos available quitting...')
+                    return
+            except NoSuchElementException:
+                pass
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             z = 0
             while len(driver.window_handles) == 1:
