@@ -1114,6 +1114,13 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_element(By.XPATH, '/html/body/div/table[1]/tbody/tr[2]/td/table/tbody/tr/td/nav/ul/li[2]/a').click()
     driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]/'
                                   'td/center/div[6]/div').click()
+    try:
+        if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
+                'There are no videos available to view at this time. Try coming back or refreshing.':
+            logging.info('No videos available quitting...')
+            return
+    except NoSuchElementException:
+        pass
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
