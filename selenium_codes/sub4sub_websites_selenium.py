@@ -281,7 +281,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 pass
-        except Exception:
+        except (NoSuchElementException, NoSuchElementException):
             pass
         try:
             button_confirm = eval(confirm_btn_code)
@@ -1126,7 +1126,7 @@ def youlikehits_functions(req_dict: dict) -> None:
 
     def for_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
-        video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+        video_name: str = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
