@@ -1135,7 +1135,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
-            # driver.save_screenshot("screenshots/screenshot.png")
             try:
                 WebDriverWait(driver, 120).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
