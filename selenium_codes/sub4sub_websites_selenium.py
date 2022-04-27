@@ -1208,7 +1208,7 @@ def like4like_functions(req_dict: dict) -> None:
     driver.save_screenshot("screenshots/screenshot.png")
     event.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.like4like.org/user/earn-youtube.php")
-    driver.save_screenshot("screenshots/screenshot.png")
+    # driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_like(like_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
                                         "/div[1]/div[2]/div[1]/div/div[3]/div/div/a",
