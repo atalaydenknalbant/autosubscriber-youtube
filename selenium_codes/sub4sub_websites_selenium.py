@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException
+    NoSuchWindowException, WebDriverException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -190,7 +190,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 event.wait(secrets.choice(range(1, 4)))
                 while driver.find_element(By.ID, "seconds").text == "0":
                     continue
-            except (StaleElementReferenceException, NoSuchElementException):
+            except (StaleElementReferenceException, NoSuchElementException, WebDriverException):
                 driver.save_screenshot("screenshots/screenshot.png")
                 if driver.find_elements(By.ID, "remainingHint") == 0:
                     driver.quit()
@@ -1195,7 +1195,7 @@ def like4like_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(12)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
@@ -1225,8 +1225,12 @@ def like4like_functions(req_dict: dict) -> None:
             # driver.save_screenshot("screenshots/screenshot.png")
             event.wait(secrets.choice(range(1, 4)))
             if i % 2 == 0:
+                driver.save_screenshot("screenshots/screenshot.png")
+                event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_1).click()
             else:
+                driver.save_screenshot("screenshots/screenshot.png")
+                event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_2).click()
             while len(driver.window_handles) == 1:
                 event.wait(secrets.choice(range(1, 4)))
