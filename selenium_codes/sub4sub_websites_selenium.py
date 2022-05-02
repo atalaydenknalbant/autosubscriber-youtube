@@ -1224,14 +1224,14 @@ def like4like_functions(req_dict: dict) -> None:
                       ) -> None:
         logging.info("Loop Started")
         for i in range(500):
-            # driver.save_screenshot("screenshots/screenshot.png")
+            driver.save_screenshot("screenshots/screenshot.png")
             event.wait(secrets.choice(range(1, 4)))
             if i % 2 == 0:
-                # driver.save_screenshot("screenshots/screenshot.png")
+                driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_1).click()
             else:
-                # driver.save_screenshot("screenshots/screenshot.png")
+                driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_2).click()
             while len(driver.window_handles) == 1:
