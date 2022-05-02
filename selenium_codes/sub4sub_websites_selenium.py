@@ -1227,11 +1227,11 @@ def like4like_functions(req_dict: dict) -> None:
             # driver.save_screenshot("screenshots/screenshot.png")
             event.wait(secrets.choice(range(1, 4)))
             if i % 2 == 0:
-                driver.save_screenshot("screenshots/screenshot.png")
+                # driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_1).click()
             else:
-                driver.save_screenshot("screenshots/screenshot.png")
+                # driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(secrets.choice(range(1, 4)))
                 driver.find_element(By.XPATH, like_btn_2).click()
             while len(driver.window_handles) == 1:
@@ -1267,7 +1267,7 @@ def like4like_functions(req_dict: dict) -> None:
                 pass
             event.wait(secrets.choice(range(1, 4)))
             driver.close()
-            event.wait(secrets.choice(range(1, 4)))
+            event.wait(secrets.choice(range(3, 5)))
             driver.switch_to.window(driver.window_handles[0])
             if i % 2 == 0:
                 driver.find_element(By.XPATH, confirm_btn_1).click()
