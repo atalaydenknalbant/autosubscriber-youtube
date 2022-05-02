@@ -1223,7 +1223,7 @@ def like4like_functions(req_dict: dict) -> None:
 
                       ) -> None:
         logging.info("Loop Started")
-        for i in range(60):
+        for i in range(500):
             # driver.save_screenshot("screenshots/screenshot.png")
             event.wait(secrets.choice(range(1, 4)))
             if i % 2 == 0:
