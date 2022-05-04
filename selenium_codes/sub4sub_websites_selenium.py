@@ -1225,28 +1225,32 @@ def like4like_functions(req_dict: dict) -> None:
         logging.info("Loop Started")
         for i in range(500):
             driver.save_screenshot("screenshots/screenshot.png")
-            event.wait(secrets.choice(range(1, 4)))
+            event.wait(secrets.choice(range(3, 4)))
             if i % 2 == 0:
                 driver.save_screenshot("screenshots/screenshot.png")
-                event.wait(secrets.choice(range(1, 4)))
-                driver.find_element(By.XPATH, like_btn_1).click()
+                event.wait(secrets.choice(range(3, 4)))
+                try:
+                    driver.find_element(By.XPATH, like_btn_1).click()
+                except NoSuchElementException:
+                    pass
+
             else:
                 driver.save_screenshot("screenshots/screenshot.png")
-                event.wait(secrets.choice(range(1, 4)))
+                event.wait(secrets.choice(range(3, 4)))
                 driver.find_element(By.XPATH, like_btn_2).click()
             while len(driver.window_handles) == 1:
                 event.wait(secrets.choice(range(1, 4)))
                 continue
-            event.wait(secrets.choice(range(1, 4)))
+            event.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[1])
             try:
-                event.wait(secrets.choice(range(1, 4)))
+                event.wait(secrets.choice(range(3, 4)))
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     if len(driver.find_elements(By.CSS_SELECTOR,
                                                 ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                         pass
                     else:
-                        event.wait(secrets.choice(range(1, 4)))
+                        event.wait(secrets.choice(range(3, 4)))
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
@@ -1267,7 +1271,7 @@ def like4like_functions(req_dict: dict) -> None:
                 pass
             event.wait(secrets.choice(range(1, 4)))
             driver.close()
-            event.wait(secrets.choice(range(3, 5)))
+            event.wait(secrets.choice(range(7, 10)))
             driver.switch_to.window(driver.window_handles[0])
             if i % 2 == 0:
                 driver.find_element(By.XPATH, confirm_btn_1).click()
