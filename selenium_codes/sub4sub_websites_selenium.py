@@ -306,7 +306,7 @@ def subpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(4.75)
+    driver.implicitly_wait(4.5)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(secrets.choice(range(1, 4)))
@@ -348,7 +348,7 @@ def sonuker_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(4.5)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(secrets.choice(range(1, 4)))
@@ -391,7 +391,7 @@ def ytpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(4.5)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     event.wait(secrets.choice(range(1, 4)))
@@ -428,7 +428,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(8)
+    driver.implicitly_wait(7.75)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -602,7 +602,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
-    driver.implicitly_wait(4.75)
+    driver.implicitly_wait(4.5)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -727,7 +727,7 @@ def submenow_functions(req_dict: dict) -> None:
                             # logging.info("Flag2")
                         # driver.save_screenshot("screenshots/screenshot.png")
                         el = \
-                            WebDriverWait(driver, 8).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
+                            WebDriverWait(driver, 7.75).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                         el.click()
                     except ElementNotInteractableException:
                         logging.info("submenow Found Element Not Interact able Exception, Quitting")
@@ -1226,9 +1226,11 @@ def like4like_functions(req_dict: dict) -> None:
         for i in range(500):
             driver.save_screenshot("screenshots/screenshot.png")
             event.wait(secrets.choice(range(3, 4)))
+            logging.info('Flag1')
             if i % 2 == 0:
                 driver.save_screenshot("screenshots/screenshot.png")
                 event.wait(secrets.choice(range(3, 4)))
+                logging.info('Flag2')
                 try:
                     driver.find_element(By.XPATH, like_btn_1).click()
                 except NoSuchElementException:
@@ -1240,11 +1242,14 @@ def like4like_functions(req_dict: dict) -> None:
                 driver.find_element(By.XPATH, like_btn_2).click()
             while len(driver.window_handles) == 1:
                 event.wait(secrets.choice(range(1, 4)))
+                logging.info('Flag3')
                 continue
             event.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[1])
+            logging.info('Flag4')
             try:
                 event.wait(secrets.choice(range(3, 4)))
+                logging.info('Flag5')
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     if len(driver.find_elements(By.CSS_SELECTOR,
                                                 ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
@@ -1273,6 +1278,7 @@ def like4like_functions(req_dict: dict) -> None:
             driver.close()
             event.wait(secrets.choice(range(7, 10)))
             driver.switch_to.window(driver.window_handles[0])
+            logging.info('Flag6')
             if i % 2 == 0:
                 driver.find_element(By.XPATH, confirm_btn_1).click()
             else:
