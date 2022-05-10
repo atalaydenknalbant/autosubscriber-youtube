@@ -428,7 +428,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7.75)
+    driver.implicitly_wait(7.65)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -524,7 +524,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         break
                     window_after = driver.window_handles[1]
                     driver.switch_to.window(window_after)
-                    driver.switch_to.default_content()
                     event.wait(secrets.choice(range(1, 4)))
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                         if i == 0:
