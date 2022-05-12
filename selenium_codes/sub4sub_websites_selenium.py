@@ -1111,6 +1111,17 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, "username").send_keys(req_dict['username_youlikehits'])
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
     driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").click()
+    event.wait(secrets.choice(range(2, 4)))
+
+    def collect_bonus_points() -> None:
+        """collect if bonus points are available"""
+        driver.get("https://www.youlikehits.com/bonuspoints.php")
+        event.wait(secrets.choice(range(2, 4)))
+        try:
+            driver.find_element(By.CLASS_NAME, "buybutton").click()
+        except (NoSuchElementException, ElementNotInteractableException):
+            pass
+    collect_bonus_points()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element(By.XPATH, '/html/body/div/table[1]/tbody/tr[2]/td/table/tbody/tr/td/nav/ul/li[2]/a').click()
     driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]/'
@@ -1125,7 +1136,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
-    def for_loop_watch(hours_time: int) -> None:
+    def while_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
         video_name: str = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
         now = datetime.now()
@@ -1183,8 +1194,9 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag3')
             event.wait(secrets.choice(range(5, 7)))
 
-
-    for_loop_watch(16)
+    while_loop_watch(14)
+    collect_bonus_points()
+    logging.info("Finished Viewing Videos...")
     driver.quit()
 
 
