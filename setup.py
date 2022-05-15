@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name='autosubscriber-youtube',
-    version='1.76',
-    packages=['selenium'],
+    version='1.8',
+    packages=['selenium', 'webdriver-manager'],
     url='https://github.com/atalaydenknalbant/autosubscriber-youtube',
     license='GPL-3.0 License',
     author='Atalay Denknalbant',
