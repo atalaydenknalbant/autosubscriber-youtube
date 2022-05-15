@@ -253,16 +253,19 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                             pass
                 event.wait(secrets.choice(range(1, 4)))
                 # driver.save_screenshot("screenshots/screenshot.png")
-                try:
-                    if yt_javascript:
-                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                    else:
-                        sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[1]
-                        ActionChains(driver).move_to_element(sub_button).click().perform()
-                except (NoSuchElementException, ElementNotInteractableException):
+                j = 0
+                if yt_javascript:
+                    driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                else:
+                    for i in range(3):
+                        try:
+                            sub_button = driver.find_elements(By.ID,
+                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[i]
+                            ActionChains(driver).move_to_element(sub_button).click().perform()
+                        except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
+                            j += 1
+                if j > 2:
                     logging.info('Couldnt find sub button in: ' + d)
-                    pass
                 # driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
@@ -543,17 +546,21 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(secrets.choice(range(1, 4)))
+                        j = 0
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_elements(By.ID,
-                                                              ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[0]
-                            try:
-                                ActionChains(driver).move_to_element(sub_button).click().perform()
-                            except ElementNotInteractableException:
-                                logging.info('Element Not Interactable Exception')
-                                pass
+                            for i in range(3):
+                                try:
+                                    sub_button = driver.find_elements(By.ID,
+                                                                      ytbutton_elements_location_dict[
+                                                                          'yt_id_sub_button_type1'])[i]
+                                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                                except (NoSuchElementException, ElementNotInteractableException,
+                                        ElementClickInterceptedException):
+                                    j += 1
+                        if j > 2:
+                            logging.info('Couldnt find sub button in: ' + "subscribersvideo")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before)
@@ -703,16 +710,21 @@ def submenow_functions(req_dict: dict) -> None:
                                 ActionChains(driver).move_to_element(like_button).click().perform()
 
                         event.wait(secrets.choice(range(1, 4)))
+                        j = 0
                         if yt_javascript:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            sub_button = driver.find_elements(By.ID,
-                                                              ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[0]
-                            try:
-                                ActionChains(driver).move_to_element(sub_button).click().perform()
-                            except ElementNotInteractableException:
-                                pass
+                            for i in range(3):
+                                try:
+                                    sub_button = driver.find_elements(By.ID,
+                                                                      ytbutton_elements_location_dict[
+                                                                          'yt_id_sub_button_type1'])[i]
+                                    ActionChains(driver).move_to_element(sub_button).click().perform()
+                                except (NoSuchElementException, ElementNotInteractableException,
+                                        ElementClickInterceptedException):
+                                    j += 1
+                        if j > 2:
+                            logging.info('Couldnt find sub button in: ' + "submenow")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before_5)
@@ -888,14 +900,21 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver.execute_script("window.scrollTo(0, 400);")
                     event.wait(secrets.choice(range(1, 4)))
                     driver.switch_to.default_content()
+                    j = 0
                     if yt_javascript:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        event.wait(secrets.choice(range(1, 4)))
-                        sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            0]
-                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                        for _ in range(3):
+                            try:
+                                sub_button = driver.find_elements(By.ID,
+                                                                  ytbutton_elements_location_dict[
+                                                                      'yt_id_sub_button_type1'])[_]
+                                ActionChains(driver).move_to_element(sub_button).click().perform()
+                            except (NoSuchElementException, ElementNotInteractableException,
+                                    ElementClickInterceptedException):
+                                j += 1
+                    if j > 2:
+                        logging.info('Couldnt find sub button in: ' + "ytbpals")
                     # driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
                     driver.switch_to.window(window_before)
@@ -983,14 +1002,21 @@ def ytbpals_functions(req_dict: dict) -> None:
                     # driver.save_screenshot("screenshots/screenshot.png")
                     driver.switch_to.default_content()
                     event.wait(secrets.choice(range(1, 4)))
+                    j = 0
                     if yt_javascript:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
-                        event.wait(secrets.choice(range(1, 4)))
-                        sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[
-                            0]
-                        ActionChains(driver).move_to_element(sub_button).click().perform()
+                        for _ in range(3):
+                            try:
+                                sub_button = driver.find_elements(By.ID,
+                                                                  ytbutton_elements_location_dict[
+                                                                      'yt_id_sub_button_type1'])[_]
+                                ActionChains(driver).move_to_element(sub_button).click().perform()
+                            except (NoSuchElementException, ElementNotInteractableException,
+                                    ElementClickInterceptedException):
+                                j += 1
+                    if j > 2:
+                        logging.info('Couldnt find sub button in: ' + "ytbpals")
                     # driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
                     driver.switch_to.window(window_before)
@@ -1123,9 +1149,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             pass
     collect_bonus_points()
     driver.save_screenshot("screenshots/screenshot.png")
-    driver.find_element(By.XPATH, '/html/body/div/table[1]/tbody/tr[2]/td/table/tbody/tr/td/nav/ul/li[2]/a').click()
-    driver.find_element(By.XPATH, '/html/body/div/table[2]/tbody/tr/td/table[1]/tbody/tr/td/table/tbody/tr[2]/'
-                                  'td/center/div[6]/div').click()
+    driver.get("https://www.youlikehits.com/youtubenew2.php")
     try:
         if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                 'There are no videos available to view at this time. Try coming back or refreshing.':
