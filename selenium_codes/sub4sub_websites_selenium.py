@@ -1150,6 +1150,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     collect_bonus_points()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.get("https://www.youlikehits.com/youtubenew2.php")
+    event.wait(secrets.choice(range(3, 4)))
     try:
         if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                 'There are no videos available to view at this time. Try coming back or refreshing.':
