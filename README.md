@@ -13,7 +13,6 @@ Python Selenium-based automated subscribing, liking, viewing functions for youtu
 </a> 
 
 
-
 ## Usage
 1. Try to use a newly created youtube account to avoid security questions and make that account simple.
 1. Open that youtube account in normal and incognito mode on chrome before you use.
