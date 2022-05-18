@@ -262,7 +262,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                             sub_button = driver.find_elements(By.ID,
                                                           ytbutton_elements_location_dict['yt_id_sub_button_type1'])[i]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
-                        except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
+                        except (NoSuchElementException,
+                                ElementNotInteractableException,
+                                ElementClickInterceptedException):
                             j += 1
                 if j > 2:
                     logging.info('Couldnt find sub button in: ' + d)
@@ -1185,7 +1187,10 @@ def youlikehits_functions(req_dict: dict) -> None:
             event.wait(secrets.choice(range(6, 10)))
             try:
                 c = 0
-                while video_name != driver.find_element(By.XPATH, '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.format(i)).text.split('"')[1::2][0]:
+                while video_name != \
+                        driver.find_element(By.XPATH,
+                                            '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.
+                                                    format(i)).text.split('"')[1::2][0]:
                     event.wait(2)
                     # logging.info('flag1')
                     c += 1
