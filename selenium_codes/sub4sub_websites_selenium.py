@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import secrets
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.utils import ChromeType
 
 
 # Logging Initializer
@@ -113,7 +114,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install()), options=chrome_options)
     return driver
 
 
