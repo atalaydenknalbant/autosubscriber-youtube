@@ -1161,6 +1161,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             return
     except NoSuchElementException:
         pass
+    event.wait(secrets.choice(range(4, 6)))
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
