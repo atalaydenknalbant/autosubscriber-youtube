@@ -1234,7 +1234,6 @@ def youlikehits_functions(req_dict: dict) -> None:
     collect_bonus_points()
     logging.info("Finished Viewing Videos...")
     driver.quit()
-    display.stop()
 
 
 def like4like_functions(req_dict: dict) -> None:
