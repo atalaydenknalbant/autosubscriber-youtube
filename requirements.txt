@@ -1,4 +1,3 @@
 selenium==4.1.5
 webdriver-manager==3.7.0
 setuptools==62.3.2
-PyVirtualDisplay~=3.0
