@@ -1244,7 +1244,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
-                    driver.save_screenshot('screenshots/screenshot_test.png')
+                    # driver.save_screenshot('screenshots/screenshot_test.png')
                     driver.execute_script("window.scrollTo(0, 600);")
                     event.wait(secrets.choice(range(2, 3)))
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
