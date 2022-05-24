@@ -30,11 +30,11 @@
       "required": false
     },
     "youtube_email": {
-      "value": "Enter Youtube Email",
+      "value": "Enter YouTube Email",
       "required": true
     },
     "youtube_password": {
-      "value": "Enter Youtube Password",
+      "value": "Enter YouTube Password",
       "required": true
     },
     "youtube_channel_id": {
@@ -81,14 +81,6 @@
       "value": "Enter Ytbpals Password",
       "required": true
     },
-    "viewgrip_email": {
-      "value": "Enter ViewGrip Email",
-      "required": true
-    },
-    "viewgrip_password": {
-      "value": "Enter ViewGrip Password",
-      "required": true
-    },
     "tolikes_username": {
       "value": "Enter TOLikes Username",
       "required": true
@@ -114,11 +106,11 @@
       "required": true
     },
     "like4like_username": {
-      "value": "Enter YOULIKEHITS Username",
+      "value": "Enter LIKE4LIKE Username",
       "required": true
     },
     "like4like_password": {
-      "value": "Enter YOULIKEHITS Password",
+      "value": "Enter LIKE4LIKE Password",
       "required": true
     }
   }

@@ -14,8 +14,6 @@ from datetime import datetime, timedelta
 import secrets
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.utils import ChromeType
-
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -89,7 +87,8 @@ def set_driver_opt(req_dict: dict,
     else:
         pass
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
-    if website != "":
+    if website == "YOULIKEHITS":
+        chrome_options.add_extension('extensions/hCaptcha-Solver.crx')
         pass
     else:
         chrome_options.add_argument("--disable-extensions")
@@ -114,7 +113,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install()), options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
 
@@ -1129,7 +1128,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
@@ -1153,7 +1152,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     collect_bonus_points()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.get("https://www.youlikehits.com/youtubenew2.php")
-    event.wait(secrets.choice(range(3, 4)))
+    event.wait(secrets.choice(range(4, 6)))
     try:
         if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                 'There are no videos available to view at this time. Try coming back or refreshing.':
@@ -1161,6 +1160,8 @@ def youlikehits_functions(req_dict: dict) -> None:
             return
     except NoSuchElementException:
         pass
+    event.wait(secrets.choice(range(12, 14)))
+    driver.find_element(By.TAG_NAME, "input").click()
     event.wait(secrets.choice(range(4, 6)))
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
@@ -1213,13 +1214,16 @@ def youlikehits_functions(req_dict: dict) -> None:
             z = 0
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
-                driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 event.wait(secrets.choice(range(5, 7)))
                 z += 1
                 if z == 15:
-                    driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
+                    # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
+                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     event.wait(secrets.choice(range(5, 7)))
-                    driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                    # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
+                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                     # logging.info('Flag2')
                     if z == 15:
                         i += 1
@@ -1230,6 +1234,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     collect_bonus_points()
     logging.info("Finished Viewing Videos...")
     driver.quit()
+    display.stop()
 
 
 def like4like_functions(req_dict: dict) -> None:
