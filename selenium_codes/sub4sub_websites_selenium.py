@@ -1237,13 +1237,16 @@ def youlikehits_functions(req_dict: dict) -> None:
             z = 0
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
+                driver.execute_script("window.scrollTo(0, 600);")
                 # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 event.wait(secrets.choice(range(4, 6)))
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
-                    # driver.save_screenshot('screenshots/screenshot_test.png')
+                    driver.save_screenshot('screenshots/screenshot_test.png')
+                    event.wait(secrets.choice(range(2, 3)))
+                    driver.execute_script("window.scrollTo(0, 600);")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     event.wait(secrets.choice(range(5, 7)))
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
