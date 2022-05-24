@@ -19,6 +19,7 @@ Python Selenium-based automated subscribing, liking, viewing functions for youtu
 1. Edit config.ini file to match with your accounts.
 1. Whenever chrome updates, you need to change your user agent in your config file.
 
+
 ## Included sub4sub Websites
 ### Type 1 Websites 
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
