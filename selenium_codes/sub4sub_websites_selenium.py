@@ -1162,9 +1162,17 @@ def youlikehits_functions(req_dict: dict) -> None:
             return
     except NoSuchElementException:
         pass
-    event.wait(secrets.choice(range(12, 14)))
-    driver.find_element(By.TAG_NAME, "input").click()
+    while True:
+        try:
+            event.wait(secrets.choice(range(16, 20)))
+            driver.find_element(By.TAG_NAME, "input").click()
+            break
+        except ElementClickInterceptedException:
+            driver.get("https://www.youlikehits.com/youtubenew2.php")
+            event.wait(secrets.choice(range(2, 3)))
+            continue
     event.wait(secrets.choice(range(4, 6)))
+    driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
     driver.save_screenshot("screenshots/screenshot.png")
 
@@ -1183,13 +1191,15 @@ def youlikehits_functions(req_dict: dict) -> None:
             event.wait(secrets.choice(range(1, 3)))
             if len(driver.find_elements(By.PARTIAL_LINK_TEXT, 'This video ran out of points.')) > 0:
                 logging.info('This video ran out of points.')
+                driver.close()
                 driver.switch_to.window(driver.window_handles[0])
                 driver.find_element(By.LINK_TEXT, 'Skip').click()
                 event.wait(secrets.choice(range(4, 6)))
+                driver.execute_script("window.scrollTo(0, 600);")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 continue
-
             driver.switch_to.window(driver.window_handles[0])
+            driver.execute_script("window.scrollTo(0, 600);")
             try:
                 WebDriverWait(driver, 120).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
@@ -1233,6 +1243,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
+                    # driver.save_screenshot('screenshots/screenshot_test.png')
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     event.wait(secrets.choice(range(5, 7)))
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
@@ -1242,6 +1253,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         i += 1
                 # logging.info('Flag3')
             event.wait(secrets.choice(range(5, 7)))
+            driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
     collect_bonus_points()
