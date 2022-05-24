@@ -83,6 +83,8 @@ def set_driver_opt(req_dict: dict,
     chrome_options = webdriver.ChromeOptions()
     if headless:
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-gpu")
         pass
     else:
         pass
@@ -103,9 +105,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--proxy-server='direct://'")
@@ -113,6 +113,7 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-infobars")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
@@ -1131,6 +1132,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
+    driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("youtube login completed")
     event.wait(secrets.choice(range(3, 6)))
@@ -1177,6 +1179,17 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             event.wait(secrets.choice(range(6, 10)))
+            driver.switch_to.window(driver.window_handles[1])
+            event.wait(secrets.choice(range(1, 3)))
+            if len(driver.find_elements(By.PARTIAL_LINK_TEXT, 'This video ran out of points.')) > 0:
+                logging.info('This video ran out of points.')
+                driver.switch_to.window(driver.window_handles[0])
+                driver.find_element(By.LINK_TEXT, 'Skip').click()
+                event.wait(secrets.choice(range(4, 6)))
+                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                continue
+
+            driver.switch_to.window(driver.window_handles[0])
             try:
                 WebDriverWait(driver, 120).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
@@ -1216,7 +1229,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # print("window_handles: ", len(driver.window_handles))
                 # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                event.wait(secrets.choice(range(5, 7)))
+                event.wait(secrets.choice(range(4, 6)))
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
