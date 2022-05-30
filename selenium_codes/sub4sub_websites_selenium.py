@@ -1187,13 +1187,13 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             # driver.save_screenshot('screenshots/screenshot_test.png')
-            event.wait(secrets.choice(range(1, 3)))
+            event.wait(secrets.choice(range(3, 4)))
             # logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
             driver.execute_script("window.scrollTo(0, 600);")
             # logging.info('Flag4')
             try:
-                WebDriverWait(driver, 120).until(ec.visibility_of_element_located((By.XPATH,
+                WebDriverWait(driver, 150).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
                                                                                    'tr[{}]/td/center/b'.format(i))))\
                     .get_attribute("value")
@@ -1279,7 +1279,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     if z == 15:
                         i += 1
                 # logging.info('Flag3')
-            event.wait(secrets.choice(range(2, 3)))
+            event.wait(secrets.choice(range(4, 5)))
             # logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
