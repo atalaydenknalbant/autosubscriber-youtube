@@ -1188,12 +1188,27 @@ def youlikehits_functions(req_dict: dict) -> None:
                 break
             # driver.save_screenshot('screenshots/screenshot_test.png')
             event.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag1')
+            logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
             driver.execute_script("window.scrollTo(0, 600);")
-            # logging.info('Flag4')
+            logging.info('Flag4')
             try:
-                WebDriverWait(driver, 150).until(ec.visibility_of_element_located((By.XPATH,
+                logging.info('Flag4.1')
+                driver.switch_to.window(driver.window_handles[1])
+                if len(driver.find_elements(By.PARTIAL_LINK_TEXT, 'Please skip')) > 0:
+                    driver.switch_to.window(driver.window_handles[0])
+                    driver.find_element(By.LINK_TEXT, 'Skip').click()
+                    event.wait(secrets.choice(range(5, 8)))
+                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                    event.wait(secrets.choice(range(3, 4)))
+                    logging.info('Flag4.2')
+                    continue
+            except (NoSuchElementException, IndexError):
+                logging.info('Flag4.3')
+                pass
+            driver.switch_to.window(driver.window_handles[0])
+            try:
+                WebDriverWait(driver, 110).until(ec.visibility_of_element_located((By.XPATH,
                                                                                    '//*[@id="showresult"]/table/tbody/'
                                                                                    'tr[{}]/td/center/b'.format(i))))\
                     .get_attribute("value")
@@ -1204,7 +1219,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             event.wait(secrets.choice(range(6, 10)))
             try:
-                # logging.info('Flag5.0')
+                logging.info('Flag5.0')
                 c = 0
 
                 while video_name != \
@@ -1212,14 +1227,14 @@ def youlikehits_functions(req_dict: dict) -> None:
                                             '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.
                                                     format(i)).text.split('"')[1::2][0]:
                     event.wait(2)
-                    # logging.info('flag1')
+                    logging.info('flag1')
                     c += 1
                     if c == 50:
                         break
             except NoSuchElementException:
                 pass
-            event.wait(secrets.choice(range(6, 10)))
-            # logging.info('Flag5.1')
+            event.wait(secrets.choice(range(3, 5)))
+            logging.info('Flag5.1')
             # driver.save_screenshot("screenshots/screenshot.png")
             try:
                 driver.switch_to.window(driver.window_handles[1])
@@ -1231,7 +1246,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.execute_script("window.scrollTo(0, 600);")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                     n = 1
-                    # logging.info('Flag2')
+                    logging.info('Flag2')
                     while len(driver.window_handles) == 1:
                         driver.execute_script("window.scrollTo(0, 600);")
                         # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
@@ -1259,14 +1274,14 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             z = 0
-            # logging.info('Flag6')
+            logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
                 # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 # event.wait(secrets.choice(range(2, 3)))
-                # logging.info('Flag7')
+                logging.info('Flag7')
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
@@ -1275,12 +1290,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    # logging.info('Flag8')
+                    logging.info('Flag8')
                     if z == 15:
                         i += 1
-                # logging.info('Flag3')
+                logging.info('Flag3')
             event.wait(secrets.choice(range(4, 5)))
-            # logging.info('Flag9')
+            logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
