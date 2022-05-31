@@ -1130,7 +1130,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
-    driver.implicitly_wait(7)
+    driver.implicitly_wait(6.75)
     driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
@@ -1194,8 +1194,12 @@ def youlikehits_functions(req_dict: dict) -> None:
             # logging.info('Flag4')
             try:
                 # logging.info('Flag4.1')
+                try:
+                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
+                except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
+                    pass
                 driver.switch_to.window(driver.window_handles[1])
-                if len(driver.find_elements(By.PARTIAL_LINK_TEXT, 'Please skip')) > 0:
+                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
                     driver.switch_to.window(driver.window_handles[0])
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
                     event.wait(secrets.choice(range(5, 8)))
@@ -1258,7 +1262,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                             driver.execute_script("window.scrollTo(0, 600);")
                             driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                             driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                            logging.info('Flag3')
+                            # logging.info('Flag3')
                             if n == 15:
                                 i += 1
                     driver.switch_to.window(driver.window_handles[0])
