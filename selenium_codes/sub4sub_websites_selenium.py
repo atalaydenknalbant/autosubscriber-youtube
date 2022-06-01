@@ -1200,7 +1200,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                     pass
                 driver.switch_to.window(driver.window_handles[1])
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
-                    driver.close()
+                    try:
+                        driver.close()
+                    except NoSuchWindowException:
+                        pass
                     driver.switch_to.window(driver.window_handles[0])
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
                     event.wait(secrets.choice(range(5, 8)))
