@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
-import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
@@ -261,7 +260,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     for i in range(3):
                         try:
                             sub_button = driver.find_elements(By.ID,
-                                                          ytbutton_elements_location_dict['yt_id_sub_button_type1'])[i]
+                                                              ytbutton_elements_location_dict
+                                                              ['yt_id_sub_button_type1'])[i]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         except (NoSuchElementException,
                                 ElementNotInteractableException,
@@ -434,7 +434,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7.65)
+    driver.implicitly_wait(7.60)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
     driver.set_window_size(1900, 1050)
@@ -684,16 +684,13 @@ def submenow_functions(req_dict: dict) -> None:
                         while driver.find_element(By.CSS_SELECTOR, "#marketStatus > span").text != \
                                 "Watch, Like & Subscribe":
                             event.wait(secrets.choice(range(1, 4)))
-                            # logging.info("Flag1")
                     except (StaleElementReferenceException, NoSuchElementException):
                         logging.info("Couldn't find [Watch, Like & Subscribe] element closing")
                         driver.quit()
                         return
-                    # driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.ID, "btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     window_after = driver.window_handles[1]
                     driver.switch_to.window(window_after)
-                    # driver.save_screenshot("screenshots/screenshot.png")
                     event.wait(secrets.choice(range(1, 4)))
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                         if i == 0:
