@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
+import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
@@ -113,8 +114,13 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-infobars")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    return driver
+    try:
+        if os.environ['HEROKU'] == 'available':
+            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+            return driver
+    except KeyError:
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        return driver
 
 
 def youtube_too_many_controller() -> int:
