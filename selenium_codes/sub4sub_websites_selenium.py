@@ -7,13 +7,14 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.service import Service
 import logging
 import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
+
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -593,7 +594,8 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                 if len(driver.find_elements(By.XPATH, "//*[@id='buttonPlan6']")) > 0:
                     try:
                         driver.find_element(By.XPATH, "//*[@id='buttonPlan6']").click()
-                    except Exception as ex_4:
+                    except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
+                            as ex_4:
                         logging.info("subscribersvideo Couldn't able to click buttonPlan6 Exception: " + str(ex_4))
                         driver.close()
                         return
@@ -764,7 +766,8 @@ def submenow_functions(req_dict: dict) -> None:
                 if len(driver.find_elements(By.ID, "buttonPlan8")) > 0:
                     try:
                         driver.find_element(By.ID, "buttonPlan8").click()
-                    except Exception as ex_5:
+                    except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
+                            as ex_5:
                         logging.info("submenow Alert Skipped Exception: " + str(ex_5))
                         driver.close()
                         return
@@ -892,8 +895,9 @@ def ytbpals_functions(req_dict: dict) -> None:
                             .send_keys(Keys.ENTER)
                         logging.info("Started plan successfully")
 
-                    except Exception as ex:
-                        logging.info("Error: Exception: " + str(ex))
+                    except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
+                            as ex:
+                        logging.info("Error: Exception: {}".format(str(ex)))
                         driver.save_screenshot("screenshots/screenshot.png")
                     driver.quit()
                     break
