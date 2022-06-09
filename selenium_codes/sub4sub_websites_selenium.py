@@ -808,7 +808,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             else:
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[i])
-            driver.get("https://www.ytmonster.net/client/" + req_dict['username_ytmonster'])
+            driver.get("https://www.ytmonster.net/client")
             # driver.save_screenshot("screenshots/screenshot.png")
             driver.set_window_size(1200, 900)
             event.wait(secrets.choice(range(1, 4)))
