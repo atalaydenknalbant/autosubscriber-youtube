@@ -1232,8 +1232,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                     .get_attribute("value")
 
             except (TimeoutException, IndexError) as ex:
-                if ex.__class__.__name__ == IndexError:
-                    i -= 1
+                # if ex.__class__.__name__ == IndexError:
+                #     i -= 1
                 pass
             EVENT.wait(secrets.choice(range(6, 10)))
             try:
