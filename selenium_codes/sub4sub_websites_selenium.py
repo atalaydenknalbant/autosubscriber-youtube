@@ -1231,9 +1231,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                                                    'tr[{}]/td/center/b'.format(i))))\
                     .get_attribute("value")
 
-            except (TimeoutException, IndexError) as ex:
-                # if ex.__class__.__name__ == IndexError:
-                #     i -= 1
+            except (TimeoutException, IndexError):
                 pass
             EVENT.wait(secrets.choice(range(6, 10)))
             try:
