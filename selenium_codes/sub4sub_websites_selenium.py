@@ -188,7 +188,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = YT_JAVASCRIPT
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
         driver.switch_to.window(window_before)
@@ -248,7 +247,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     pass
                 else:
                     EVENT.wait(secrets.choice(range(1, 4)))
-                    if yt_javascript:
+                    if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
                         try:
@@ -262,7 +261,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 EVENT.wait(secrets.choice(range(1, 4)))
                 # driver.save_screenshot("screenshots/screenshot.png")
                 j = 0
-                if yt_javascript:
+                if YT_JAVASCRIPT:
                     driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
                     for i in range(3):
@@ -442,7 +441,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7.60)
     driver.get("https://www.subscribers.video")  # Type_2
@@ -550,7 +548,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
-                            if yt_javascript:
+                            if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 like_button = driver.find_elements(By.TAG_NAME,
@@ -560,7 +558,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
 
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
-                        if yt_javascript:
+                        if YT_JAVASCRIPT:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
                             for i in range(3):
@@ -620,7 +618,6 @@ def submenow_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
@@ -714,7 +711,7 @@ def submenow_functions(req_dict: dict) -> None:
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                             pass
                         else:
-                            if yt_javascript:
+                            if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 like_button = driver.find_elements(By.TAG_NAME,
@@ -724,7 +721,7 @@ def submenow_functions(req_dict: dict) -> None:
 
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
-                        if yt_javascript:
+                        if YT_JAVASCRIPT:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
                             for i in range(3):
@@ -853,7 +850,6 @@ def ytbpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://ytbpals.com/")  # Type_Undefined
@@ -918,7 +914,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     EVENT.wait(secrets.choice(range(1, 4)))
                     driver.switch_to.default_content()
                     j = 0
-                    if yt_javascript:
+                    if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         for _ in range(3):
@@ -1020,7 +1016,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     driver.switch_to.default_content()
                     EVENT.wait(secrets.choice(range(1, 4)))
                     j = 0
-                    if yt_javascript:
+                    if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                     else:
                         for _ in range(3):
@@ -1065,7 +1061,7 @@ def youtubviews_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = True
+    YT_JAVASCRIPT = True
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
@@ -1119,7 +1115,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                                             ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
                     pass
                 else:
-                    if yt_javascript:
+                    if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
                         like_button = driver.find_elements(By.TAG_NAME,
@@ -1335,7 +1331,6 @@ def like4like_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     global YT_JAVASCRIPT
-    yt_javascript = YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(12)
     driver.get("https://accounts.google.com/signin")
@@ -1396,7 +1391,7 @@ def like4like_functions(req_dict: dict) -> None:
                         pass
                     else:
                         EVENT.wait(secrets.choice(range(3, 4)))
-                        if yt_javascript:
+                        if YT_JAVASCRIPT:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
                             try:
