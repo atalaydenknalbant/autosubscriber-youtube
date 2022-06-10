@@ -8,12 +8,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import ast
 import logging
 import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
-from webdriver_manager.chrome import ChromeDriverManager
+
 
 
 # Logging Initializer
@@ -217,7 +219,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.switch_to.window(window_before)
         # driver.save_screenshot("screenshots/screenshot.png")
         try:
-            button_subscribe = eval(subscribe_btn_code)
+            button_subscribe = ast.literal_eval(subscribe_btn_code)
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
@@ -298,7 +300,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except (NoSuchElementException, NoSuchElementException):
             pass
         try:
-            button_confirm = eval(confirm_btn_code)
+            button_confirm = ast.literal_eval(confirm_btn_code)
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
