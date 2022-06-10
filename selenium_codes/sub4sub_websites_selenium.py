@@ -128,15 +128,17 @@ def set_driver_opt(req_dict: dict,
 
 def youtube_too_many_controller() -> int:
     """ Checks user's google account if there are too many subscriptions or likes for the given google account and
-    returns integer that represents condition
+    returns boolean that represents condition
         Args:
         - driver(webdriver): webdriver parameter.
         - req_dict(dict): dictionary object of required parameters
         - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
         Returns:
-        - None(NoneType)
+        - Boolean(bool)
         """
-    pass
+    toomany_suborlike = False
+    return toomany_suborlike
+
 
 
 def google_login(driver: webdriver,
