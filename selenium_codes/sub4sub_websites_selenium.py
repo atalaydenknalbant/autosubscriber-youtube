@@ -9,7 +9,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-import ast
 import logging
 import os
 from threading import Event
@@ -140,7 +139,6 @@ def youtube_too_many_controller() -> int:
     return toomany_suborlike
 
 
-
 def google_login(driver: webdriver,
                  req_dict: dict,
                  has_login_btn: bool = True,
@@ -178,8 +176,8 @@ def google_login(driver: webdriver,
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
-                                 confirm_btn_code: str = "driver.find_elements(By.CLASS_NAME, 'btn-step')[2]",
-                                 subscribe_btn_code: str = "driver.find_elements(By.CLASS_NAME, 'btn-step')[0]"
+                                 confirm_btn: str = "btn-step",
+                                 subscribe_btn: str = "btn-step"
                                  ) -> None:
     """ Loop for like and sub, includes google login
     Args:
@@ -221,7 +219,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.switch_to.window(window_before)
         # driver.save_screenshot("screenshots/screenshot.png")
         try:
-            button_subscribe = ast.literal_eval(subscribe_btn_code)
+            button_subscribe = driver.find_elements(By.CLASS_NAME, subscribe_btn)[0]
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
         except NoSuchElementException:
             logging.info(d+" Couldn't find subscribe_btn")
@@ -285,14 +283,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 driver.switch_to.window(window_before)
                 while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                     pass
-                button_confirm = driver.find_elements(By.CLASS_NAME, 'btn-step')[2]
+                button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
                 ActionChains(driver).move_to_element(button_confirm).click().perform()
                 continue
         except TimeoutException:
             driver.switch_to.window(window_before)
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 pass
-            button_confirm = driver.find_elements(By.CLASS_NAME, 'btn-step')[2]
+            button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
@@ -303,7 +301,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except (NoSuchElementException, NoSuchElementException):
             pass
         try:
-            button_confirm = ast.literal_eval(confirm_btn_code)
+            button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         except NoSuchElementException:
