@@ -230,7 +230,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 logging.info(d+" Website is not working properly, closing driver")
                 driver.quit()
                 return
-        except Exception:
+        except (TimeoutException, NoSuchElementException,
+                ElementNotInteractableException, ElementClickInterceptedException):
             pass
         EVENT.wait(secrets.choice(range(1, 4)))
         window_after = driver.window_handles[1]
@@ -1000,7 +1001,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         ActionChains(driver).move_to_element(button).click(button).perform()
 
                         logging.info("Started plan successfully")
-                    except Exception as ex:
+                    except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as ex:
                         logging.info("Error:" + str(ex))
                     driver.quit()
                     break
@@ -1230,8 +1231,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                                                    'tr[{}]/td/center/b'.format(i))))\
                     .get_attribute("value")
 
-            except (TimeoutException, IndexError):
-                if IndexError:
+            except (TimeoutException, IndexError) as ex:
+                if ex.__class__.__name__ == IndexError:
                     i -= 1
                 pass
             EVENT.wait(secrets.choice(range(6, 10)))
