@@ -187,7 +187,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
     for _ in range(0, 100000000):
         window_before = driver.window_handles[0]
         driver.switch_to.window(window_before)
@@ -440,7 +439,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7.60)
     driver.get("https://www.subscribers.video")  # Type_2
@@ -617,7 +615,6 @@ def submenow_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
     driver.set_window_size(1800, 900)
@@ -849,7 +846,6 @@ def ytbpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://ytbpals.com/")  # Type_Undefined
@@ -1330,7 +1326,6 @@ def like4like_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(12)
     driver.get("https://accounts.google.com/signin")
