@@ -1215,6 +1215,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     except NoSuchWindowException:
                         pass
                     driver.switch_to.window(driver.window_handles[0])
+                    EVENT.wait(secrets.choice(range(1, 2)))
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
                     EVENT.wait(secrets.choice(range(5, 8)))
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
@@ -1253,35 +1254,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             # logging.info('Flag5.1')
             # driver.save_screenshot("screenshots/screenshot.png")
             try:
-                driver.switch_to.window(driver.window_handles[1])
-                if len(driver.find_elements(By.PARTIAL_LINK_TEXT, 'This video')) > 0:
-                    logging.info('This video ran out of points.')
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[0])
-                    driver.find_element(By.LINK_TEXT, 'Skip').click()
-                    driver.execute_script("window.scrollTo(0, 600);")
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    n = 1
-                    # logging.info('Flag2')
-                    while len(driver.window_handles) == 1:
-                        driver.execute_script("window.scrollTo(0, 600);")
-                        # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
-                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                        EVENT.wait(secrets.choice(range(2, 3)))
-                        n += 1
-                        if n == 15:
-                            # driver.save_screenshot('screenshots/screenshot_test.png')
-                            driver.execute_script("window.scrollTo(0, 600);")
-                            driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
-                            driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                            # logging.info('Flag3')
-                            if n == 15:
-                                i += 1
-                    driver.switch_to.window(driver.window_handles[0])
-                    continue
-            except IndexError:
-                pass
-            try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                         'There are no videos available to view at this time. Try coming back or refreshing.':
                     logging.info('No videos available quitting...')
@@ -1296,6 +1268,23 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.execute_script("window.scrollTo(0, 600);")
                 # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                try:
+                    driver.switch_to.window(driver.window_handles[1])
+                    if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
+                        try:
+                            driver.close()
+                        except NoSuchWindowException:
+                            pass
+                        driver.switch_to.window(driver.window_handles[0])
+                        EVENT.wait(secrets.choice(range(1, 2)))
+                        driver.find_element(By.LINK_TEXT, 'Skip').click()
+                        EVENT.wait(secrets.choice(range(5, 8)))
+                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                        EVENT.wait(secrets.choice(range(3, 4)))
+                        break
+                        # logging.info('Flag2')
+                except IndexError:
+                    pass
                 # EVENT.wait(secrets.choice(range(2, 3)))
                 # logging.info('Flag7')
                 z += 1
@@ -1310,7 +1299,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     if z == 15:
                         i += 1
                 # logging.info('Flag8.9')
-            EVENT.wait(secrets.choice(range(4, 5)))
+            EVENT.wait(secrets.choice(range(3, 4)))
             # logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
