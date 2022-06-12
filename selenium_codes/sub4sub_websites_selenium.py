@@ -1217,8 +1217,11 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.switch_to.window(driver.window_handles[0])
                     EVENT.wait(secrets.choice(range(1, 2)))
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
-                    EVENT.wait(secrets.choice(range(5, 8)))
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                    EVENT.wait(secrets.choice(range(3, 4)))
+                    driver.find_element(By.XPATH, '/html/body/div/table[2]/'
+                                                  'tbody/tr/td/table[1]/tbody/tr/'
+                                                  'td/center/table/tbody/tr[2]/td/'
+                                                  'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(3, 4)))
                     # logging.info('Flag4.2')
                     continue
@@ -1242,7 +1245,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 while video_name != \
                         driver.find_element(By.XPATH,
                                             '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.
-                                                    format(i)).text.split('"')[1::2][0]:
+                                            format(i)).text.split('"')[1::2][0]:
                     EVENT.wait(2)
                     # logging.info('flag1')
                     c += 1
@@ -1281,8 +1284,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(5, 8)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
-                        break
                         # logging.info('Flag2')
+                        break
                 except IndexError:
                     pass
                 # EVENT.wait(secrets.choice(range(2, 3)))
