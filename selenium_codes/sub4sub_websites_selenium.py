@@ -16,7 +16,6 @@ from datetime import datetime, timedelta
 import secrets
 
 
-
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -670,7 +669,7 @@ def submenow_functions(req_dict: dict) -> None:
     if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
         driver.quit()
         return
-    if len(driver.find_elements(By.CSS_SELECTOR,"#errorAjax > i")) > 0:
+    if len(driver.find_elements(By.CSS_SELECTOR, "#errorAjax > i")) > 0:
         logging.info("submenow found error dialog")
         driver.quit()
         return
