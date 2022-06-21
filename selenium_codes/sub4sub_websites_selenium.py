@@ -1202,11 +1202,10 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.execute_script("window.scrollTo(0, 600);")
             # logging.info('Flag4')
             try:
-                # logging.info('Flag4.1')
-                try:
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
-                except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
-                    pass
+                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
+            except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
+                pass
+            try:
                 driver.switch_to.window(driver.window_handles[1])
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
                     try:
@@ -1220,7 +1219,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.find_element(By.XPATH, '/html/body/div/table[2]/'
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
-                                                  'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
+                                                  'center/div[2]/div/center/a[2]').click()
                     EVENT.wait(secrets.choice(range(3, 4)))
                     # logging.info('Flag4.2')
                     continue
@@ -1238,7 +1237,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             EVENT.wait(secrets.choice(range(6, 10)))
             try:
-                # logging.info('Flag5.0')
                 c = 0
 
                 while video_name != \
@@ -1246,7 +1244,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                                             '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.
                                             format(i)).text.split('"')[1::2][0]:
                     EVENT.wait(2)
-                    # logging.info('flag1')
                     c += 1
                     if c == 50:
                         break
@@ -1268,7 +1265,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
-                # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 try:
                     driver.switch_to.window(driver.window_handles[1])
