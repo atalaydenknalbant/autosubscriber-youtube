@@ -679,9 +679,15 @@ def submenow_functions(req_dict: dict) -> None:
         try:
             logging.info("submenow loop started")
             for _ in range(1, 1000000000):
-                if len(driver.find_elements(By.XPATH,
-                                            "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
-                    break
+                try:
+                    if len(driver.find_elements(By.XPATH,
+                                                "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
+                        break
+                except UnexpectedAlertPresentException:
+                    if len(driver.find_elements(By.XPATH,
+                                                "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
+                        break
+                    pass
                 else:
                     window_before_5 = driver.window_handles[0]
                     if len(driver.find_elements(By.ID, "buttonPlan1")) > 0 \
@@ -1220,6 +1226,11 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').click()
+                    EVENT.wait(secrets.choice(range(2, 3)))
+                    driver.find_element(By.XPATH, '/html/body/div/table[2]/'
+                                                  'tbody/tr/td/table[1]/tbody/tr/'
+                                                  'td/center/table/tbody/tr[2]/td/'
+                                                  'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(3, 4)))
                     # logging.info('Flag4.2')
                     continue
@@ -1281,7 +1292,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(3, 4)))
                         # logging.info('Flag2')
                         break
-                except IndexError:
+                except (IndexError, WebDriverException):
                     pass
                 # EVENT.wait(secrets.choice(range(2, 3)))
                 # logging.info('Flag7')
