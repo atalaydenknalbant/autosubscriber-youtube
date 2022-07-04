@@ -575,7 +575,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before)
-                        driver.switch_to.default_content()
                         EVENT.wait(secrets.choice(range(1, 4)))
                         driver.find_element(By.ID, "btnSkip").click()
                         continue
