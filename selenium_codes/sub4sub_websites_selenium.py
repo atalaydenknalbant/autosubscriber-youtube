@@ -903,7 +903,7 @@ def ytbpals_functions(req_dict: dict) -> None:
 
                     except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
                             as ex:
-                        logging.info("Error: Exception: {}".format(str(ex)))
+                        logging.info(f"Error: Exception: {str(ex)}")
                         driver.save_screenshot("screenshots/screenshot.png")
                     driver.quit()
                     break
@@ -1238,9 +1238,9 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             driver.switch_to.window(driver.window_handles[0])
             try:
-                WebDriverWait(driver, 110).until(ec.visibility_of_element_located((By.XPATH,
-                                                                                   '//*[@id="showresult"]/table/tbody/'
-                                                                                   'tr[{}]/td/center/b'.format(i))))\
+                WebDriverWait(driver, 110)\
+                    .until(ec.visibility_of_element_located((By.XPATH,
+                                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
                     .get_attribute("value")
 
             except (TimeoutException, IndexError):
@@ -1251,8 +1251,8 @@ def youlikehits_functions(req_dict: dict) -> None:
 
                 while video_name != \
                         driver.find_element(By.XPATH,
-                                            '//*[@id="showresult"]/table/tbody/tr[{}]/td/center/b'.
-                                            format(i)).text.split('"')[1::2][0]:
+                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
+                        .text.split('"')[1::2][0]:
                     EVENT.wait(2)
                     c += 1
                     if c == 50:
