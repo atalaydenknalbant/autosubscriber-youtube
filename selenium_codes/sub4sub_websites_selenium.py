@@ -277,7 +277,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                             j += 1
                 if j > 2:
                     logging.info('Couldnt find sub button in: ' + d)
-                # driver.save_screenshot("screenshots/screenshot_proof.png")
             else:
                 driver.switch_to.window(window_before)
                 while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
@@ -842,7 +841,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             pass
         driver.quit()
 
-    # Determines How Many Hours Program Will Run
+    # Determines how many hours program will run
     timer(16)
 
 
@@ -888,7 +887,6 @@ def ytbpals_functions(req_dict: dict) -> None:
                     logging.info("clicked Subscribe btn")
                 except NoSuchElementException:
                     logging.info("No such Element Exception(sub_btn)")
-                    # driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
                                                          " ul.navbar-nav > li:nth-child(4) > a") \
                         .send_keys(Keys.ENTER)
@@ -931,7 +929,6 @@ def ytbpals_functions(req_dict: dict) -> None:
                                 j += 1
                     if j > 2:
                         logging.info('Couldnt find sub button in: ' + "ytbpals")
-                    # driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
                     driver.switch_to.window(window_before)
                     driver.switch_to.default_content()
