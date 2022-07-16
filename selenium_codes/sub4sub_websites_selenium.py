@@ -717,10 +717,14 @@ def submenow_functions(req_dict: dict) -> None:
                             if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_elements(By.TAG_NAME,
+                                try:
+                                    like_button = driver.find_elements(By.TAG_NAME,
                                                                    ytbutton_elements_location_dict
                                                                    ['yt_tag_like_button_type1'])[0]
-                                ActionChains(driver).move_to_element(like_button).click().perform()
+                                    ActionChains(driver).move_to_element(like_button).click().perform()
+                                except IndexError:
+                                    pass
+
 
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
