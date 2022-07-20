@@ -722,7 +722,7 @@ def submenow_functions(req_dict: dict) -> None:
                                                                        ytbutton_elements_location_dict
                                                                        ['yt_tag_like_button_type1'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
-                                except (IndexError, NoSuchElementException):
+                                except (IndexError, NoSuchElementException, ElementNotInteractableException):
                                     pass
 
                         EVENT.wait(secrets.choice(range(1, 4)))
