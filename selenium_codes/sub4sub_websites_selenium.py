@@ -586,7 +586,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         else:
                             for i in range(5):
                                 try:
-                                    # driver.save_screenshot("screenshots/screenshot.png")
                                     sub_button = driver.find_elements(By.ID,
                                                                       ytbutton_elements_location_dict[
                                                                           'yt_id_sub_button_type1'])[i]
