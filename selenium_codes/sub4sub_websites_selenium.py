@@ -201,20 +201,38 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                     continue
             except (StaleElementReferenceException, NoSuchElementException, WebDriverException):
                 driver.save_screenshot("screenshots/screenshot.png")
-                if driver.find_elements(By.ID, "remainingHint") == 0:
-                    driver.quit()
-                    return
+                if d == "sonuker":
+                    if driver.find_elements(By.TAG_NAME, "h2") == 0:
+                        driver.quit()
+                        return
+                    else:
+                        pass
                 else:
-                    pass
-        try:
-            remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
-                                                             "div/div/div/div/div[2]/div[1]/h2/span/div").text
+                    if driver.find_elements(By.ID, "remainingHint") == 0:
+                        driver.quit()
+                        return
+                    else:
+                        pass
+        if d == "sonuker":
+            try:
+                remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/div/"
+                                                                 "div/div/div/div/div[1]/h2/span/div").text
 
-            logging.info(d+" Remaining Videos: " + remaining_videos)
-        except NoSuchElementException:
-            driver.save_screenshot("screenshots/screenshot.png")
-            driver.quit()
-            return
+                logging.info(f'{d}  Remaining Videos:  {remaining_videos}')
+            except NoSuchElementException:
+                driver.save_screenshot("screenshots/screenshot.png")
+                driver.quit()
+                return
+        else:
+            try:
+                remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
+                                                                 "div/div/div/div/div[2]/div[1]/h2/span/div").text
+
+                logging.info(f'{d}  Remaining Videos:  {remaining_videos}')
+            except NoSuchElementException:
+                driver.save_screenshot("screenshots/screenshot.png")
+                driver.quit()
+                return
         driver.switch_to.window(window_before)
         # driver.save_screenshot("screenshots/screenshot.png")
         try:
@@ -265,7 +283,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 if YT_JAVASCRIPT:
                     driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                 else:
-                    for i in range(3):
+                    for i in range(5):
                         try:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
@@ -273,9 +291,10 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         except (NoSuchElementException,
                                 ElementNotInteractableException,
-                                ElementClickInterceptedException):
+                                ElementClickInterceptedException,
+                                IndexError):
                             j += 1
-                if j > 2:
+                if j > 4:
                     logging.info('Couldnt find sub button in: ' + d)
             else:
                 driver.switch_to.window(window_before)
@@ -382,10 +401,15 @@ def sonuker_functions(req_dict: dict) -> None:
         logging.info("Couldn't find activate button ")
     driver.save_screenshot("screenshots/screenshot.png")
     try:
-        activate_btn = driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div.dashboardBody >"
-                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
-                                                            " div:nth-child(2) > div:nth-child(1) > div >"
-                                                            " div.panel-body > div.btn-holder > form > a")
+        activate_btn = driver.find_element(By.LINK_TEXT, "section.dashboard:nth-child(3)"
+                                                         " div.container div.dashboardBody"
+                                                         " div.row:nth-child(2)"
+                                                         " div.col-lg-12"
+                                                         " div.dashboard__userContent div.userContent_pricing:"
+                                                         "nth-child(1) div.row:nth-child(3) div.col-lg-4.col-item:"
+                                                         "nth-child(1) div.panel.panel-primary div.panel-body div."
+                                                         "btn-holder form:nth-child(1) > a.btn.btn-warning.btn-pt:"
+                                                         "nth-child(2)")
         activate_btn.send_keys(Keys.ENTER)
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
@@ -560,16 +584,17 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         if YT_JAVASCRIPT:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            for i in range(3):
+                            for i in range(5):
                                 try:
+                                    # driver.save_screenshot("screenshots/screenshot.png")
                                     sub_button = driver.find_elements(By.ID,
                                                                       ytbutton_elements_location_dict[
                                                                           'yt_id_sub_button_type1'])[i]
                                     ActionChains(driver).move_to_element(sub_button).click().perform()
                                 except (NoSuchElementException, ElementNotInteractableException,
-                                        ElementClickInterceptedException):
+                                        ElementClickInterceptedException, IndexError):
                                     j += 1
-                        if j > 2:
+                        if j > 4:
                             logging.info('Couldnt find sub button in: ' + "subscribersvideo")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
@@ -730,16 +755,17 @@ def submenow_functions(req_dict: dict) -> None:
                         if YT_JAVASCRIPT:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
                         else:
-                            for i in range(3):
+                            for i in range(5):
                                 try:
                                     sub_button = driver.find_elements(By.ID,
                                                                       ytbutton_elements_location_dict[
                                                                           'yt_id_sub_button_type1'])[i]
                                     ActionChains(driver).move_to_element(sub_button).click().perform()
                                 except (NoSuchElementException, ElementNotInteractableException,
-                                        ElementClickInterceptedException):
+                                        ElementClickInterceptedException,
+                                        IndexError):
                                     j += 1
-                        if j > 2:
+                        if j > 4:
                             logging.info('Couldnt find sub button in: ' + "submenow")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
