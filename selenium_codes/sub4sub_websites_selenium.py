@@ -218,7 +218,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/div/"
                                                                  "div/div/div/div/div[1]/h2/span/div").text
 
-                logging.info(f'{d}  Remaining Videos:  {remaining_videos}')
+                logging.info(f'{d} Remaining Videos:{remaining_videos}')
             except NoSuchElementException:
                 driver.save_screenshot("screenshots/screenshot.png")
                 driver.quit()
@@ -228,7 +228,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
                                                                  "div/div/div/div/div[2]/div[1]/h2/span/div").text
 
-                logging.info(f'{d}  Remaining Videos:  {remaining_videos}')
+                logging.info(f'{d} Remaining Videos:{remaining_videos}')
             except NoSuchElementException:
                 driver.save_screenshot("screenshots/screenshot.png")
                 driver.quit()
@@ -596,6 +596,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         if j > 4:
                             logging.info('Couldnt find sub button in: ' + "subscribersvideo")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
+
                     else:
                         driver.switch_to.window(window_before)
                         EVENT.wait(secrets.choice(range(1, 4)))
@@ -607,7 +608,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                     el = WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                     el.click()
                     logging.info("subscribersvideo done sub & like")
-
         except UnexpectedAlertPresentException:
             try:
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
