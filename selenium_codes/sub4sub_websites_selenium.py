@@ -86,13 +86,11 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
-        pass
     else:
-        pass
+        EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "YOULIKEHITS":
         chrome_options.add_extension('extensions/hCaptcha-Solver.crx')
-        pass
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
@@ -101,7 +99,6 @@ def set_driver_opt(req_dict: dict,
                  "credentials_enable_service": False}
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
-        pass
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -154,7 +151,7 @@ def google_login(driver: webdriver,
         sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     if already_in_website:
-        pass
+        EVENT.wait(0.25)
     else:
         driver.get("https://accounts.google.com/signin")
     driver.save_screenshot("screenshots/g_screenshot.png")
@@ -206,13 +203,13 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.quit()
                         return
                     else:
-                        pass
+                        EVENT.wait(0.25)
                 else:
                     if driver.find_elements(By.ID, "remainingHint") == 0:
                         driver.quit()
                         return
                     else:
-                        pass
+                        EVENT.wait(0.25)
         if d == "sonuker":
             try:
                 remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/div/"
@@ -249,21 +246,21 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 return
         except (TimeoutException, NoSuchElementException,
                 ElementNotInteractableException, ElementClickInterceptedException):
-            pass
+            EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         try:
             driver.find_elements(By.TAG_NAME, 'ytd-grid-video-renderer')[0].click()
         except (NoSuchElementException, IndexError):
-            pass
+            EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
         # driver.save_screenshot("screenshots/screenshot.png")
         try:
             if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements(By.CSS_SELECTOR,
                                             ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    pass
+                    EVENT.wait(0.25)
                 else:
                     EVENT.wait(secrets.choice(range(1, 4)))
                     if YT_JAVASCRIPT:
@@ -276,7 +273,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info('Couldnt find like button in: ' + d)
-                            pass
                 EVENT.wait(secrets.choice(range(1, 4)))
                 # driver.save_screenshot("screenshots/screenshot.png")
                 j = 0
@@ -299,14 +295,14 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             else:
                 driver.switch_to.window(window_before)
                 while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
-                    pass
+                    EVENT.wait(1)
                 button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
                 ActionChains(driver).move_to_element(button_confirm).click().perform()
                 continue
         except TimeoutException:
             driver.switch_to.window(window_before)
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
-                pass
+                EVENT.wait(1)
             button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
@@ -314,9 +310,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         # driver.save_screenshot("screenshots/screenshot.png")
         try:
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
-                pass
+                EVENT.wait(1)
         except (NoSuchElementException, NoSuchElementException):
-            pass
+            EVENT.wait(0.25)
         try:
             button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
             ActionChains(driver).move_to_element(button_confirm).click().perform()
@@ -365,7 +361,6 @@ def subpals_functions(req_dict: dict) -> None:
 
     except NoSuchElementException:
         logging.info("subpals activate button passed")
-        pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     type_1_for_loop_like_and_sub(driver, "subpals")
@@ -413,7 +408,6 @@ def sonuker_functions(req_dict: dict) -> None:
         activate_btn.send_keys(Keys.ENTER)
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
-        pass
     driver.switch_to.default_content()
     driver.save_screenshot("screenshots/screenshot.png")
     type_1_for_loop_like_and_sub(driver, "sonuker")
@@ -450,7 +444,6 @@ def ytpals_functions(req_dict: dict) -> None:
 
     except NoSuchElementException:
         logging.info("ytpals activate button passed")
-        pass
     driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
     type_1_for_loop_like_and_sub(driver, "ytpals")
@@ -475,7 +468,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
             driver.quit()
             return
         else:
-            pass
+            EVENT.wait(0.25)
     except NoSuchElementException as ex:
         logging.info("subscribersvideo"+str(ex))
         driver.quit()
@@ -496,19 +489,19 @@ def subscribersvideo_functions(req_dict: dict) -> None:
         alert.accept()
 
     except TimeoutException:
-        pass
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Your channel doesn't have any public video.")) > 0:
         logging.info("subscribersvideo Your channel doesn't have any public video"
                      " Please try to reload this page one more time.")
         driver.quit()
         return
     else:
-        pass
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.ID, "buttonPlan6")) > 0:
         try:
             driver.find_element(By.CSS_SELECTOR, "#reviewDialog > div.greenHeader > div > a > i").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
-            pass
+            EVENT.wait(0.25)
         try:
             driver.find_element(By.ID, "buttonPlan6").click()
         except (UnexpectedAlertPresentException, NoSuchElementException):
@@ -517,14 +510,14 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
-        pass
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Please come later")) > 0:
         logging.info("subscribersvideo FOUND PLEASE COME LATER TEXT, EXITING")
         driver.quit()
         return
 
     else:
-        pass
+        EVENT.wait(0.25)
 
     EVENT.wait(secrets.choice(range(1, 4)))
     if len(driver.find_elements(By.XPATH, "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
@@ -569,7 +562,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                            pass
+                            EVENT.wait(0.25)
                         else:
                             if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
@@ -650,7 +643,7 @@ def submenow_functions(req_dict: dict) -> None:
             driver.quit()
             return
         else:
-            pass
+            EVENT.wait(0.25)
     except NoSuchElementException as ex:
         logging.info("submenow" + str(ex))
         driver.quit()
@@ -672,12 +665,12 @@ def submenow_functions(req_dict: dict) -> None:
         driver.quit()
         return
     else:
-        pass
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.ID, "buttonPlan6")) > 0:
         try:
             driver.find_element(By.CSS_SELECTOR, "#reviewDialog > div.headerPlan > div > a > img").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
-            pass
+            EVENT.wait(0.25)
         driver.find_element(By.ID, "buttonPlan8").click()
     else:
         logging.info("submenow active Button Passed")
@@ -687,7 +680,7 @@ def submenow_functions(req_dict: dict) -> None:
     try:
         driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
-        pass
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
         driver.quit()
         return
@@ -709,7 +702,7 @@ def submenow_functions(req_dict: dict) -> None:
                     if len(driver.find_elements(By.XPATH,
                                                 "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
                         break
-                    pass
+                    EVENT.wait(0.25)
                 else:
                     window_before_5 = driver.window_handles[0]
                     if len(driver.find_elements(By.ID, "buttonPlan1")) > 0 \
@@ -736,7 +729,7 @@ def submenow_functions(req_dict: dict) -> None:
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                            pass
+                            EVENT.wait(0.25)
                         else:
                             if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
@@ -747,7 +740,7 @@ def submenow_functions(req_dict: dict) -> None:
                                                                        ['yt_tag_like_button_type1'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
                                 except (IndexError, NoSuchElementException, ElementNotInteractableException):
-                                    pass
+                                    EVENT.wait(0.25)
 
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
@@ -834,13 +827,13 @@ def ytmonster_functions(req_dict: dict) -> None:
     try:
         driver.execute_script("document.querySelector('#endAll').click()")
     except NoSuchElementException:
-        pass
+        EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(1, 4)))
 
     def open_tabs(total_tabs: int = 3) -> None:
         for i in range(total_tabs):
             if i == 0:
-                pass
+                EVENT.wait(0.25)
             else:
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[i])
@@ -866,7 +859,6 @@ def ytmonster_functions(req_dict: dict) -> None:
         while future > datetime.now():
             EVENT.wait(60)
             # driver.save_screenshot("screenshots/screenshot.png")
-            pass
         driver.quit()
 
     # Determines how many hours program will run
@@ -1088,8 +1080,7 @@ def youtubviews_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    global YT_JAVASCRIPT
-    YT_JAVASCRIPT = True
+    YT_JAVASCRIPT: bool = False
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
@@ -1126,7 +1117,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                     driver.close()
                     driver.switch_to.window(driver.window_handles[0])
             except (NoSuchWindowException, IndexError):
-                pass
+                EVENT.wait(0.25)
             EVENT.wait(18)
             try:
                 like_button = driver.find_elements(By.CLASS_NAME, like_btn)[i]
@@ -1141,7 +1132,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                 EVENT.wait(secrets.choice(range(1, 4)))
                 if len(driver.find_elements(By.CSS_SELECTOR,
                                             ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    pass
+                    EVENT.wait(0.25)
                 else:
                     if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
@@ -1189,7 +1180,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         try:
             driver.find_element(By.CLASS_NAME, "buybutton").click()
         except (NoSuchElementException, ElementNotInteractableException):
-            pass
+            EVENT.wait(0.25)
     collect_bonus_points()
     driver.save_screenshot("screenshots/screenshot.png")
     driver.get("https://www.youlikehits.com/youtubenew2.php")
@@ -1200,7 +1191,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             logging.info('No videos available quitting...')
             return
     except NoSuchElementException:
-        pass
+        EVENT.wait(0.25)
     while True:
         try:
             EVENT.wait(secrets.choice(range(16, 20)))
@@ -1234,14 +1225,14 @@ def youlikehits_functions(req_dict: dict) -> None:
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
-                pass
+                EVENT.wait(0.25)
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
                     try:
                         driver.close()
                     except NoSuchWindowException:
-                        pass
+                        EVENT.wait(0.25)
                     driver.switch_to.window(driver.window_handles[0])
                     EVENT.wait(secrets.choice(range(1, 2)))
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
@@ -1260,7 +1251,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     continue
             except (NoSuchElementException, IndexError):
                 # logging.info('Flag4.3')
-                pass
+                EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
             try:
                 WebDriverWait(driver, 110)\
@@ -1269,7 +1260,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     .get_attribute("value")
 
             except (TimeoutException, IndexError):
-                pass
+                EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(6, 10)))
             try:
                 c = 0
@@ -1283,7 +1274,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     if c == 50:
                         break
             except NoSuchElementException:
-                pass
+                EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(3, 5)))
             # logging.info('Flag5.1')
             # driver.save_screenshot("screenshots/screenshot.png")
@@ -1293,7 +1284,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     logging.info('No videos available quitting...')
                     return
             except NoSuchElementException:
-                pass
+                EVENT.wait(0.25)
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             z = 0
             # logging.info('Flag6')
@@ -1307,7 +1298,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         try:
                             driver.close()
                         except NoSuchWindowException:
-                            pass
+                            EVENT.wait(0.25)
                         driver.switch_to.window(driver.window_handles[0])
                         EVENT.wait(secrets.choice(range(1, 2)))
                         driver.find_element(By.LINK_TEXT, 'Skip').click()
@@ -1317,7 +1308,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         # logging.info('Flag2')
                         break
                 except (IndexError, WebDriverException):
-                    pass
+                    EVENT.wait(0.25)
                 # EVENT.wait(secrets.choice(range(2, 3)))
                 # logging.info('Flag7')
                 z += 1
@@ -1387,7 +1378,7 @@ def like4like_functions(req_dict: dict) -> None:
                 try:
                     driver.find_element(By.XPATH, like_btn_1).click()
                 except NoSuchElementException:
-                    pass
+                    EVENT.wait(0.25)
 
             else:
                 driver.save_screenshot("screenshots/screenshot.png")
@@ -1406,7 +1397,7 @@ def like4like_functions(req_dict: dict) -> None:
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     if len(driver.find_elements(By.CSS_SELECTOR,
                                                 ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                        pass
+                        EVENT.wait(0.25)
                     else:
                         EVENT.wait(secrets.choice(range(3, 4)))
                         if YT_JAVASCRIPT:
@@ -1421,12 +1412,11 @@ def like4like_functions(req_dict: dict) -> None:
                                 # driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
                                 logging.info('Couldnt find like button')
-                                pass
                     EVENT.wait(secrets.choice(range(1, 4)))
                 else:
-                    pass
+                    EVENT.wait(0.25)
             except TimeoutException:
-                pass
+                EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.close()
             EVENT.wait(secrets.choice(range(7, 10)))
