@@ -396,16 +396,10 @@ def sonuker_functions(req_dict: dict) -> None:
         logging.info("Couldn't find activate button ")
     driver.save_screenshot("screenshots/screenshot.png")
     try:
-        activate_btn = driver.find_element(By.LINK_TEXT, "section.dashboard:nth-child(3)"
-                                                         " div.container div.dashboardBody"
-                                                         " div.row:nth-child(2)"
-                                                         " div.col-lg-12"
-                                                         " div.dashboard__userContent div.userContent_pricing:"
-                                                         "nth-child(1) div.row:nth-child(3) div.col-lg-4.col-item:"
-                                                         "nth-child(1) div.panel.panel-primary div.panel-body div."
-                                                         "btn-holder form:nth-child(1) > a.btn.btn-warning.btn-pt:"
-                                                         "nth-child(2)")
-        activate_btn.send_keys(Keys.ENTER)
+        activate_btn = driver.find_element(By.XPATH, "/html[1]/body[1]/div[1]/section[1]/div[1]/"
+                                                     "div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/"
+                                                     "div[1]/div[1]/div[2]/div[2]/form[1]/a[1]")
+        activate_btn.click()
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
     driver.switch_to.default_content()
