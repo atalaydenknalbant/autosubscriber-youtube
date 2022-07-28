@@ -15,3 +15,7 @@
 /screenshots/screenshot_proof.png
 /.idea/dictionaries/yineh.xml
 /screenshots/g_screenshot.png
+/.wdm/drivers.json
+/.wdm/drivers/chromedriver/
+/.wdm/drivers/chromedriver/win32/103.0.5060/chromedriver.exe
+/.wdm

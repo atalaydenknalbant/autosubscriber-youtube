@@ -18,7 +18,8 @@ if heroku == "available":
         "yt_channel_id": os.environ["youtube_channel_id"],
         "username_ytmonster": os.environ["ytmonster_com_username"],
         "pw_ytmonster": os.environ["ytmonster_com_password"],
-        "yt_useragent": os.environ["youtube_useragent"]
+        "yt_useragent": os.environ["youtube_useragent"],
+        "github_token": os.environ["github_token"]
     }
 
 # config.ini
@@ -33,7 +34,8 @@ else:
         "yt_channel_id": userinfo["youtube_channel_id"],
         "username_ytmonster": userinfo["ytmonster_com_username"],
         "pw_ytmonster": userinfo["ytmonster_com_password"],
-        "yt_useragent": userinfo["youtube_useragent"]
+        "yt_useragent": userinfo["youtube_useragent"],
+        "github_token": userinfo["github_token"]
     }
 
 if __name__ == "__main__":

@@ -19,7 +19,8 @@ if heroku == "available":
         "yt_channel_id": os.environ["youtube_channel_id"],
         "email_submenow": os.environ["submenow_com_email"],
         "email_subscribersvideo": os.environ["subscribers_video_email"],
-        "yt_useragent": os.environ["youtube_useragent"]
+        "yt_useragent": os.environ["youtube_useragent"],
+        "github_token": os.environ["github_token"]
     }
 
 # config.ini
@@ -34,7 +35,8 @@ else:
         "yt_channel_id": userinfo["youtube_channel_id"],
         "email_submenow": userinfo["submenow_com_email"],
         "email_subscribersvideo": userinfo["subscribers_video_email"],
-        "yt_useragent": userinfo["youtube_useragent"]
+        "yt_useragent": userinfo["youtube_useragent"],
+        "github_token": userinfo["github_token"]
     }
 
 

@@ -18,7 +18,8 @@ if heroku == "available":
         "yt_channel_id": os.environ["youtube_channel_id"],
         "username_youtubviews": os.environ["youtubviews_username"],
         "pw_youtubviews": os.environ["youtubviews_password"],
-        "yt_useragent": os.environ["youtube_useragent"]
+        "yt_useragent": os.environ["youtube_useragent"],
+        "github_token": os.environ["github_token"]
     }
 # config.ini
 else:
@@ -32,7 +33,8 @@ else:
         "yt_channel_id": userinfo["youtube_channel_id"],
         "username_youtubviews": userinfo["youtubviews_username"],
         "pw_youtubviews": userinfo["youtubviews_password"],
-        "yt_useragent": userinfo["youtube_useragent"]
+        "yt_useragent": userinfo["youtube_useragent"],
+        "github_token": userinfo["github_token"]
     }
 
 if __name__ == "__main__":

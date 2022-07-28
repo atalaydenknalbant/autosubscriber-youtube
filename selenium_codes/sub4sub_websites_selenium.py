@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 import logging
 import os
@@ -106,18 +106,27 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("--proxy-server='direct://'")
-    chrome_options.add_argument("--proxy-bypass-list=*")
+    # chrome_options.add_argument("--proxy-server='direct://'")
+    # chrome_options.add_argument("--proxy-bypass-list=*")
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-infobars")
+
+    # Set github token environment for webdriver manager
+    os.environ['GH_TOKEN'] = req_dict['github_token']
+    # Save binary webdrivers to project location
+    os.environ['WDM_LOCAL'] = '1'
+    # Enable or Disable SSL verification when downloading webdrivers
+    os.environ['WDM_SSL_VERIFY'] = '1'
+    # Disable logging for webdriver manager
+    os.environ['WDM_LOG'] = str(logging.NOTSET)
     try:
         if os.environ['HEROKU'] == 'available':
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
             return driver
     except KeyError:
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(path=".wdm/drivers/chromedriver", cache_valid_range=3).install()), options=chrome_options)
         return driver
 
 
@@ -1228,8 +1237,23 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(0.25)
                     driver.switch_to.window(driver.window_handles[0])
                     EVENT.wait(secrets.choice(range(1, 2)))
+                    try:
+                        video_name = driver.find_element(By.XPATH,
+                                                         f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
+                            .text.split('"')[1::2][0]
+                    except NoSuchElementException:
+                        EVENT.wait(0.25)
                     driver.find_element(By.LINK_TEXT, 'Skip').click()
                     EVENT.wait(secrets.choice(range(3, 4)))
+                    try:
+                        if video_name == driver.find_element(By.XPATH,
+                                                             f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
+                                .text.split('"')[1::2][0]:
+                            driver.refresh()
+                            continue
+                    except NoSuchElementException:
+                        EVENT.wait(0.25)
+
                     driver.find_element(By.XPATH, '/html/body/div/table[2]/'
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
