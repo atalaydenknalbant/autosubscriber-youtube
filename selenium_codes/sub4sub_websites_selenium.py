@@ -126,7 +126,9 @@ def set_driver_opt(req_dict: dict,
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
             return driver
     except KeyError:
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(path=".wdm/drivers/chromedriver", cache_valid_range=3).install()), options=chrome_options)
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(path=".wdm/drivers/chromedriver",
+                                                                            cache_valid_range=3).install()),
+                                  options=chrome_options)
         return driver
 
 
@@ -570,11 +572,13 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                             if YT_JAVASCRIPT:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
-                                like_button = driver.find_elements(By.TAG_NAME,
-                                                                   ytbutton_elements_location_dict
-                                                                   ['yt_tag_like_button_type1'])[0]
-                                ActionChains(driver).move_to_element(like_button).click().perform()
-
+                                try:
+                                    like_button = driver.find_elements(By.TAG_NAME,
+                                                                       ytbutton_elements_location_dict
+                                                                       ['yt_tag_like_button_type1'])[0]
+                                    ActionChains(driver).move_to_element(like_button).click().perform()
+                                except IndexError:
+                                    pass
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
                         if YT_JAVASCRIPT:
