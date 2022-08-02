@@ -26,7 +26,7 @@ EVENT = Event()
 # Making Program to start with other locators instead of javascript locator
 YT_JAVASCRIPT = False
 
-# Locations For youtube button elements
+# Locations For YouTube button elements
 ytbutton_elements_location_dict = {
 
     "yt_tag_like_button_type1": "ytd-toggle-button-renderer",
@@ -133,7 +133,7 @@ def set_driver_opt(req_dict: dict,
 
 
 def youtube_too_many_controller() -> int:
-    """ Checks user's google account if there are too many subscriptions or likes for the given google account and
+    """ Checks user's Google account if there are too many subscriptions or likes for the given google account and
     returns boolean that represents condition
         Args:
         - driver(webdriver): webdriver parameter.
@@ -283,7 +283,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                                                ['yt_tag_like_button_type1'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
-                            logging.info('Couldnt find like button in: ' + d)
+                            logging.info("Couldn't find like button in: " + d)
                 EVENT.wait(secrets.choice(range(1, 4)))
                 # driver.save_screenshot("screenshots/screenshot.png")
                 j = 0
@@ -302,7 +302,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                 IndexError):
                             j += 1
                 if j > 4:
-                    logging.info('Couldnt find sub button in: ' + d)
+                    logging.info("Couldn't find sub button in: " + d)
             else:
                 driver.switch_to.window(window_before)
                 while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
@@ -594,7 +594,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                         ElementClickInterceptedException, IndexError):
                                     j += 1
                         if j > 4:
-                            logging.info('Couldnt find sub button in: ' + "subscribersvideo")
+                            logging.info("Couldn't find sub button in: " + "subscribersvideo")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
 
                     else:
@@ -765,7 +765,7 @@ def submenow_functions(req_dict: dict) -> None:
                                         IndexError):
                                     j += 1
                         if j > 4:
-                            logging.info('Couldnt find sub button in: ' + "submenow")
+                            logging.info("Couldn't find sub button in: " + "submenow")
                         # driver.save_screenshot("screenshots/screenshot_proof.png")
                     else:
                         driver.switch_to.window(window_before_5)
@@ -824,7 +824,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.implicitly_wait(6)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
-    logging.info("youtube login completed")
+    logging.info("YouTube login completed")
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.ytmonster.net/login")  # Type_Undefined
     driver.find_element(By.ID, 'inputUsername').send_keys(req_dict['username_ytmonster'])
@@ -955,7 +955,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                                     ElementClickInterceptedException):
                                 j += 1
                     if j > 2:
-                        logging.info('Couldnt find sub button in: ' + "ytbpals")
+                        logging.info("Couldn't find sub button in: " + "ytbpals")
                     driver.close()
                     driver.switch_to.window(window_before)
                     driver.switch_to.default_content()
@@ -1056,7 +1056,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                                     ElementClickInterceptedException):
                                 j += 1
                     if j > 2:
-                        logging.info('Couldnt find sub button in: ' + "ytbpals")
+                        logging.info("Couldn't find sub button in: " + "ytbpals")
                     # driver.save_screenshot("screenshots/screenshot_proof.png")
                     driver.close()
                     driver.switch_to.window(window_before)
@@ -1091,7 +1091,7 @@ def youtubviews_functions(req_dict: dict) -> None:
     driver.implicitly_wait(7)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
-    logging.info("youtube login completed")
+    logging.info("YouTube login completed")
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://youtubviews.com/")  # Type_Undefined
     driver.save_screenshot("screenshots/screenshot.png")
@@ -1170,7 +1170,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
-    logging.info("youtube login completed")
+    logging.info("YouTube login completed")
     EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.save_screenshot("screenshots/screenshot.png")
@@ -1224,10 +1224,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                 break
             # driver.save_screenshot('screenshots/screenshot_test.png')
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag1')
+            logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
             driver.execute_script("window.scrollTo(0, 600);")
-            # logging.info('Flag4')
+            logging.info('Flag4')
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
@@ -1268,10 +1268,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(3, 4)))
-                    # logging.info('Flag4.2')
+                    logging.info('Flag4.2')
                     continue
             except (NoSuchElementException, IndexError):
-                # logging.info('Flag4.3')
+                logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -1297,7 +1297,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(3, 5)))
-            # logging.info('Flag5.1')
+            logging.info('Flag5.1')
             # driver.save_screenshot("screenshots/screenshot.png")
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
@@ -1308,7 +1308,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 EVENT.wait(0.25)
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             z = 0
-            # logging.info('Flag6')
+            logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
@@ -1326,12 +1326,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(5, 8)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
-                        # logging.info('Flag2')
+                        logging.info('Flag2')
                         break
                 except (IndexError, WebDriverException):
                     EVENT.wait(0.25)
                 # EVENT.wait(secrets.choice(range(2, 3)))
-                # logging.info('Flag7')
+                logging.info('Flag7')
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
@@ -1340,12 +1340,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    # logging.info('Flag8')
+                    logging.info('Flag8')
                     if z == 15:
                         i += 1
-                # logging.info('Flag8.9')
+                logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag9')
+            logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
@@ -1365,7 +1365,7 @@ def like4like_functions(req_dict: dict) -> None:
     driver.implicitly_wait(12)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
-    logging.info("youtube login completed")
+    logging.info("YouTube login completed")
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.like4like.org/login/")  # Type_Undefined
     driver.save_screenshot("screenshots/screenshot.png")
@@ -1432,7 +1432,7 @@ def like4like_functions(req_dict: dict) -> None:
                                 logging.info("Liked the Video")
                                 # driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
-                                logging.info('Couldnt find like button')
+                                logging.info("Couldn't find like button")
                     EVENT.wait(secrets.choice(range(1, 4)))
                 else:
                     EVENT.wait(0.25)
