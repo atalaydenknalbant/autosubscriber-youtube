@@ -284,7 +284,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info("Couldn't find like button in: " + d)
                 EVENT.wait(secrets.choice(range(1, 4)))
-#                 # driver.save_screenshot("screenshots/screenshot.png")
+                # driver.save_screenshot("screenshots/screenshot.png")
                 j = 0
                 if YT_JAVASCRIPT:
                     driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
@@ -678,13 +678,13 @@ def submenow_functions(req_dict: dict) -> None:
         driver.quit()
         return
     EVENT.wait(secrets.choice(range(1, 4)))
-
     try:
-        if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
-            driver.quit()
-            return
+        driver.save_screenshot("screenshots/screenshot.png")
     except UnexpectedAlertPresentException:
         EVENT.wait(0.25)
+    if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
+        driver.quit()
+        return
     if len(driver.find_elements(By.CSS_SELECTOR, "#errorAjax > i")) > 0:
         logging.info("submenow found error dialog")
         driver.quit()
