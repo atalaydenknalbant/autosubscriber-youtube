@@ -512,18 +512,13 @@ def subscribersvideo_functions(req_dict: dict) -> None:
         except (UnexpectedAlertPresentException, NoSuchElementException):
             logging.info("subscribersvideo Button Passed")
     EVENT.wait(secrets.choice(range(1, 4)))
-    # try:
-    #     driver.save_screenshot("screenshots/screenshot.png")
-    # except UnexpectedAlertPresentException:
-    #     EVENT.wait(0.25)
-    if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Please come later")) > 0:
-        logging.info("subscribersvideo FOUND PLEASE COME LATER TEXT, EXITING")
-        driver.quit()
-        return
-
-    else:
+    try:
+        if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Please come later")) > 0:
+            logging.info("subscribersvideo FOUND PLEASE COME LATER TEXT, EXITING")
+            driver.quit()
+            return
+    except UnexpectedAlertPresentException:
         EVENT.wait(0.25)
-
     EVENT.wait(secrets.choice(range(1, 4)))
     if len(driver.find_elements(By.XPATH, "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
         logging.info("subscribersvideo found gray button")
@@ -684,13 +679,13 @@ def submenow_functions(req_dict: dict) -> None:
         driver.quit()
         return
     EVENT.wait(secrets.choice(range(1, 4)))
-    # try:
-    #     driver.save_screenshot("screenshots/screenshot.png")
-    # except UnexpectedAlertPresentException:
-    #     EVENT.wait(0.25)
-    if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
-        driver.quit()
-        return
+
+    try:
+        if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
+            driver.quit()
+            return
+    except UnexpectedAlertPresentException:
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.CSS_SELECTOR, "#errorAjax > i")) > 0:
         logging.info("submenow found error dialog")
         driver.quit()
