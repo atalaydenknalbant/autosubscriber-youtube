@@ -178,7 +178,6 @@ def google_login(driver: webdriver,
     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
     EVENT.wait(secrets.choice(range(1, 4)))
     # driver.save_screenshot("screenshots/g_screenshot.png")
-    driver.switch_to.default_content()
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
