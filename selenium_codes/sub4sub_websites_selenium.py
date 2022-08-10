@@ -90,7 +90,7 @@ def set_driver_opt(req_dict: dict,
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "YOULIKEHITS":
-        chrome_options.add_extension('extensions/Noptcha--ReCAPTCHA---hCAPTCHA-Solver.crx')
+        chrome_options.add_extension('extensions/hCaptcha-Solver.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
