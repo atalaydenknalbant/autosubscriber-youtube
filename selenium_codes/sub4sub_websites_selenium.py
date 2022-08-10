@@ -1241,17 +1241,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                             .text.split('"')[1::2][0]
                     except NoSuchElementException:
                         EVENT.wait(0.25)
-                    driver.find_element(By.LINK_TEXT, 'Skip').click()
+                    driver.refresh()
                     EVENT.wait(secrets.choice(range(3, 4)))
-                    try:
-                        if video_name == driver.find_element(By.XPATH,
-                                                             f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
-                                .text.split('"')[1::2][0]:
-                            driver.refresh()
-                            continue
-                    except NoSuchElementException:
-                        EVENT.wait(0.25)
-
                     driver.find_element(By.XPATH, '/html/body/div/table[2]/'
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
@@ -1316,7 +1307,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                             EVENT.wait(0.25)
                         driver.switch_to.window(driver.window_handles[0])
                         EVENT.wait(secrets.choice(range(1, 2)))
-                        driver.find_element(By.LINK_TEXT, 'Skip').click()
+                        driver.refresh()
                         EVENT.wait(secrets.choice(range(5, 8)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
