@@ -104,13 +104,13 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--mute-audio")
         chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--proxy-server='direct://'")
         chrome_options.add_argument("--proxy-bypass-list=*")
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-running-insecure-content")
         chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--window-size=1920,1080")
 
     # Set github token environment for webdriver manager
