@@ -90,7 +90,7 @@ def set_driver_opt(req_dict: dict,
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "YOULIKEHITS":
-        chrome_options.add_extension('extensions/hCaptcha-Solver.crx')
+        chrome_options.add_extension('extensions/0.1.8_0.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
@@ -99,19 +99,19 @@ def set_driver_opt(req_dict: dict,
                  "credentials_enable_service": False}
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option("useAutomationExtension", False)
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--ignore-certificate-errors")
-    chrome_options.add_argument("--mute-audio")
-    chrome_options.add_argument("--disable-notifications")
-    # chrome_options.add_argument("--proxy-server='direct://'")
-    # chrome_options.add_argument("--proxy-bypass-list=*")
-    chrome_options.add_argument("--disable-web-security")
-    chrome_options.add_argument("--allow-running-insecure-content")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--mute-audio")
+        chrome_options.add_argument("--disable-notifications")
+        chrome_options.add_argument("--proxy-server='direct://'")
+        chrome_options.add_argument("--proxy-bypass-list=*")
+        chrome_options.add_argument("--disable-web-security")
+        chrome_options.add_argument("--allow-running-insecure-content")
+        chrome_options.add_argument("--disable-infobars")
     chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--disable-infobars")
 
     # Set github token environment for webdriver manager
     os.environ['GH_TOKEN'] = req_dict['github_token']
@@ -1166,7 +1166,11 @@ def youlikehits_functions(req_dict: dict) -> None:
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("YouTube login completed")
     EVENT.wait(secrets.choice(range(3, 6)))
+    driver.get("chrome-extension://dknlfmjaanfblgfdfebhijalfmhmjjjo/popup.html")
+    driver.find_elements(By.CLASS_NAME, "slider")[1].click()
+    EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
+    driver.switch_to.default_content()
     # driver.save_screenshot("screenshots/screenshot.png")
     driver.find_element(By.ID, "username").send_keys(req_dict['username_youlikehits'])
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
