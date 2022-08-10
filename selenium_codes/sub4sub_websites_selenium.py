@@ -1198,7 +1198,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         EVENT.wait(0.25)
     while True:
         try:
-            EVENT.wait(secrets.choice(range(16, 20)))
+            EVENT.wait(secrets.choice(range(7, 10)))
             driver.find_element(By.TAG_NAME, "input").click()
             break
         except ElementClickInterceptedException:
