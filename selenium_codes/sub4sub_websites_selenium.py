@@ -1160,7 +1160,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
-    driver.implicitly_wait(6.75)
+    driver.implicitly_wait(5.75)
     driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
@@ -1324,7 +1324,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
-#                     # driver.save_screenshot('screenshots/screenshot_test.png')
+                    # driver.save_screenshot('screenshots/screenshot_test.png')
                     driver.execute_script("window.scrollTo(0, 600);")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
