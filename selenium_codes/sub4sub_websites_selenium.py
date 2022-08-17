@@ -1,3 +1,4 @@
+import urllib3.exceptions
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -536,11 +537,14 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                     break
                 else:
                     window_before = driver.window_handles[0]
-#                     # driver.save_screenshot("screenshots/screenshot.png")
-                    if len(driver.find_elements(By.XPATH,
-                                                "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
-                        driver.quit()
-                        break
+                    # driver.save_screenshot("screenshots/screenshot.png")
+                    try:
+                        if len(driver.find_elements(By.XPATH,
+                                                    "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
+                            driver.quit()
+                            break
+                    except UnexpectedAlertPresentException:
+                        pass
                     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Please come later")) > 0:
                         driver.quit()
                         logging.info("subscribersvideo found Please come later text, closing")
@@ -654,8 +658,9 @@ def submenow_functions(req_dict: dict) -> None:
                                              " div:nth-child(1) > div > button")\
             .click()
     except NoSuchElementException:
-        logging.info("Website is not available closing the driver")
         driver.quit()
+        logging.info("Website is not available closing the driver")
+        return
     driver.find_element(By.ID, "inputEmail").send_keys(req_dict['email_submenow'])
     driver.find_element(By.ID, "inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element(By.ID, "buttonSignIn").click()
