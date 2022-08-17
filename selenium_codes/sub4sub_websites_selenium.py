@@ -241,7 +241,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 driver.quit()
                 return
         driver.switch_to.window(window_before)
-#         # driver.save_screenshot("screenshots/screenshot.png")
+        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             button_subscribe = driver.find_elements(By.CLASS_NAME, subscribe_btn)[0]
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
@@ -265,7 +265,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except (NoSuchElementException, IndexError):
             EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
-#         # driver.save_screenshot("screenshots/screenshot.png")
+        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements(By.CSS_SELECTOR,
@@ -317,7 +317,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
-#         # driver.save_screenshot("screenshots/screenshot.png")
+        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 EVENT.wait(1)
@@ -571,7 +571,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                                                        ytbutton_elements_location_dict
                                                                        ['yt_tag_like_button_type1'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
-                                except IndexError:
+                                except (IndexError, ElementNotInteractableException):
                                     pass
                         EVENT.wait(secrets.choice(range(1, 4)))
                         j = 0
@@ -589,7 +589,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                     j += 1
                         if j > 4:
                             logging.info("Couldn't find sub button in: " + "subscribersvideo")
-#                         # driver.save_screenshot("screenshots/screenshot_proof.png")
+                            # driver.save_screenshot("screenshots/screenshot_proof.png")
 
                     else:
                         driver.switch_to.window(window_before)
