@@ -532,6 +532,12 @@ def subscribersvideo_functions(req_dict: dict) -> None:
             logging.info("subscribersvideo loop started")
             i = 0
             for _ in range(1, 10000000000):
+                try:
+                    if len(driver.find_elements(By.XPATH,
+                                                "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
+                        break
+                except UnexpectedAlertPresentException:
+                    pass
                 if len(driver.find_elements(By.XPATH,
                                             "//*[@id='content']/div/div/div[2]/div[15]/div/div[3]/button")) > 0:
                     break
