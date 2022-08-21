@@ -1176,10 +1176,6 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
     logging.info("YouTube login completed")
-    # EVENT.wait(secrets.choice(range(3, 6)))
-    # driver.get("chrome-extension://dknlfmjaanfblgfdfebhijalfmhmjjjo/popup.html")
-    # driver.find_elements(By.CLASS_NAME, "slider")[1].click()
-    # EVENT.wait(secrets.choice(range(2, 3)))
     EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
