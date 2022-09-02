@@ -1118,7 +1118,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                  .until(ec.visibility_of_element_located((By.XPATH,
                                                          "/html/body/div[2]/div/div[2]/center/div/div")))\
                  .get_attribute("value")
-#             # driver.save_screenshot("screenshots/screenshot.png")
+            # driver.save_screenshot("screenshots/screenshot.png")
             driver.switch_to.window(driver.window_handles[0])
             EVENT.wait(28)
             try:
@@ -1138,7 +1138,7 @@ def youtubviews_functions(req_dict: dict) -> None:
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.switch_to.window(driver.window_handles[1])
             if len(driver.find_elements(By.CSS_SELECTOR, "#container > h1 > yt-formatted-string")) > 0:
-#                 # driver.save_screenshot("screenshots/screenshot.png")
+                # driver.save_screenshot("screenshots/screenshot.png")
                 EVENT.wait(secrets.choice(range(1, 4)))
                 if len(driver.find_elements(By.CSS_SELECTOR,
                                             ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
