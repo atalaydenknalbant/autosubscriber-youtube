@@ -1227,12 +1227,11 @@ def youlikehits_functions(req_dict: dict) -> None:
         while True:
             if datetime.now() > future:
                 break
-            # driver.save_screenshot('screenshots/screenshot_test.png')
             EVENT.wait(secrets.choice(range(3, 4)))
-            logging.info('Flag1')
+            # logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
             driver.execute_script("window.scrollTo(0, 600);")
-            logging.info('Flag4')
+            # logging.info('Flag4')
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
@@ -1264,10 +1263,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(3, 4)))
-                    logging.info('Flag4.2')
+                    # logging.info('Flag4.2')
                     continue
             except (NoSuchElementException, IndexError):
-                logging.info('Flag4.3')
+                # logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -1293,8 +1292,8 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(3, 5)))
-            logging.info('Flag5.1')
-#             # driver.save_screenshot("screenshots/screenshot.png")
+            # logging.info('Flag5.1')
+            # driver.save_screenshot("screenshots/screenshot.png")
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                         'There are no videos available to view at this time. Try coming back or refreshing.':
@@ -1304,7 +1303,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 EVENT.wait(0.25)
             video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             z = 0
-            logging.info('Flag6')
+            # logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
@@ -1322,12 +1321,11 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(5, 8)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
-                        logging.info('Flag2')
+                        # logging.info('Flag2')
                         break
                 except (IndexError, WebDriverException):
                     EVENT.wait(0.25)
-                # EVENT.wait(secrets.choice(range(2, 3)))
-                logging.info('Flag7')
+                # logging.info('Flag7')
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
@@ -1336,12 +1334,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    logging.info('Flag8')
+                    # logging.info('Flag8')
                     if z == 15:
                         i += 1
-                logging.info('Flag8.9')
+                # logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
-            logging.info('Flag9')
+            # logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
