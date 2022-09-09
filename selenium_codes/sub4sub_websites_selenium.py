@@ -1270,7 +1270,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
             try:
-                WebDriverWait(driver, 110)\
+                WebDriverWait(driver, 100)\
                     .until(ec.visibility_of_element_located((By.XPATH,
                                                             f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
                     .get_attribute("value")
@@ -1442,7 +1442,7 @@ def like4like_functions(req_dict: dict) -> None:
             else:
                 driver.find_element(By.XPATH, confirm_btn_2).click()
             EVENT.wait(8)
-#             # driver.save_screenshot("screenshots/screenshot.png")
+            # driver.save_screenshot("screenshots/screenshot.png")
 
     for_loop_like()
     driver.quit()
