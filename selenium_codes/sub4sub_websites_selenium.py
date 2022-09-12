@@ -1369,7 +1369,7 @@ def like4like_functions(req_dict: dict) -> None:
     # driver.save_screenshot("screenshots/screenshot.png")
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.like4like.org/user/earn-youtube.php")
-#     # driver.save_screenshot("screenshots/screenshot.png")
+    # driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_like(like_btn_1: str = "/html/body/div[6]/div/div[1]/div/div[2]/div[4]"
                                         "/div[1]/div[2]/div[1]/div/div[3]/div/div/a",
@@ -1424,7 +1424,7 @@ def like4like_functions(req_dict: dict) -> None:
                                                                    ['yt_tag_like_button_type1'])[0]
                                 ActionChains(driver).move_to_element(like_button).click().perform()
                                 logging.info("Liked the Video")
-#                                 # driver.save_screenshot("screenshots/screenshot_proof.png")
+                                # driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
                                 logging.info("Couldn't find like button")
                     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1442,7 +1442,6 @@ def like4like_functions(req_dict: dict) -> None:
             else:
                 driver.find_element(By.XPATH, confirm_btn_2).click()
             EVENT.wait(8)
-            # driver.save_screenshot("screenshots/screenshot.png")
 
     for_loop_like()
     driver.quit()
