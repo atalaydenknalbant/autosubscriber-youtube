@@ -1434,7 +1434,7 @@ def like4like_functions(req_dict: dict) -> None:
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.close()
-            EVENT.wait(secrets.choice(range(7, 10)))
+            EVENT.wait(secrets.choice(range(6, 9)))
             driver.switch_to.window(driver.window_handles[0])
             logging.info('Flag6')
             if i % 2 == 0:
