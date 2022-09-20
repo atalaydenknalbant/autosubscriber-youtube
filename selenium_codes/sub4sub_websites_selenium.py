@@ -1419,10 +1419,9 @@ def like4like_functions(req_dict: dict) -> None:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
                             try:
-                                like_button = driver.find_elements(By.TAG_NAME,
-                                                                   ytbutton_elements_location_dict
-                                                                   ['yt_tag_like_button_type1'])[0]
-                                ActionChains(driver).move_to_element(like_button).click().perform()
+                                ActionChains(driver).move_to_element(driver.find_elements(By.TAG_NAME,
+                                                                     ytbutton_elements_location_dict
+                                                                     ['yt_tag_like_button_type1'])[0]).click().perform()
                                 logging.info("Liked the Video")
                                 # driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
