@@ -869,7 +869,6 @@ def ytmonster_functions(req_dict: dict) -> None:
         future = now + hours_added
         while future > datetime.now():
             EVENT.wait(60)
-#             # driver.save_screenshot("screenshots/screenshot.png")
         driver.quit()
 
     # Determines how many hours program will run
@@ -913,7 +912,6 @@ def ytbpals_functions(req_dict: dict) -> None:
             if i == 0:
                 i += 1
                 try:
-#                     # driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
                     logging.info("clicked Subscribe btn")
                 except NoSuchElementException:
