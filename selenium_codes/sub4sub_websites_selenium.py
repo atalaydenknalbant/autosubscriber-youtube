@@ -1299,7 +1299,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                     return
             except NoSuchElementException:
                 EVENT.wait(0.25)
-            video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            try:
+                video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            except NoSuchElementException:
+                pass
             z = 0
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
