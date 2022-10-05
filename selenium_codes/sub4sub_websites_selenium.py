@@ -1311,7 +1311,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.save_screenshot("screenshots/screenshot.png")
                 while True:
                     try:
-                        EVENT.wait(secrets.choice(range(5, 6)))
+                        EVENT.wait(secrets.choice(range(12, 14)))
                         driver.find_element(By.TAG_NAME, "input").click()
                     except (ElementClickInterceptedException, NoSuchElementException):
                         pass
