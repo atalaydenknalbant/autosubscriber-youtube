@@ -1309,12 +1309,16 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
                 driver.save_screenshot("screenshots/screenshot.png")
-                try:
-                    EVENT.wait(secrets.choice(range(5, 6)))
-                    driver.find_element(By.TAG_NAME, "input").click()
-                except (ElementClickInterceptedException, NoSuchElementException):
-                    pass
-                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                while True:
+                    try:
+                        EVENT.wait(secrets.choice(range(5, 6)))
+                        driver.find_element(By.TAG_NAME, "input").click()
+                    except (ElementClickInterceptedException, NoSuchElementException):
+                        pass
+                    try:
+                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                    except NoSuchElementException:
+                        continue
                 try:
                     driver.switch_to.window(driver.window_handles[1])
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
