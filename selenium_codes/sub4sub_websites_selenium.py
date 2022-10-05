@@ -1206,10 +1206,8 @@ def youlikehits_functions(req_dict: dict) -> None:
             EVENT.wait(secrets.choice(range(17, 20)))
             driver.find_element(By.TAG_NAME, "input").click()
             break
-        except ElementClickInterceptedException:
-            driver.get("https://www.youlikehits.com/youtubenew2.php")
-            EVENT.wait(secrets.choice(range(2, 3)))
-            continue
+        except NoSuchElementException:
+            pass
     EVENT.wait(secrets.choice(range(4, 6)))
     driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
@@ -1308,7 +1306,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
-                driver.save_screenshot("screenshots/screenshot.png")
                 while True:
                     try:
                         EVENT.wait(secrets.choice(range(12, 14)))
