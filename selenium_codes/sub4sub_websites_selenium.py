@@ -1201,13 +1201,13 @@ def youlikehits_functions(req_dict: dict) -> None:
             return
     except NoSuchElementException:
         EVENT.wait(0.25)
-    while True:
-        try:
-            EVENT.wait(secrets.choice(range(17, 20)))
-            driver.find_element(By.TAG_NAME, "input").click()
-            break
-        except NoSuchElementException:
-            pass
+    # while True:
+    #     try:
+    #         EVENT.wait(secrets.choice(range(17, 20)))
+    #         driver.find_element(By.TAG_NAME, "input").click()
+    #         break
+    #     except NoSuchElementException:
+    #         pass
     EVENT.wait(secrets.choice(range(4, 6)))
     driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
@@ -1224,10 +1224,10 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag1')
+            logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
             driver.execute_script("window.scrollTo(0, 600);")
-            # logging.info('Flag4')
+            logging.info('Flag4')
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
@@ -1259,10 +1259,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(3, 4)))
-                    # logging.info('Flag4.2')
+                    logging.info('Flag4.2')
                     continue
             except (NoSuchElementException, IndexError):
-                # logging.info('Flag4.3')
+                logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -1288,7 +1288,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(3, 5)))
-            # logging.info('Flag5.1')
+            logging.info('Flag5.1')
             # driver.save_screenshot("screenshots/screenshot.png")
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
@@ -1302,20 +1302,21 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 pass
             z = 0
-            # logging.info('Flag6')
+            logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 # print("window_handles: ", len(driver.window_handles))
                 driver.execute_script("window.scrollTo(0, 600);")
-                while True:
-                    try:
-                        EVENT.wait(secrets.choice(range(12, 14)))
-                        driver.find_element(By.TAG_NAME, "input").click()
-                    except (ElementClickInterceptedException, NoSuchElementException):
-                        pass
-                    try:
-                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    except NoSuchElementException:
-                        continue
+                # while True:
+                #     try:
+                #         EVENT.wait(secrets.choice(range(12, 14)))
+                #         driver.find_element(By.TAG_NAME, "input").click()
+                #     except (ElementClickInterceptedException, NoSuchElementException):
+                #         pass
+                #     try:
+                #         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                #     except NoSuchElementException:
+                #         continue
+                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 try:
                     driver.switch_to.window(driver.window_handles[1])
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
@@ -1329,11 +1330,11 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(5, 8)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
-                        # logging.info('Flag2')
+                        logging.info('Flag2')
                         break
                 except (IndexError, WebDriverException):
                     EVENT.wait(0.25)
-                # logging.info('Flag7')
+                logging.info('Flag7')
                 z += 1
                 if z == 15:
                     # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
@@ -1342,12 +1343,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                    # logging.info('Flag8')
+                    logging.info('Flag8')
                     if z == 15:
                         i += 1
-                # logging.info('Flag8.9')
+                logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag9')
+            logging.info('Flag9')
             driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
