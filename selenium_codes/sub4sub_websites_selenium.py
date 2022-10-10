@@ -1302,16 +1302,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 driver.execute_script("window.scrollTo(0, 600);")
-                # while True:
-                #     try:
-                #         EVENT.wait(secrets.choice(range(12, 14)))
-                #         driver.find_element(By.TAG_NAME, "input").click()
-                #     except (ElementClickInterceptedException, NoSuchElementException):
-                #         pass
-                #     try:
-                #         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                #     except NoSuchElementException:
-                #         continue
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 try:
                     driver.switch_to.window(driver.window_handles[1])
