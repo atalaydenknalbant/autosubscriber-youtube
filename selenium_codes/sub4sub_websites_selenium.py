@@ -1200,13 +1200,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             return
     except NoSuchElementException:
         EVENT.wait(0.25)
-    # while True:
-    #     try:
-    #         EVENT.wait(secrets.choice(range(17, 20)))
-    #         driver.find_element(By.TAG_NAME, "input").click()
-    #         break
-    #     except NoSuchElementException:
-    #         pass
     EVENT.wait(secrets.choice(range(4, 6)))
     driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
