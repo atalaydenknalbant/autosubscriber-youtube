@@ -1295,7 +1295,10 @@ def youlikehits_functions(req_dict: dict) -> None:
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 driver.execute_script("window.scrollTo(0, 600);")
-                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                try:
+                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                except NoSuchElementException:
+                    pass
                 try:
                     driver.switch_to.window(driver.window_handles[1])
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
