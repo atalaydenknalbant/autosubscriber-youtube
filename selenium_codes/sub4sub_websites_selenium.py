@@ -1177,7 +1177,8 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     # driver.save_screenshot("screenshots/screenshot.png")
-    driver.find_element(By.ID, "username").send_keys(req_dict['username_youlikehits'])
+    WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "username")))\
+        .send_keys(req_dict['username_youlikehits'])
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
     driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").click()
     EVENT.wait(secrets.choice(range(2, 4)))
