@@ -1320,8 +1320,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag7')
                 z += 1
                 if z == 15:
-                    # driver.execute_script("document.querySelector('#listall > center > a:nth-child(11)').click()")
                     driver.execute_script("window.scrollTo(0, 600);")
+                    # driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
                     # driver.execute_script("document.querySelector('#listall > center > a.followbutton').click()")
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
