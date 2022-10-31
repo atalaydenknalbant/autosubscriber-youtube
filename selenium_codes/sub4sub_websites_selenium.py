@@ -693,7 +693,7 @@ def submenow_functions(req_dict: dict) -> None:
         return
     EVENT.wait(secrets.choice(range(1, 4)))
     try:
-        driver.find_element(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button").click()
+        driver.find_element(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")
     except (UnexpectedAlertPresentException,NoSuchElementException):
         EVENT.wait(0.25)
     if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
