@@ -159,7 +159,10 @@ def google_login(driver: webdriver,
     - None(NoneType)
     """
     if has_login_btn:
-        sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
+        try:
+            sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
+        except NoSuchElementException:
+            sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     if already_in_website:
         EVENT.wait(0.25)
@@ -177,7 +180,7 @@ def google_login(driver: webdriver,
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    # driver.save_screenshot("screenshots/g_screenshot.png")
+    driver.save_screenshot("screenshots/g_screenshot.png")
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
@@ -557,6 +560,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                     try:
                         driver.find_element(By.ID, "btnWatchLikeAndSubscribe").send_keys(Keys.ENTER)
                     except NoSuchElementException:
+                        driver.save_screenshot("screenshots/screenshot.png")
                         logging.info("subscribersvideo couldn't find watch and subscribe button, closing")
                         driver.quit()
                         break
