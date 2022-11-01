@@ -28,8 +28,7 @@ YT_JAVASCRIPT = False
 
 # Locations For YouTube button elements
 ytbutton_elements_location_dict = {
-
-    "yt_tag_like_button_type1": "ytd-toggle-button-renderer",
+    "yt_id_like_button": "segmented-like-button",
     "yt_id_sub_button_type1": "subscribe-button",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
                                  "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
@@ -282,7 +281,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         try:
                             like_button = driver.find_elements(By.TAG_NAME,
                                                                ytbutton_elements_location_dict
-                                                               ['yt_tag_like_button_type1'])[0]
+                                                               ['yt_id_like_button'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info("Couldn't find like button in: " + d)
@@ -582,7 +581,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                 try:
                                     like_button = driver.find_elements(By.TAG_NAME,
                                                                        ytbutton_elements_location_dict
-                                                                       ['yt_tag_like_button_type1'])[0]
+                                                                       ['yt_id_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
                                 except (IndexError, ElementNotInteractableException):
                                     pass
@@ -752,7 +751,7 @@ def submenow_functions(req_dict: dict) -> None:
                                 try:
                                     like_button = driver.find_elements(By.TAG_NAME,
                                                                        ytbutton_elements_location_dict
-                                                                       ['yt_tag_like_button_type1'])[0]
+                                                                       ['yt_id_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
                                 except (IndexError, NoSuchElementException, ElementNotInteractableException):
                                     EVENT.wait(0.25)
@@ -1151,7 +1150,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                     else:
                         like_button = driver.find_elements(By.TAG_NAME,
                                                            ytbutton_elements_location_dict
-                                                           ['yt_tag_like_button_type1'])[0]
+                                                           ['yt_id_like_button'])[0]
                         ActionChains(driver).move_to_element(like_button).click().perform()
 #                 # driver.save_screenshot("screenshots/screenshot_proof.png")
                 EVENT.wait(secrets.choice(range(1, 4)))
@@ -1415,7 +1414,7 @@ def like4like_functions(req_dict: dict) -> None:
                             try:
                                 ActionChains(driver).move_to_element(driver.find_elements(By.TAG_NAME,
                                                                      ytbutton_elements_location_dict
-                                                                     ['yt_tag_like_button_type1'])[0]).click().perform()
+                                                                     ['yt_id_like_button'])[0]).click().perform()
                                 logging.info("Liked the Video")
                                 # driver.save_screenshot("screenshots/screenshot_proof.png")
                             except (NoSuchElementException, IndexError):
