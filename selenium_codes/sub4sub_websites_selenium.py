@@ -158,10 +158,7 @@ def google_login(driver: webdriver,
     - None(NoneType)
     """
     if has_login_btn:
-        try:
-            sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
-        except NoSuchElementException:
-            sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer > a")
+        sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer")
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     if already_in_website:
         EVENT.wait(0.25)
@@ -279,7 +276,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
                         try:
-                            like_button = driver.find_elements(By.TAG_NAME,
+                            like_button = driver.find_elements(By.ID,
                                                                ytbutton_elements_location_dict
                                                                ['yt_id_like_button'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
@@ -579,7 +576,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 try:
-                                    like_button = driver.find_elements(By.TAG_NAME,
+                                    like_button = driver.find_elements(By.ID,
                                                                        ytbutton_elements_location_dict
                                                                        ['yt_id_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
@@ -749,7 +746,7 @@ def submenow_functions(req_dict: dict) -> None:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 try:
-                                    like_button = driver.find_elements(By.TAG_NAME,
+                                    like_button = driver.find_elements(By.ID,
                                                                        ytbutton_elements_location_dict
                                                                        ['yt_id_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
@@ -1148,7 +1145,7 @@ def youtubviews_functions(req_dict: dict) -> None:
                     if YT_JAVASCRIPT:
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
-                        like_button = driver.find_elements(By.TAG_NAME,
+                        like_button = driver.find_elements(By.ID,
                                                            ytbutton_elements_location_dict
                                                            ['yt_id_like_button'])[0]
                         ActionChains(driver).move_to_element(like_button).click().perform()
@@ -1412,7 +1409,7 @@ def like4like_functions(req_dict: dict) -> None:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
                             try:
-                                ActionChains(driver).move_to_element(driver.find_elements(By.TAG_NAME,
+                                ActionChains(driver).move_to_element(driver.find_elements(By.ID,
                                                                      ytbutton_elements_location_dict
                                                                      ['yt_id_like_button'])[0]).click().perform()
                                 logging.info("Liked the Video")
