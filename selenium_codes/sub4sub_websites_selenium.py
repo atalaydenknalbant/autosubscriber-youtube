@@ -28,7 +28,7 @@ YT_JAVASCRIPT = False
 
 # Locations For YouTube button elements
 ytbutton_elements_location_dict = {
-    "yt_id_like_button": "segmented-like-button",
+    "yt_id_like_button": "like-button",
     "yt_id_sub_button_type1": "subscribe-button",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
                                  "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
@@ -240,7 +240,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 driver.quit()
                 return
         driver.switch_to.window(window_before)
-        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             button_subscribe = driver.find_elements(By.CLASS_NAME, subscribe_btn)[0]
             ActionChains(driver).move_to_element(button_subscribe).click().perform()
@@ -260,8 +259,8 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         window_after = driver.window_handles[1]
         driver.switch_to.window(window_after)
         try:
-            driver.find_elements(By.TAG_NAME, 'ytd-grid-video-renderer')[0].click()
-        except (NoSuchElementException, IndexError):
+            driver.find_elements(By.ID, 'dismissible')[0].click()
+        except (NoSuchElementException, IndexError, ElementNotInteractableException):
             EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
         # driver.save_screenshot("screenshots/screenshot.png")
@@ -281,6 +280,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                                                                ['yt_id_like_button'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
+                            driver.save_screenshot("screenshots/screenshot.png")
                             logging.info("Couldn't find like button in: " + d)
                 EVENT.wait(secrets.choice(range(1, 4)))
                 # driver.save_screenshot("screenshots/screenshot.png")
@@ -781,7 +781,6 @@ def submenow_functions(req_dict: dict) -> None:
                         while len(driver.find_elements(By.CLASS_NAME, "button buttonGray")) > 0:
                             EVENT.wait(secrets.choice(range(1, 4)))
                             # logging.info("Flag2")
-                        # driver.save_screenshot("screenshots/screenshot.png")
                         el = \
                             WebDriverWait(driver, 7.75).until(ec.element_to_be_clickable((By.ID, "btnSubVerify")))
                         el.click()
@@ -790,7 +789,6 @@ def submenow_functions(req_dict: dict) -> None:
                         driver.quit()
                         return
                     logging.info("submenow done sub & like")
-                    # driver.save_screenshot("screenshots/screenshot.png")
                 if len(driver.find_elements(By.XPATH, "//*[@id='dialog2']/div[3]/button")) > 0:
                     logging.info("submenow Found end dialog")
                     driver.quit()
@@ -849,7 +847,6 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[i])
             driver.get("https://www.ytmonster.net/client")
-#             # driver.save_screenshot("screenshots/screenshot.png")
             driver.set_window_size(1200, 900)
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.execute_script("document.querySelector('#startBtn').click()")
