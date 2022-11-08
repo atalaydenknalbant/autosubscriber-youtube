@@ -282,7 +282,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info("Couldn't find like button in: " + d)
                 EVENT.wait(secrets.choice(range(1, 4)))
-                # driver.save_screenshot("screenshots/screenshot.png")
                 j = 0
                 if YT_JAVASCRIPT:
                     driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
