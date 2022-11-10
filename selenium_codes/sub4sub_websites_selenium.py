@@ -314,7 +314,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
             ActionChains(driver).move_to_element(button_confirm).click().perform()
             continue
         driver.switch_to.window(window_before)
-        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 EVENT.wait(1)
