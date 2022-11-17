@@ -1316,7 +1316,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                 if z == 15:
                     driver.execute_script("window.scrollTo(0, 600);")
                     # driver.save_screenshot("screenshots/screenshot.png")
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
+                    try:
+                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
+                    except (NoSuchElementException, NoSuchElementException):
+                        break
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                     # logging.info('Flag8')
                     if z == 15:
