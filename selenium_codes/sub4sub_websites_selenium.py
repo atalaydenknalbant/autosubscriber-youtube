@@ -236,7 +236,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
 
                 logging.info(f'{d} Remaining Videos:{remaining_videos}')
             except NoSuchElementException:
-                # driver.save_screenshot("screenshots/screenshot.png")
                 driver.quit()
                 return
         driver.switch_to.window(window_before)
@@ -263,7 +262,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         except (NoSuchElementException, IndexError, ElementNotInteractableException):
             EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
-        # driver.save_screenshot("screenshots/screenshot.png")
         try:
             if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                 if len(driver.find_elements(By.CSS_SELECTOR,
