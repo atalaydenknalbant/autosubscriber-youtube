@@ -164,19 +164,16 @@ def google_login(driver: webdriver,
         EVENT.wait(0.25)
     else:
         driver.get("https://accounts.google.com/signin")
-    # driver.save_screenshot("screenshots/g_screenshot.png")
     EVENT.wait(secrets.choice(range(1, 4)))
     email_area = driver.find_element(By.ID, "identifierId")
     email_area.send_keys(req_dict['yt_email'])
     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    # driver.save_screenshot("screenshots/g_screenshot.png")
     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    # driver.save_screenshot("screenshots/g_screenshot.png")
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
