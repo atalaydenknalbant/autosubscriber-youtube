@@ -203,7 +203,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 while driver.find_element(By.ID, "seconds").text == "0":
                     continue
             except (StaleElementReferenceException, NoSuchElementException):
-                # driver.save_screenshot("screenshots/screenshot.png")
                 if d == "sonuker":
                     if driver.find_elements(By.TAG_NAME, "h2") == 0:
                         driver.quit()
@@ -223,7 +222,6 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
 
                 logging.info(f'{d} Remaining Videos:{remaining_videos}')
             except NoSuchElementException:
-                # driver.save_screenshot("screenshots/screenshot.png")
                 driver.quit()
                 return
         else:
