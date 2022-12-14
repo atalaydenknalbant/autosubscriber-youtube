@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='autosubscriber-youtube',
-    version='1.93',
+    version='1.99',
     packages=['selenium', 'webdriver-manager', 'setuptools'],
     url='https://github.com/atalaydenknalbant/autosubscriber-youtube',
     license='GPL-3.0 License',
