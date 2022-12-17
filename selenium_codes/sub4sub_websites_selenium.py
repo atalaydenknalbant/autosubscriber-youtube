@@ -1240,6 +1240,25 @@ def youlikehits_functions(req_dict: dict) -> None:
                     EVENT.wait(secrets.choice(range(3, 4)))
                     # logging.info('Flag4.2')
                     continue
+                else:
+                    if i <= 2:
+                        i += 1
+                        try:
+                            driver.find_element(By.CSS_SELECTOR, "#movie_player >"
+                                                                 " div.ytp-chrome-bottom >"
+                                                                 " div.ytp-chrome-controls >"
+                                                                 " div.ytp-right-controls >"
+                                                                 " button.ytp-button.ytp-settings-button")\
+                                .click()
+                            driver.find_element(By.XPATH, "//div[contains(text(),'Quality')]").click()
+                            EVENT.wait(secrets.choice(range(2, 3)))
+                            WebDriverWait(driver, 7.75)\
+                                .until(ec.visibility_of_element_located((By.XPATH,
+                                                                         "//span[contains(string(),'144p')]")))\
+                                .click()
+                        except (TimeoutException, ElementClickInterceptedException):
+                            pass
+
             except (NoSuchElementException, IndexError):
                 # logging.info('Flag4.3')
                 EVENT.wait(0.25)
