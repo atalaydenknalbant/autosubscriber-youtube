@@ -1227,17 +1227,17 @@ def youlikehits_functions(req_dict: dict) -> None:
                     except NoSuchElementException:
                         EVENT.wait(0.25)
                     driver.refresh()
-                    EVENT.wait(secrets.choice(range(3, 4)))
+                    EVENT.wait(secrets.choice(range(1, 4)))
                     driver.find_element(By.XPATH, '/html/body/div/table[2]/'
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').click()
-                    EVENT.wait(secrets.choice(range(2, 3)))
+                    EVENT.wait(secrets.choice(range(1, 3)))
                     driver.find_element(By.XPATH, '/html/body/div/table[2]/'
                                                   'tbody/tr/td/table[1]/tbody/tr/'
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
-                    EVENT.wait(secrets.choice(range(3, 4)))
+                    EVENT.wait(secrets.choice(range(1, 3)))
                     # logging.info('Flag4.2')
                     continue
                 else:
