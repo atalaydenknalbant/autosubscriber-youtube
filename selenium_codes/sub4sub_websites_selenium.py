@@ -1189,7 +1189,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     except NoSuchElementException:
         EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(4, 6)))
-    driver.execute_script("window.scrollTo(0, 600);")
+    # driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
 
     def while_loop_watch(hours_time: int) -> None:
@@ -1205,7 +1205,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             EVENT.wait(secrets.choice(range(3, 4)))
             # logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
-            driver.execute_script("window.scrollTo(0, 600);")
+            # driver.execute_script("window.scrollTo(0, 600);")
             # logging.info('Flag4')
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
@@ -1301,7 +1301,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             z = 0
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
-                driver.execute_script("window.scrollTo(0, 600);")
+                # driver.execute_script("window.scrollTo(0, 600);")
                 try:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 except NoSuchElementException:
@@ -1326,7 +1326,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag7')
                 z += 1
                 if z == 15:
-                    driver.execute_script("window.scrollTo(0, 600);")
+                    # driver.execute_script("window.scrollTo(0, 600);")
                     # driver.save_screenshot("screenshots/screenshot.png")
                     try:
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
@@ -1339,7 +1339,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
             # logging.info('Flag9')
-            driver.execute_script("window.scrollTo(0, 600);")
+            # driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
     collect_bonus_points()
