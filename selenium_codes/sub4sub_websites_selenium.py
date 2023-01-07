@@ -1189,7 +1189,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     except NoSuchElementException:
         EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(4, 6)))
-    # driver.execute_script("window.scrollTo(0, 600);")
+    driver.execute_script("window.scrollTo(0, 600);")
     driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
 
     def while_loop_watch(hours_time: int) -> None:
@@ -1203,10 +1203,8 @@ def youlikehits_functions(req_dict: dict) -> None:
             if datetime.now() > future:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag1')
             driver.switch_to.window(driver.window_handles[0])
-            # driver.execute_script("window.scrollTo(0, 600);")
-            # logging.info('Flag4')
+            # logging.info('Flag1')
             try:
                 driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
