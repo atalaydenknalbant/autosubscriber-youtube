@@ -1299,7 +1299,6 @@ def youlikehits_functions(req_dict: dict) -> None:
             z = 0
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
-                # driver.execute_script("window.scrollTo(0, 600);")
                 try:
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                 except NoSuchElementException:
