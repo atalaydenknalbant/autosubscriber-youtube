@@ -1254,7 +1254,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                                 .until(ec.visibility_of_element_located((By.XPATH,
                                                                          "//span[contains(string(),'144p')]")))\
                                 .click()
-                        except (TimeoutException, ElementClickInterceptedException):
+                        except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException):
+                            i -= 1
                             pass
 
             except (NoSuchElementException, IndexError):
