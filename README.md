@@ -22,7 +22,6 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 1. While editing config file make sure to add GitHub token to speed up general code speed.
 1. Whenever chrome updates, you need to change your user agent in your config file.
 
-
 ## Included sub4sub Websites
 ### Type 1 Websites 
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
