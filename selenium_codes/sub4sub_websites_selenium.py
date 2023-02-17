@@ -28,7 +28,7 @@ YT_JAVASCRIPT = False
 
 # Locations For YouTube button elements
 ytbutton_elements_location_dict = {
-    "yt_id_like_button": "like-button",
+    "yt_id_like_button": "segmented-like-button",
     "yt_id_sub_button_type1": "subscribe-button",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
                                  "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
@@ -82,7 +82,7 @@ def set_driver_opt(req_dict: dict,
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     if headless:
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
     else:
@@ -352,10 +352,8 @@ def subpals_functions(req_dict: dict) -> None:
         return
     driver.execute_script("window.scrollTo(0, 300);")
     try:
-        activate_btn = driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div.dashboardBody >"
-                                                            " div:nth-child(2) > div > div > div.userContent_pricing >"
-                                                            " div:nth-child(2) > div:nth-child(1) > div >"
-                                                            " div.panel-body > div.btn-holder > form > a")
+        activate_btn = driver.find_element(By.CSS_SELECTOR, "#pricing_upd > div:nth-child(1) >"
+                                                            " div > div > div.btn-holder > form > a")
         activate_btn.send_keys(Keys.ENTER)
 
     except NoSuchElementException:
@@ -395,9 +393,8 @@ def sonuker_functions(req_dict: dict) -> None:
         logging.info("Couldn't find activate button ")
     # driver.save_screenshot("screenshots/screenshot.png")
     try:
-        activate_btn = driver.find_element(By.XPATH, "/html[1]/body[1]/div[1]/section[1]/div[1]/"
-                                                     "div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/"
-                                                     "div[1]/div[1]/div[2]/div[2]/form[1]/a[1]")
+        activate_btn = driver.find_element(By.CSS_SELECTOR, "#pricing_upd > div:nth-child(1) > div > div >"
+                                                            " div.btn-holder > form > a")
         activate_btn.click()
     except NoSuchElementException:
         logging.info("sonuker activate button passed")
