@@ -84,7 +84,6 @@ def set_driver_opt(req_dict: dict,
     if headless:
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-gpu")
     else:
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
