@@ -92,7 +92,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
                 .click()
             break
         except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-                StaleElementReferenceException):
+                StaleElementReferenceException, AttributeError):
             driver.refresh()
             logging.error("Changing Resolution Failed. Retrying...")
 
