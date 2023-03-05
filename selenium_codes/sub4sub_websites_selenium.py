@@ -68,6 +68,35 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
+def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
+    """Change YouTube video resolution to given resolution.
+    Args:
+    - driver (webdriver): webdriver parameter.
+    Returns:
+    - None(NoneType)
+    """
+    while True:
+        try:
+            WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
+                                                                        " div.ytp-chrome-bottom >"
+                                                                        " div.ytp-chrome-controls >"
+                                                                        " div.ytp-right-controls >"
+                                                                        " button.ytp-button.ytp-settings-button")))\
+                .click()
+            WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
+                .click()
+            EVENT.wait(secrets.choice(range(2, 3)))
+            WebDriverWait(driver, 7.75) \
+                .until(ec.visibility_of_element_located((By.XPATH,
+                                                         f"//span[contains(string(),'{resolution}p')]"))) \
+                .click()
+            break
+        except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
+                StaleElementReferenceException):
+            driver.refresh()
+            # logging.info("Changing Resolution Failed. Retrying...")
+
+
 def set_driver_opt(req_dict: dict,
                    headless: bool = True,
                    website: str = "") -> webdriver:
@@ -130,7 +159,7 @@ def set_driver_opt(req_dict: dict,
         return driver
 
 
-def youtube_too_many_controller() -> int:
+def yt_too_many_controller() -> int:
     """ Checks user's Google account if there are too many subscriptions or likes for the given google account and
     returns boolean that represents condition
         Args:
@@ -830,14 +859,23 @@ def ytmonster_functions(req_dict: dict) -> None:
             if i == 0:
                 EVENT.wait(0.25)
             else:
-                driver.execute_script("window.open('');")
-                driver.switch_to.window(driver.window_handles[i])
+                driver.switch_to.new_window('tab')
             driver.get("https://www.ytmonster.net/client")
             driver.set_window_size(1200, 900)
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.execute_script("document.querySelector('#startBtn').click()")
-            EVENT.wait(secrets.choice(range(1, 4)))
-            driver.execute_script("document.querySelector('#startBtn').click()")
+            if i == 0:
+                EVENT.wait(secrets.choice(range(8, 10)))
+                while True:
+                    try:
+                        driver.switch_to.window(driver.window_handles[1])
+                        break
+                    except IndexError:
+                        driver.switch_to.window(driver.window_handles[0])
+                        driver.refresh()
+                yt_change_resolution(driver)
+                driver.switch_to.window(driver.window_handles[i])
+            EVENT.wait(secrets.choice(range(3, 4)))
     open_tabs()
 
     def timer(hours_time: int) -> None:
@@ -1237,22 +1275,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 else:
                     if i <= 2:
                         i += 1
-                        try:
-                            driver.find_element(By.CSS_SELECTOR, "#movie_player >"
-                                                                 " div.ytp-chrome-bottom >"
-                                                                 " div.ytp-chrome-controls >"
-                                                                 " div.ytp-right-controls >"
-                                                                 " button.ytp-button.ytp-settings-button")\
-                                .click()
-                            driver.find_element(By.XPATH, "//div[contains(text(),'Quality')]").click()
-                            EVENT.wait(secrets.choice(range(2, 3)))
-                            WebDriverWait(driver, 7.75)\
-                                .until(ec.visibility_of_element_located((By.XPATH,
-                                                                         "//span[contains(string(),'144p')]")))\
-                                .click()
-                        except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException):
-                            i -= 1
-                            pass
+                        yt_change_resolution(driver)
 
             except (NoSuchElementException, IndexError):
                 # logging.info('Flag4.3')
