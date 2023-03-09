@@ -371,8 +371,12 @@ def subpals_functions(req_dict: dict) -> None:
                                                     " form > div:nth-child(2) > input")
     pw_place.send_keys(req_dict['pw_subpals'])
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div > form > button") \
-        .send_keys(Keys.ENTER)
+    try:
+        driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div > form > button") \
+            .send_keys(Keys.ENTER)
+    except TimeoutException:
+        logging.info("subpals website problem occurred closing site...")
+        return
 
     driver.switch_to.default_content()
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Activated")) > 0:
