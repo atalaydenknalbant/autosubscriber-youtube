@@ -1293,7 +1293,7 @@ def youlikehits_functions(req_dict: dict) -> None:
 
             except (TimeoutException, IndexError):
                 EVENT.wait(0.25)
-            EVENT.wait(secrets.choice(range(6, 10)))
+            EVENT.wait(secrets.choice(range(4, 8)))
             try:
                 c = 0
 
@@ -1337,7 +1337,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         driver.switch_to.window(driver.window_handles[0])
                         EVENT.wait(secrets.choice(range(1, 2)))
                         driver.refresh()
-                        EVENT.wait(secrets.choice(range(5, 8)))
+                        EVENT.wait(secrets.choice(range(4, 6)))
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                         EVENT.wait(secrets.choice(range(3, 4)))
                         # logging.info('Flag2')
