@@ -83,7 +83,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
                                                                         " div.ytp-right-controls >"
                                                                         " button.ytp-button.ytp-settings-button")))\
                 .click()
-            WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
+            WebDriverWait(driver, 20).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
                 .click()
             EVENT.wait(secrets.choice(range(2, 3)))
             WebDriverWait(driver, 7.75) \
