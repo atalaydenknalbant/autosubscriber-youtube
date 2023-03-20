@@ -1277,7 +1277,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     # logging.info('Flag4.2')
                     continue
                 else:
-                    if i <= 2:
+                    if i < 1:
                         i += 1
                         yt_change_resolution(driver)
 
