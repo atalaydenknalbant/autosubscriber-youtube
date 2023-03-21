@@ -1264,7 +1264,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     # driver.save_screenshot("screenshots/screenshot.png")
                     try:
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
-                    except (NoSuchElementException, NoSuchElementException):
+                    except (NoSuchElementException,ElementNotInteractableException):
                         break
                     driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
                     # logging.info('Flag8')
