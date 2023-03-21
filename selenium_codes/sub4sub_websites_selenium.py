@@ -505,13 +505,8 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, "inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element(By.ID, "buttonSignIn").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    try:
-        WebDriverWait(driver, 10).until(ec.alert_is_present())
-        alert = driver.switch_to.alert
-        alert.accept()
-
-    except TimeoutException:
-        EVENT.wait(0.25)
+    WebDriverWait(driver, 10, ignored_exceptions=[TimeoutException])\
+        .until(ec.alert_is_present()).switch_to.alert.accept()
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Your channel doesn't have any public video.")) > 0:
         logging.info("subscribersvideo Your channel doesn't have any public video"
                      " Please try to reload this page one more time.")
@@ -1033,7 +1028,7 @@ def ytbpals_functions(req_dict: dict) -> None:
 
                 except NoSuchElementException:
                     logging.info("All channels were subscribed, activating free plan")
-#                     # driver.save_screenshot("screenshots/screenshot.png")
+                    # driver.save_screenshot("screenshots/screenshot.png")
                     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
                                                          " ul.navbar-nav > li:nth-child(4) > a")\
                         .send_keys(Keys.ENTER)
@@ -1105,84 +1100,6 @@ def ytbpals_functions(req_dict: dict) -> None:
                         continue
 
     for_loop_sub()
-
-
-def youtubviews_functions(req_dict: dict) -> None:
-    """youtubviews login and then earn credits by liking videos with inner like loop function(for_loop_sub)
-    Args:
-    - req_dict(dict): dictionary object of required parameters
-    Returns:
-    - None(NoneType)
-    """
-    driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(7)
-    driver.get("https://accounts.google.com/signin")
-    google_login(driver, req_dict, has_login_btn=False)
-    logging.info("YouTube login completed")
-    EVENT.wait(secrets.choice(range(1, 4)))
-    driver.get("https://youtubviews.com/")  # Type_Undefined
-    # driver.save_screenshot("screenshots/screenshot.png")
-    driver.find_element(By.NAME, "login").send_keys(req_dict['username_youtubviews'])
-    driver.find_element(By.NAME, "pass").send_keys(req_dict['pw_youtubviews'])
-    driver.find_element(By.NAME, "connect").click()
-    # driver.save_screenshot("screenshots/screenshot.png")
-    driver.find_element(By.CSS_SELECTOR, "body > div.container > div > div:nth-child(2) > div >"
-                                         " div.exchange_content > div > ul > li:nth-child(2) > a")\
-        .click()
-    # driver.save_screenshot("screenshots/screenshot.png")
-
-    def for_loop_like(like_btn: str = "followbutton"
-                      ) -> None:
-        logging.info("Loop Started")
-        for i in range(50):
-            EVENT.wait(secrets.choice(range(1, 4)))
-            if i >= 1:
-                WebDriverWait(driver, 75)\
-                 .until(ec.visibility_of_element_located((By.XPATH,
-                                                         "/html/body/div[2]/div/div[2]/center/div/div")))\
-                 .get_attribute("value")
-            # driver.save_screenshot("screenshots/screenshot.png")
-            driver.switch_to.window(driver.window_handles[0])
-            EVENT.wait(28)
-            try:
-                if i >= 1:
-                    driver.switch_to.window(driver.window_handles[1])
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[0])
-            except (NoSuchWindowException, IndexError):
-                EVENT.wait(0.25)
-            EVENT.wait(18)
-            try:
-                like_button = driver.find_elements(By.CLASS_NAME, like_btn)[i]
-                ActionChains(driver).move_to_element(like_button).click().send_keys(Keys.ENTER).perform()
-            except NoSuchElementException:
-                logging.info("Couldn't find like button closing driver")
-                return
-            EVENT.wait(secrets.choice(range(1, 4)))
-            driver.switch_to.window(driver.window_handles[1])
-            if len(driver.find_elements(By.CSS_SELECTOR, "#container > h1 > yt-formatted-string")) > 0:
-                # driver.save_screenshot("screenshots/screenshot.png")
-                EVENT.wait(secrets.choice(range(1, 4)))
-                if len(driver.find_elements(By.CSS_SELECTOR,
-                                            ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
-                    EVENT.wait(0.25)
-                else:
-                    if YT_JAVASCRIPT:
-                        driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
-                    else:
-                        like_button = driver.find_elements(By.ID,
-                                                           ytbutton_elements_location_dict
-                                                           ['yt_id_like_button'])[0]
-                        ActionChains(driver).move_to_element(like_button).click().perform()
-#                 # driver.save_screenshot("screenshots/screenshot_proof.png")
-                EVENT.wait(secrets.choice(range(1, 4)))
-                logging.info("Liked the Video")
-#                 # driver.save_screenshot("screenshots/screenshot.png")
-            driver.switch_to.window(driver.window_handles[0])
-        logging.info("Channels were successfully Liked, quitting driver")
-
-    for_loop_like()
-    driver.quit()
 
 
 def youlikehits_functions(req_dict: dict) -> None:
@@ -1285,14 +1202,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
-            try:
-                WebDriverWait(driver, 100)\
-                    .until(ec.visibility_of_element_located((By.XPATH,
-                                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
-                    .get_attribute("value")
-
-            except (TimeoutException, IndexError):
-                EVENT.wait(0.25)
+            WebDriverWait(driver, 100, ignored_exceptions=[TimeoutException, IndexError])\
+                .until(ec.visibility_of_element_located((By.XPATH,
+                                                        f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
+                .get_attribute("value")
             EVENT.wait(secrets.choice(range(4, 8)))
             try:
                 c = 0

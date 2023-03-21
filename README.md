@@ -16,11 +16,11 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 </a> 
 
 ## Usage
-1. Try to use a newly created youtube account to avoid security questions and make that account simple.
-1. Open that youtube account in normal and incognito mode on chrome before you use.
+1. Try to use a newly created YouTube account to avoid security questions and make that account simple.
+1. Open that YouTube account in normal and incognito mode on chrome before you use.
 1. Edit config.ini file to match with your accounts.
 1. While editing config file make sure to add GitHub token to speed up general code speed.
-1. Whenever chrome updates, you need to change your user agent in your config file.
+1. Whenever Chrome updates, you need to change your user agent in your config file.
 
 ## Included sub4sub Websites
 ### Type 1 Websites 
@@ -28,7 +28,7 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YoutubViews](https://i.imgur.com/FGlNFkd.png)](https://youtubviews.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) 
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
