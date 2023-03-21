@@ -505,8 +505,12 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     driver.find_element(By.ID, "inputIdChannel").send_keys(req_dict['yt_channel_id'])
     driver.find_element(By.ID, "buttonSignIn").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    WebDriverWait(driver, 10, ignored_exceptions=[TimeoutException])\
-        .until(ec.alert_is_present()).switch_to.alert.accept()
+    try:
+        WebDriverWait(driver, 10).until(ec.alert_is_present())
+        alert = driver.switch_to.alert
+        alert.accept()
+    except TimeoutException:
+        EVENT.wait(0.25)
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Your channel doesn't have any public video.")) > 0:
         logging.info("subscribersvideo Your channel doesn't have any public video"
                      " Please try to reload this page one more time.")
@@ -1202,10 +1206,14 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
-            WebDriverWait(driver, 100, ignored_exceptions=[TimeoutException, IndexError])\
-                .until(ec.visibility_of_element_located((By.XPATH,
-                                                        f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
-                .get_attribute("value")
+            try:
+                WebDriverWait(driver, 100)\
+                    .until(ec.visibility_of_element_located((By.XPATH,
+                                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
+                    .get_attribute("value")
+
+            except (TimeoutException, IndexError):
+                EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(4, 8)))
             try:
                 c = 0
