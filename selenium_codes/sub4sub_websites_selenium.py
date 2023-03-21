@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, WebDriverException
+    NoSuchWindowException, WebDriverException, JavascriptException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -77,6 +77,13 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
     """
     while True:
         try:
+            try:
+                WebDriverWait(driver, 6).until(
+                    ec.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Skip Ads')]"))) \
+                    .click()
+            except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
+                    StaleElementReferenceException, NoSuchWindowException):
+                pass
             WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
                                                                         " div.ytp-chrome-bottom >"
                                                                         " div.ytp-chrome-controls >"
@@ -853,7 +860,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     driver.get("https://www.ytmonster.net/exchange/views")
     try:
         driver.execute_script("document.querySelector('#endAll').click()")
-    except NoSuchElementException:
+    except (NoSuchElementException, JavascriptException):
         EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(1, 4)))
 
