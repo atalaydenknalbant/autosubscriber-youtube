@@ -79,10 +79,12 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
         try:
             try:
                 WebDriverWait(driver, 6).until(
-                    ec.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Skip Ads')]"))) \
+                    ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Skip')]"))) \
                     .click()
+                logging.debug('Skipped Ad')
             except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
                     StaleElementReferenceException, NoSuchWindowException):
+                logging.debug('No Ad Found')
                 pass
             WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
                                                                         " div.ytp-chrome-bottom >"
