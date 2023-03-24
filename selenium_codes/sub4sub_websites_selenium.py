@@ -68,42 +68,41 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
-def yt_change_resolution(driver: webdriver, resolution: int = 144) -> None:
+def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 0) -> int:
     """Change YouTube video resolution to given resolution.
     Args:
     - driver (webdriver): webdriver parameter.
     Returns:
     - None(NoneType)
     """
-    while True:
+    try:
         try:
-            try:
-                WebDriverWait(driver, 6).until(
-                    ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Skip')]"))) \
-                    .click()
-                logging.debug('Skipped Ad')
-            except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-                    StaleElementReferenceException, NoSuchWindowException):
-                logging.debug('No Ad Found')
-                pass
-            WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
-                                                                        " div.ytp-chrome-bottom >"
-                                                                        " div.ytp-chrome-controls >"
-                                                                        " div.ytp-right-controls >"
-                                                                        " button.ytp-button.ytp-settings-button")))\
+            WebDriverWait(driver, 7).until(
+                ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Skip')]"))) \
                 .click()
-            WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
-                .click()
-            EVENT.wait(secrets.choice(range(2, 3)))
-            WebDriverWait(driver, 7.75) \
-                .until(ec.visibility_of_element_located((By.XPATH,
-                                                         f"//span[contains(string(),'{resolution}p')]"))) \
-                .click()
-            break
+            logging.debug('Skipped Ad')
         except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-                StaleElementReferenceException, AttributeError):
-            driver.refresh()
-            logging.debug("Changing Resolution Failed. Retrying...")
+                StaleElementReferenceException, NoSuchWindowException):
+            logging.debug('No Ad Found')
+            pass
+        WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
+                                                                    " div.ytp-chrome-bottom >"
+                                                                    " div.ytp-chrome-controls >"
+                                                                    " div.ytp-right-controls >"
+                                                                    " button.ytp-button.ytp-settings-button")))\
+            .click()
+        WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
+            .click()
+        EVENT.wait(secrets.choice(range(2, 3)))
+        WebDriverWait(driver, 7.75) \
+            .until(ec.visibility_of_element_located((By.XPATH,
+                                                     f"//span[contains(string(),'{resolution}p')]"))) \
+            .click()
+
+    except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
+            StaleElementReferenceException, AttributeError, NoSuchWindowException):
+        retry = 1
+    return retry
 
 
 def set_driver_opt(req_dict: dict,
@@ -867,6 +866,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
 
     def open_tabs(total_tabs: int = 3) -> None:
+        r = 0
         for i in range(total_tabs):
             if i == 0:
                 EVENT.wait(0.25)
@@ -1166,7 +1166,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
-        i = 0
+        i = 1
         while True:
             if datetime.now() > future:
                 break
@@ -1207,9 +1207,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                     # logging.info('Flag4.2')
                     continue
                 else:
-                    if i < 1:
-                        i += 1
-                        yt_change_resolution(driver)
+                    if i == 1:
+                        i = yt_change_resolution(driver)
 
             except (NoSuchElementException, IndexError):
                 # logging.info('Flag4.3')
