@@ -866,7 +866,6 @@ def ytmonster_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
 
     def open_tabs(total_tabs: int = 3) -> None:
-        r = 0
         for i in range(total_tabs):
             if i == 0:
                 EVENT.wait(0.25)
