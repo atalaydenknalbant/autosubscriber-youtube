@@ -515,8 +515,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
     try:
         WebDriverWait(driver, 10).until(ec.alert_is_present())
-        alert = driver.switch_to.alert
-        alert.accept()
+        driver.switch_to.alert.accept()
     except TimeoutException:
         EVENT.wait(0.25)
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Your channel doesn't have any public video.")) > 0:
@@ -640,8 +639,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
         except UnexpectedAlertPresentException:
             try:
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
-                alert_4 = driver.switch_to.alert
-                alert_4.accept()
+                driver.switch_to.alert.accept()
                 EVENT.wait(secrets.choice(range(1, 4)))
                 if len(driver.find_elements(By.XPATH, "//*[@id='buttonPlan6']")) > 0:
                     try:
@@ -822,8 +820,7 @@ def submenow_functions(req_dict: dict) -> None:
         except UnexpectedAlertPresentException:
             try:
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
-                alert_2 = driver.switch_to.alert
-                alert_2.accept()
+                driver.switch_to.alert.accept()
                 if len(driver.find_elements(By.ID, "buttonPlan8")) > 0:
                     try:
                         driver.find_element(By.ID, "buttonPlan8").click()
