@@ -816,10 +816,13 @@ def submenow_functions(req_dict: dict) -> None:
                         driver.quit()
                         return
                     logging.info("submenow done sub & like")
-                if len(driver.find_elements(By.XPATH, "//*[@id='dialog2']/div[3]/button")) > 0:
-                    logging.info("submenow Found end dialog")
-                    driver.quit()
-                    return
+                    try:
+                        if len(driver.find_elements(By.XPATH, "//*[@id='dialog2']/div[3]/button")) > 0:
+                            logging.info("submenow Found end dialog")
+                            driver.quit()
+                            return
+                    except UnexpectedAlertPresentException:
+                        pass
         except UnexpectedAlertPresentException:
             try:
                 WebDriverWait(driver, 2).until(ec.alert_is_present())
