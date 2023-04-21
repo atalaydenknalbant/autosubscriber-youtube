@@ -14,7 +14,7 @@ import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
-
+import traceback
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -68,7 +68,7 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
-def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 0) -> int:
+def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 0, website: str = "") -> int:
     """Change YouTube video resolution to given resolution.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -76,15 +76,18 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 
     - None(NoneType)
     """
     try:
-        try:
-            WebDriverWait(driver, 7).until(
-                ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Skip')]"))) \
-                .click()
-            logging.debug('Skipped Ad')
-        except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-                StaleElementReferenceException, NoSuchWindowException):
-            logging.debug('No Ad Found')
+        if website == "YOULIKEHITS":
             pass
+        else:
+            try:
+                WebDriverWait(driver, 7).until(
+                    ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Skip')]"))) \
+                    .click()
+                logging.debug('Skipped Ad')
+            except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
+                    StaleElementReferenceException, NoSuchWindowException):
+                logging.debug('No Ad Found')
+                pass
         WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CSS_SELECTOR, "#movie_player >"
                                                                     " div.ytp-chrome-bottom >"
                                                                     " div.ytp-chrome-controls >"
@@ -100,7 +103,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 
             .click()
 
     except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-            StaleElementReferenceException, AttributeError, NoSuchWindowException):
+            StaleElementReferenceException, AttributeError, NoSuchWindowException) as ex:
         retry = 1
     return retry
 
@@ -1154,7 +1157,6 @@ def youlikehits_functions(req_dict: dict) -> None:
         EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(4, 6)))
     driver.execute_script("window.scrollTo(0, 600);")
-    driver.find_elements(By.CLASS_NAME, 'followbutton')[0].click()
 
     def while_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
@@ -1170,17 +1172,21 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.switch_to.window(driver.window_handles[0])
             # logging.info('Flag1')
             try:
-                driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').send_keys(Keys.RETURN)
-            except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException):
+                driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
+            except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
+                    JavascriptException):
                 EVENT.wait(0.25)
+                # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
-                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
+                driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
+                if len(driver.find_elements(By.XPATH, "//*[@id='movie_player']/div[3]/div[2]/div/a")) == 0:
                     try:
                         driver.close()
                     except NoSuchWindowException:
                         EVENT.wait(0.25)
                     driver.switch_to.window(driver.window_handles[0])
+                    driver.switch_to.default_content()
                     EVENT.wait(secrets.choice(range(1, 2)))
                     try:
                         video_name = driver.find_element(By.XPATH,
@@ -1204,12 +1210,15 @@ def youlikehits_functions(req_dict: dict) -> None:
                     continue
                 else:
                     if i == 1:
-                        i = yt_change_resolution(driver)
-
+                        driver.switch_to.window(driver.window_handles[1])
+                        driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
+                        # logging.info('Flag1.2')
+                        i = yt_change_resolution(driver, website='YOULIKEHITS')
             except (NoSuchElementException, IndexError):
                 # logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
+            driver.switch_to.default_content()
             try:
                 WebDriverWait(driver, 100)\
                     .until(ec.visibility_of_element_located((By.XPATH,
@@ -1249,26 +1258,9 @@ def youlikehits_functions(req_dict: dict) -> None:
             # logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 try:
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                except NoSuchElementException:
+                    driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
+                except (NoSuchElementException, JavascriptException):
                     pass
-                try:
-                    driver.switch_to.window(driver.window_handles[1])
-                    if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
-                        try:
-                            driver.close()
-                        except NoSuchWindowException:
-                            EVENT.wait(0.25)
-                        driver.switch_to.window(driver.window_handles[0])
-                        EVENT.wait(secrets.choice(range(1, 2)))
-                        driver.refresh()
-                        EVENT.wait(secrets.choice(range(4, 6)))
-                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
-                        EVENT.wait(secrets.choice(range(3, 4)))
-                        # logging.info('Flag2')
-                        break
-                except (IndexError, WebDriverException):
-                    EVENT.wait(0.25)
                 # logging.info('Flag7')
                 z += 1
                 if z == 15:
@@ -1276,9 +1268,9 @@ def youlikehits_functions(req_dict: dict) -> None:
                     # driver.save_screenshot("screenshots/screenshot.png")
                     try:
                         driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
-                    except (NoSuchElementException,ElementNotInteractableException):
+                    except (NoSuchElementException, ElementNotInteractableException):
                         break
-                    driver.find_element(By.CSS_SELECTOR, '#listall > center > a.followbutton').click()
+                    driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
                     # logging.info('Flag8')
                     if z == 15:
                         i += 1
