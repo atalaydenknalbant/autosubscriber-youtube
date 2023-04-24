@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, WebDriverException, JavascriptException
+    NoSuchWindowException, WebDriverException, JavascriptException, NoSuchFrameException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -877,7 +877,7 @@ def ytmonster_functions(req_dict: dict) -> None:
             driver.get("https://www.ytmonster.net/client")
             driver.set_window_size(1200, 900)
             EVENT.wait(secrets.choice(range(1, 4)))
-            driver.execute_script("document.querySelector('#startBtn').click()")
+            driver.find_element(By.ID, "startBtn").click()
             if i == 0:
                 EVENT.wait(secrets.choice(range(8, 10)))
                 while True:
@@ -1182,7 +1182,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
-                driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
+                try:
+                    driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
+                except NoSuchFrameException:
+                    pass
                 if len(driver.find_elements(By.XPATH, "//*[@id='movie_player']/div[3]/div[2]/div/a")) == 0:
                     try:
                         driver.close()
@@ -1217,7 +1220,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
                         # logging.info('Flag1.2')
                         i = yt_change_resolution(driver, website='YOULIKEHITS')
-            except (NoSuchElementException, IndexError):
+            except (NoSuchElementException, IndexError, NoSuchWindowException):
                 # logging.info('Flag4.3')
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
@@ -1228,7 +1231,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                             f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
                     .get_attribute("value")
 
-            except (TimeoutException, IndexError):
+            except (TimeoutException, IndexError, NoSuchWindowException):
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(4, 8)))
             try:
