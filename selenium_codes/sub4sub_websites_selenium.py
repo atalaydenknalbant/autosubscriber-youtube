@@ -128,7 +128,7 @@ def set_driver_opt(req_dict: dict,
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "YOULIKEHITS":
-        chrome_options.add_extension('extensions/NopeCHA.crx')
+        chrome_options.add_extension('extensions/hektCaptcha.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
@@ -1126,6 +1126,13 @@ def youlikehits_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.implicitly_wait(5.75)
+    driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
+    delay = driver.find_element(By.CSS_SELECTOR,
+                                "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
+                                " div.settings_description_container.bbflex > input")
+    delay.clear()
+    delay.send_keys("15000")
+    EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
     google_login(driver, req_dict, has_login_btn=False)
