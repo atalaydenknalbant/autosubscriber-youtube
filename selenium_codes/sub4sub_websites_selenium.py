@@ -1127,11 +1127,15 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.implicitly_wait(5.75)
     driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
-    delay = driver.find_element(By.CSS_SELECTOR,
+    solve_delay = driver.find_element(By.CSS_SELECTOR,
                                 "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
                                 " div.settings_description_container.bbflex > input")
-    delay.clear()
-    delay.send_keys("15000")
+    solve_delay.clear()
+    solve_delay.send_keys("15000")
+    click_delay = driver.find_element(By.CSS_SELECTOR,"body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
+                                                      " div.settings_description_container.bbflex > input")
+    click_delay.clear()
+    click_delay.send_keys("8000")
     EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
@@ -1144,7 +1148,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "username")))\
         .send_keys(req_dict['username_youlikehits'])
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
-    driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").click()
+    driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").send_keys(Keys.ENTER)
     EVENT.wait(secrets.choice(range(2, 4)))
 
     def collect_bonus_points() -> None:
@@ -1170,6 +1174,11 @@ def youlikehits_functions(req_dict: dict) -> None:
 
     def while_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
+        EVENT.wait(secrets.choice(range(60, 70)))
+        try:
+            driver.find_element(By.CSS_SELECTOR, '#captcha > table > tbody > tr > td > input[type=submit]').click()
+        except NoSuchElementException:
+            pass
         video_name: str = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
@@ -1180,13 +1189,13 @@ def youlikehits_functions(req_dict: dict) -> None:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
-            # logging.info('Flag1')
+            logging.info('Flag1')
             try:
                 driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
                 EVENT.wait(0.25)
-                # logging.info('Flag1.1')
+                logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 try:
@@ -1219,17 +1228,21 @@ def youlikehits_functions(req_dict: dict) -> None:
                                                   'td/center/table/tbody/tr[2]/td/'
                                                   'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
                     EVENT.wait(secrets.choice(range(1, 3)))
-                    # logging.info('Flag4.2')
+                    logging.info('Flag4.2')
                     continue
                 else:
                     if i == 1:
                         driver.switch_to.window(driver.window_handles[1])
                         driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
-                        # logging.info('Flag1.2')
+                        logging.info('Flag1.2')
                         i = yt_change_resolution(driver, website='YOULIKEHITS')
             except (NoSuchElementException, IndexError, NoSuchWindowException):
-                # logging.info('Flag4.3')
+                logging.info('Flag4.3')
                 EVENT.wait(0.25)
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.default_content()
+                driver.refresh()
+                continue
             driver.switch_to.window(driver.window_handles[0])
             driver.switch_to.default_content()
             try:
@@ -1255,7 +1268,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             EVENT.wait(secrets.choice(range(3, 5)))
-            # logging.info('Flag5.1')
+            logging.info('Flag5.1')
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                         'There are no videos available to view at this time. Try coming back or refreshing.':
@@ -1268,13 +1281,13 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 pass
             z = 0
-            # logging.info('Flag6')
+            logging.info('Flag6')
             while len(driver.window_handles) == 1:
                 try:
                     driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
                 except (NoSuchElementException, JavascriptException):
                     pass
-                # logging.info('Flag7')
+                logging.info('Flag7')
                 z += 1
                 if z == 15:
                     # driver.execute_script("window.scrollTo(0, 600);")
@@ -1284,12 +1297,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                     except (NoSuchElementException, ElementNotInteractableException):
                         break
                     driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
-                    # logging.info('Flag8')
+                    logging.info('Flag8')
                     if z == 15:
                         i += 1
-                # logging.info('Flag8.9')
+                logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
-            # logging.info('Flag9')
+            logging.info('Flag9')
             # driver.execute_script("window.scrollTo(0, 600);")
 
     while_loop_watch(14)
