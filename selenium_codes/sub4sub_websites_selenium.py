@@ -1198,11 +1198,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
-                try:
-                    driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
-                except NoSuchFrameException:
-                    pass
-                if len(driver.find_elements(By.XPATH, "//*[@id='movie_player']/div[3]/div[2]/div/a")) == 0:
+                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     try:
                         driver.close()
                     except NoSuchWindowException:
@@ -1232,8 +1228,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                     continue
                 else:
                     if i == 1:
-                        driver.switch_to.window(driver.window_handles[1])
-                        driver.switch_to.frame(driver.find_element(By.TAG_NAME, "iframe"))
                         # logging.info('Flag1.2')
                         i = yt_change_resolution(driver, website='YOULIKEHITS')
             except (NoSuchElementException, IndexError, NoSuchWindowException):
@@ -1241,8 +1235,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                 EVENT.wait(0.25)
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
-                driver.refresh()
-                continue
             driver.switch_to.window(driver.window_handles[0])
             driver.switch_to.default_content()
             try:
