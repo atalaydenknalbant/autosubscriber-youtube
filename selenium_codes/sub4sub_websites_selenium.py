@@ -293,7 +293,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         driver.switch_to.window(window_after)
         try:
             driver.find_elements(By.ID, 'dismissible')[0].click()
-        except (NoSuchElementException, IndexError, ElementNotInteractableException):
+        except (NoSuchElementException, IndexError, ElementNotInteractableException, ElementClickInterceptedException):
             EVENT.wait(0.25)
         EVENT.wait(secrets.choice(range(1, 4)))
         try:
