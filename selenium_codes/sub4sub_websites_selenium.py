@@ -1184,18 +1184,21 @@ def youlikehits_functions(req_dict: dict) -> None:
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
         i = 1
+        j = 2
         while True:
             if datetime.now() > future:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             logging.info('Flag1')
+            driver.refresh()
             try:
                 driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
                 EVENT.wait(0.25)
                 logging.info('Flag1.1')
+            EVENT.wait(3.25)
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
@@ -1240,7 +1243,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             try:
                 WebDriverWait(driver, 100)\
                     .until(ec.visibility_of_element_located((By.XPATH,
-                                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")))\
+                                                            f"//*[@id='showresult']/table/tbody/tr[{j}]/td/center/b")))\
                     .get_attribute("value")
 
             except (TimeoutException, IndexError, NoSuchWindowException):
@@ -1251,7 +1254,7 @@ def youlikehits_functions(req_dict: dict) -> None:
 
                 while video_name != \
                         driver.find_element(By.XPATH,
-                                            f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
+                                            f"//*[@id='showresult']/table/tbody/tr[{j}]/td/center/b")\
                         .text.split('"')[1::2][0]:
                     EVENT.wait(2)
                     c += 1
@@ -1291,7 +1294,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
                     logging.info('Flag8')
                     if z == 15:
-                        i += 1
+                        j += 1
                 logging.info('Flag8.9')
             EVENT.wait(secrets.choice(range(3, 4)))
             logging.info('Flag9')
