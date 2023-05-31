@@ -868,12 +868,12 @@ def ytmonster_functions(req_dict: dict) -> None:
         EVENT.wait(0.25)
     EVENT.wait(secrets.choice(range(1, 4)))
 
-    def open_tabs(total_tabs: int = 3) -> None:
+    def open_windows(total_tabs: int = 3) -> None:
         for i in range(total_tabs):
             if i == 0:
                 EVENT.wait(0.25)
             else:
-                driver.switch_to.new_window('tab')
+                driver.switch_to.new_window('window')
             driver.get("https://www.ytmonster.net/client")
             driver.set_window_size(1200, 900)
             EVENT.wait(secrets.choice(range(1, 4)))
@@ -890,7 +890,7 @@ def ytmonster_functions(req_dict: dict) -> None:
                 yt_change_resolution(driver)
                 driver.switch_to.window(driver.window_handles[i])
             EVENT.wait(secrets.choice(range(3, 4)))
-    open_tabs()
+    open_windows()
 
     def timer(hours_time: int) -> None:
         """closes the program after given time in hours
