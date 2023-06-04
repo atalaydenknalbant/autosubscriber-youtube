@@ -1191,6 +1191,12 @@ def youlikehits_functions(req_dict: dict) -> None:
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             try:
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close()
+            except (NoSuchWindowException, IndexError):
+                pass
+            driver.switch_to.window(driver.window_handles[0])
+            try:
                 driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
