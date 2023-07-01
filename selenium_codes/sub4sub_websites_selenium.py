@@ -161,7 +161,7 @@ def set_driver_opt(req_dict: dict,
     os.environ['WDM_LOG'] = str(logging.NOTSET)
     try:
         if os.environ['HEROKU'] == 'available':
-            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+            driver = webdriver.Chrome(service=ChromeService(os.environ.get("CHROMEDRIVER_PATH")), options=chrome_options)
             return driver
     except KeyError:
         driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(path=".wdm/drivers/chromedriver",
