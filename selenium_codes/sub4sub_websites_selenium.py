@@ -164,8 +164,7 @@ def set_driver_opt(req_dict: dict,
             driver = webdriver.Chrome(service=ChromeService(os.environ.get("CHROMEDRIVER_PATH")), options=chrome_options)
             return driver
     except KeyError:
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager(path=".wdm/drivers/chromedriver",
-                                                                            cache_valid_range=3).install()),
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()),
                                   options=chrome_options)
         return driver
 
