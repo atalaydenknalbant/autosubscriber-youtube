@@ -7,8 +7,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 import logging
 import os
 from threading import Event
@@ -124,6 +123,7 @@ def set_driver_opt(req_dict: dict,
     if headless:
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
+        pass
     else:
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
@@ -135,6 +135,7 @@ def set_driver_opt(req_dict: dict,
                  "disk-cache-size": 4096,
                  "profile.password_manager_enabled": False,
                  "credentials_enable_service": False}
+        pass
         chrome_options.add_experimental_option('prefs', prefs)
         chrome_options.add_experimental_option("excludeSwitches", ["ignore-certificate-errors"])
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -151,20 +152,12 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    # Set github token environment for webdriver manager
-    os.environ['GH_TOKEN'] = req_dict['github_token']
-    # Save binary webdrivers to project location
-    os.environ['WDM_LOCAL'] = '1'
-    # Enable or Disable SSL verification when downloading webdrivers
-    os.environ['WDM_SSL_VERIFY'] = '1'
-    # Disable logging for webdriver manager
-    os.environ['WDM_LOG'] = str(logging.NOTSET)
     try:
         if os.environ['HEROKU'] == 'available':
-            driver = webdriver.Chrome(service=ChromeService(os.environ.get("CHROMEDRIVER_PATH")), options=chrome_options)
+            driver = webdriver.Chrome(service=Service(), options=chrome_options)
             return driver
     except KeyError:
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()),
+        driver = webdriver.Chrome(service=Service(),
                                   options=chrome_options)
         return driver
 
@@ -202,12 +195,12 @@ def google_login(driver: webdriver,
         EVENT.wait(0.25)
     else:
         driver.get("https://accounts.google.com/signin")
-    EVENT.wait(secrets.choice(range(1, 4)))
+    EVENT.wait(secrets.choice(range(1, 6)))
     email_area = driver.find_element(By.ID, "identifierId")
     email_area.send_keys(req_dict['yt_email'])
-    EVENT.wait(secrets.choice(range(1, 4)))
+    EVENT.wait(secrets.choice(range(3, 6)))
     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
-    EVENT.wait(secrets.choice(range(2, 4)))
+    EVENT.wait(secrets.choice(range(2, 6)))
     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
     pw_area.send_keys(req_dict['yt_pw'])
     EVENT.wait(secrets.choice(range(1, 4)))
