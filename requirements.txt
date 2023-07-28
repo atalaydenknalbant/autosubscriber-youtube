@@ -1,3 +1,2 @@
 selenium==4.10.0
-webdriver-manager==3.9.1
 setuptools==68.0.0
