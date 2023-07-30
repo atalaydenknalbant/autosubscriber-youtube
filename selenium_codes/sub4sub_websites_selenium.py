@@ -121,7 +121,7 @@ def set_driver_opt(req_dict: dict,
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     if headless:
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         pass
     else:
