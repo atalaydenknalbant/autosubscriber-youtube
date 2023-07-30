@@ -102,7 +102,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 
             .click()
 
     except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-            StaleElementReferenceException, AttributeError, NoSuchWindowException) as ex:
+            StaleElementReferenceException, AttributeError, NoSuchWindowException):
         retry = 1
     return retry
 
@@ -121,7 +121,7 @@ def set_driver_opt(req_dict: dict,
     # Chrome
     chrome_options = webdriver.ChromeOptions()
     if headless:
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         pass
     else:
@@ -190,9 +190,10 @@ def google_login(driver: webdriver,
     """
     if has_login_btn:
         sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer")
+        EVENT.wait(secrets.choice(range(1, 6)))
         ActionChains(driver).move_to_element(sign_in_button).click().perform()
     if already_in_website:
-        EVENT.wait(0.25)
+        EVENT.wait(secrets.choice(range(1, 6)))
     else:
         driver.get("https://accounts.google.com/signin")
     EVENT.wait(secrets.choice(range(1, 6)))
@@ -456,7 +457,7 @@ def ytpals_functions(req_dict: dict) -> None:
     driver.find_element(By.CSS_SELECTOR, "#core-wrapper > section > div > div > div > div > div >"
                                          " form > div:nth-child(2) > input").send_keys(req_dict['pw_ytpals'])
     driver.find_element(By.CSS_SELECTOR,
-                        "#core-wrapper > section > div > div > div > div > div > form > button").click()
+                        "#activate-final > div > div > div > form > button").click()
     if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Activated")) > 0:
         driver.quit()
         return
@@ -710,7 +711,7 @@ def submenow_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
     try:
         driver.find_element(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")
-    except (UnexpectedAlertPresentException,NoSuchElementException):
+    except (UnexpectedAlertPresentException, NoSuchElementException):
         EVENT.wait(0.25)
     if len(driver.find_elements(By.XPATH, "//*[@id='mainContentWrapper']/div[18]/div[3]/div[3]/button")) > 0:
         driver.quit()
@@ -1121,12 +1122,12 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.implicitly_wait(5.75)
     driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
     solve_delay = driver.find_element(By.CSS_SELECTOR,
-                                "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
-                                " div.settings_description_container.bbflex > input")
+                                      "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
+                                      " div.settings_description_container.bbflex > input")
     solve_delay.clear()
     solve_delay.send_keys("15000")
-    click_delay = driver.find_element(By.CSS_SELECTOR,"body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
-                                                      " div.settings_description_container.bbflex > input")
+    click_delay = driver.find_element(By.CSS_SELECTOR, "body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
+                                                       " div.settings_description_container.bbflex > input")
     click_delay.clear()
     click_delay.send_keys("8000")
     EVENT.wait(secrets.choice(range(3, 6)))
