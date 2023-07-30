@@ -11,8 +11,7 @@ Python Selenium-based automated subscribing, liking, viewing functions for youtu
 If you are using Linux or Ubuntu it might delete your saved passwords and autofills make sure backup those credentials 
 
 ## Pre-requisites
-[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) <a href="https://pypi.org/project/webdriver-manager/">
-<img src="https://i.imgur.com/4ype8VS.png" width=100 height=100 >
+[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) 
 </a> 
 
 ## Usage
