@@ -486,9 +486,10 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(7.60)
+    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     driver.get("https://www.subscribers.video")  # Type_2
     driver.minimize_window()
-    driver.set_window_size(1900, 1050)
+    driver.set_window_size(1920, 1080)
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
             logging.info("subscribersvideo Website Temporarily Unavailable, closing driver")
@@ -550,7 +551,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     def for_loop() -> None:
         try:
             logging.info("subscribersvideo loop started")
-            i = 0
             for _ in range(1, 10000000000):
                 try:
                     if len(driver.find_elements(By.XPATH,
@@ -586,9 +586,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                     driver.switch_to.window(window_after)
                     EVENT.wait(secrets.choice(range(1, 4)))
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                        if i == 0:
-                            google_login(driver, req_dict)
-                            i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
@@ -665,8 +662,9 @@ def submenow_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.minimize_window()
-    driver.set_window_size(1800, 900)
+    driver.set_window_size(1920, 1080)
     driver.implicitly_wait(4.5)
+    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     driver.get("https://www.submenow.com/")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -722,7 +720,6 @@ def submenow_functions(req_dict: dict) -> None:
         return
 
     def for_loop() -> None:
-        i = 0
         try:
             logging.info("submenow loop started")
             for _ in range(1, 1000000000):
@@ -755,9 +752,6 @@ def submenow_functions(req_dict: dict) -> None:
                     driver.switch_to.window(window_after)
                     EVENT.wait(secrets.choice(range(1, 4)))
                     if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                        if i == 0:
-                            google_login(driver, req_dict)
-                            i += 1
                         driver.execute_script("window.scrollTo(0, 400)")
                         if len(driver.find_elements(By.CSS_SELECTOR,
                                ytbutton_elements_location_dict['yt_css_like_button_active'])) > 0:
