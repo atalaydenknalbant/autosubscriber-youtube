@@ -15,7 +15,7 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 </a> 
 
 ## Usage
-1. Try to use a newly created YouTube account to avoid security questions and make that account simple.
+1. Try to use a newly created YouTube account to avoid security questions and make that account simple.(Don't use 2FA)
 1. Open that YouTube account in normal and incognito mode on chrome before you use.
 1. Edit config.ini file to match with your accounts.
 1. While editing config file make sure to add GitHub token to speed up general code speed.
