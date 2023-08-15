@@ -230,7 +230,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             while driver.find_element(By.ID, "seconds").text == "0":
                 continue
-        except (StaleElementReferenceException, NoSuchElementException):
+        except (StaleElementReferenceException, NoSuchElementException, TimeoutException):
             try:
                 EVENT.wait(secrets.choice(range(1, 4)))
                 while driver.find_element(By.ID, "seconds").text == "0":
