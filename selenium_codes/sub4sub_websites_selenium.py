@@ -393,7 +393,9 @@ def subpals_functions(req_dict: dict) -> None:
         return
 
     driver.switch_to.default_content()
+    # Check if element exist in page
     if len(driver.find_elements(By.CLASS_NAME, "btn-unavailable")) > 0:
+        # Check if element is displayed
         if driver.find_element(By.CLASS_NAME, "btn-unavailable").is_displayed():
             driver.quit()
             return
@@ -432,7 +434,9 @@ def sonuker_functions(req_dict: dict) -> None:
         .send_keys(Keys.ENTER)
     # driver.save_screenshot("screenshots/screenshot.png")
     driver.switch_to.default_content()
+    # Check if element exist in page
     if len(driver.find_elements(By.CLASS_NAME, "btn-unavailable")) > 0:
+        # Check if element is displayed
         if driver.find_element(By.CLASS_NAME, "btn-unavailable").is_displayed():
             driver.quit()
             return
@@ -465,7 +469,9 @@ def ytpals_functions(req_dict: dict) -> None:
     driver.find_element(By.NAME, "password").send_keys(req_dict['pw_ytpals'])
     driver.find_element(By.CLASS_NAME,
                         "btn-login").click()
+    # Check if element exist in page
     if len(driver.find_elements(By.CLASS_NAME, "btn-unavailable")) > 0:
+        # Check if element is displayed
         if driver.find_element(By.CLASS_NAME, "btn-unavailable").is_displayed():
             driver.quit()
             return
@@ -1433,7 +1439,6 @@ def ytmonsterru_functions(req_dict: dict) -> None:
             EVENT.wait(secrets.choice(range(2, 4)))
             driver.find_element(By.CLASS_NAME, "openTask").send_keys(Keys.ENTER)
             EVENT.wait(secrets.choice(range(2, 4)))
-            # driver.save_screenshot("screenshots/screenshot.png")
             driver.switch_to.window(driver.window_handles[1])
             EVENT.wait(secrets.choice(range(5, 7)))
             driver.execute_script("window.scrollTo(0, 600);")
@@ -1443,7 +1448,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:
             driver.find_element(By.ID, "contenteditable-root").send_keys(comment)
             EVENT.wait(secrets.choice(range(2, 4)))
             driver.find_element(By.ID, "contenteditable-root").send_keys(Keys.CONTROL, Keys.ENTER)
-            logging.info(f"Total Commented Videos: {i}")
+            logging.info("Total Commented Videos: %d", i)
             EVENT.wait(secrets.choice(range(2, 4)))
             driver.switch_to.window(driver.window_handles[0])
             EVENT.wait(secrets.choice(range(2, 4)))
@@ -1472,10 +1477,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:
             WebDriverWait(driver, float(driver.find_element(By.CLASS_NAME, 'time').text) + 15)\
                 .until(ec.element_to_be_clickable((By.CSS_SELECTOR, "body > div.top > div.butt > input[type=submit]"))) \
                 .send_keys(Keys.ENTER)
-            logging.info(f"Total Watched Videos: {j}")
+            logging.info("Total Watched Videos: %d", j)
             driver.switch_to.window(driver.window_handles[0])
             j += 1
-    # watch_loop(14)
+    watch_loop(14)
     comment_loop(14)
 
 
@@ -1496,7 +1501,9 @@ def view2be_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.CLASS_NAME, "btn-login").click()
     EVENT.wait(secrets.choice(range(1, 4)))
+    # Check if element exist in page
     if len(driver.find_elements(By.CLASS_NAME, "btn-unavailable")) > 0:
+        # Check if element is displayed
         if driver.find_element(By.CLASS_NAME, "btn-unavailable").is_displayed():
             driver.quit()
             return
