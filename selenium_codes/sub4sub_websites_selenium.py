@@ -1514,8 +1514,25 @@ def view2be_functions(req_dict: dict) -> None:
         logging.info("view2be activate button passed")
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.CLASS_NAME, "btn-step").click()
-    while float(driver.find_element(By.ID, "userMinutes").text) < 240:
-        EVENT.wait(60)
+    EVENT.wait(secrets.choice(range(2, 4)))
+    driver.switch_to.window(driver.window_handles[1])
+    yt_change_resolution(driver)
+    driver.switch_to.window(driver.window_handles[0])
+    try:
+        while float(driver.find_element(By.ID, "userMinutes").text) < 240:
+            sec = driver.find_element(By.ID, "userSeconds").text
+            EVENT.wait(30)
+            if sec == driver.find_element(By.ID, "userSeconds").text:
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                driver.refresh()
+            if len(driver.window_handles) > 2:
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+    except (NoSuchElementException, NoSuchWindowException):
+        pass
     logging.info("View2be - Completed Watching Videos")
     driver.quit()
     return
