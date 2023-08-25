@@ -263,7 +263,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/div/"
                                                                  "div/div/div/div/div[1]/h2/span/div").text
 
-                logging.info(f'{d} Remaining Videos:{remaining_videos}')
+                logging.info('%s Remaining Videos: %s', d, remaining_videos)
             except NoSuchElementException:
                 driver.quit()
                 return
@@ -272,7 +272,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                 remaining_videos = driver.find_element(By.XPATH, "/html/body/div[1]/section/div/"
                                                                  "div/div/div/div/div[2]/div[1]/h2/span/div").text
 
-                logging.info(f'{d} Remaining Videos:{remaining_videos}')
+                logging.info('%s Remaining Videos: %s', d, remaining_videos)
             except NoSuchElementException:
                 driver.quit()
                 return
@@ -962,7 +962,7 @@ def ytbpals_functions(req_dict: dict) -> None:
 
                     except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
                             as ex:
-                        logging.info(f"Error: Exception: {str(ex)}")
+                        logging.info("Error: Exception: %s", str(ex))
                         # driver.save_screenshot("screenshots/screenshot.png")
                     driver.quit()
                     break
