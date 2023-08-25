@@ -353,7 +353,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
         try:
             while driver.find_elements(By.ID, "seconds")[1].text != "":  # noqa
                 EVENT.wait(1)
-        except (NoSuchElementException, NoSuchElementException):
+        except NoSuchElementException:
             EVENT.wait(0.25)
         try:
             button_confirm = driver.find_elements(By.CLASS_NAME, confirm_btn)[2]
