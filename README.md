@@ -11,8 +11,8 @@ Python Selenium-based automated subscribing, liking, viewing functions for youtu
 If you are using Linux or Ubuntu it might delete your saved passwords and autofills make sure backup those credentials 
 
 ## Pre-requisites
-[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/) 
-</a> 
+[![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)
+<a href="https://pypi.org/project/undetected-chromedriver/"><img src="https://opengraph.githubassets.com/2a3011a7c39f28995d4bb68f8b03888999482d7b8fd4e250c9cec7839b7ec87e/ultrafunkamsterdam/undetected-chromedriver" width="100" height="100"></a>
 
 ## Usage
 1. Try to use a newly created YouTube account to avoid security questions and make that account simple.(Don't use 2FA)
@@ -28,7 +28,7 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) [![ytmonsterru](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/) [![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/)  
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
