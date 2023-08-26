@@ -128,8 +128,6 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "YOULIKEHITS":
         chrome_options.add_extension('extensions/hektCaptcha.crx')
-    if website == "ytmonster":
-        chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
@@ -140,7 +138,8 @@ def set_driver_opt(req_dict: dict,
         if not undetected:
             chrome_options.add_experimental_option('prefs', prefs)
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            chrome_options.add_experimental_option("useAutomationExtension", False)
+        if website == "ytmonster":
+            chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--ignore-certificate-errors")
@@ -149,7 +148,6 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--proxy-bypass-list=*")
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-running-insecure-content")
-        chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--disable-popup-blocking")
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--window-size=1920,1080")
