@@ -459,14 +459,13 @@ def ytpals_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict)
-    driver.implicitly_wait(4.5)
+    driver.implicitly_wait(5)
     driver.get("https://accounts.google.com/signin")
     google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.find_element(By.NAME, "password").send_keys(req_dict['pw_ytpals'])
-    driver.find_element(By.CLASS_NAME,
-                        "btn-login").click()
+    driver.find_element(By.CLASS_NAME, "btn-login").click()
     # Check if element exist in page
     if len(driver.find_elements(By.CLASS_NAME, "btn-unavailable")) > 0:
         # Check if element is displayed
