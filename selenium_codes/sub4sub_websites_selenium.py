@@ -499,7 +499,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     driver: webdriver = set_driver_opt(req_dict)
     driver.implicitly_wait(8)
     google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
-    driver.get("https://www.subscribers.video")  # Type_2
+    driver.get("https://www.subscribers.video/signin.html")  # Type_2
     driver.set_window_size(1920, 1080)
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -510,12 +510,6 @@ def subscribersvideo_functions(req_dict: dict) -> None:
             EVENT.wait(0.25)
     except NoSuchElementException as ex:
         logging.info("subscribersvideo"+str(ex))
-        driver.quit()
-        return
-    try:
-        driver.find_element(By.CSS_SELECTOR, "#main-nav > ul > li:nth-child(4) > button").click()
-    except NoSuchElementException:
-        logging.info("subscribersvideo Website Temporarily Unavailable, closing driver")
         driver.quit()
         return
     driver.find_element(By.ID, "inputEmail").send_keys(req_dict['email_subscribersvideo'])
@@ -675,7 +669,7 @@ def submenow_functions(req_dict: dict) -> None:
     driver.set_window_size(1920, 1080)
     driver.implicitly_wait(4.5)
     google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
-    driver.get("https://www.submenow.com/")  # Type_2
+    driver.get("https://www.submenow.com/signin.html")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
             logging.info("submenow Website Temporarily Unavailable, closing driver")
@@ -686,14 +680,6 @@ def submenow_functions(req_dict: dict) -> None:
     except NoSuchElementException as ex:
         logging.info("submenow" + str(ex))
         driver.quit()
-        return
-    try:
-        driver.find_element(By.CSS_SELECTOR, "#header-wrapper > div.header-section.last-child >"
-                                             " div:nth-child(1) > div > button")\
-            .click()
-    except NoSuchElementException:
-        driver.quit()
-        logging.info("Website is not available closing the driver")
         return
     driver.find_element(By.ID, "inputEmail").send_keys(req_dict['email_submenow'])
     driver.find_element(By.ID, "inputIdChannel").send_keys(req_dict['yt_channel_id'])
