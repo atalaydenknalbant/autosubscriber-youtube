@@ -14,8 +14,9 @@ except KeyError:
 # Heroku
 if heroku == "available":
     required_dict = {
-        "yt_pw": os.environ["youtube_password"],
         "yt_email": os.environ["youtube_email"],
+        "chrome_userdata_directory": os.environ["chrome_userdata_directory"],
+        "chrome_profile_name": os.environ["chrome_profile_name"],
         "yt_channel_id": os.environ["youtube_channel_id"],
         "email_submenow": os.environ["submenow_com_email"],
         "email_subscribersvideo": os.environ["subscribers_video_email"],
@@ -30,8 +31,9 @@ else:
     userinfo = config_object["USERINFO"]
 
     required_dict = {
-        "yt_pw": userinfo["youtube_password"],
         "yt_email": userinfo["youtube_email"],
+        "chrome_userdata_directory": userinfo["chrome_userdata_directory"],
+        "chrome_profile_name": userinfo["chrome_profile_name"],
         "yt_channel_id": userinfo["youtube_channel_id"],
         "email_submenow": userinfo["submenow_com_email"],
         "email_subscribersvideo": userinfo["subscribers_video_email"],
@@ -41,5 +43,9 @@ else:
 
 
 if __name__ == "__main__":
-    Thread(target=sws.submenow_functions, args=[required_dict]).start()
-    Thread(target=sws.subscribersvideo_functions, args=[required_dict]).start()
+    t1 = Thread(target=sws.submenow_functions, args=[required_dict])
+    t1.start()
+    t1.join()
+    t2 = Thread(target=sws.subscribersvideo_functions, args=[required_dict])
+    t2.start()
+    t2.join()

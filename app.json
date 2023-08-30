@@ -33,8 +33,12 @@
       "value": "Enter YouTube Email",
       "required": true
     },
-    "youtube_password": {
-      "value": "Enter YouTube Password",
+    "chrome_userdata_directory": {
+      "value": "Enter your chrome User Data path. example='C:/Users/<username>/AppData/Local/Google/Chrome/User Data'",
+      "required": true
+    },
+    "chrome_profile_name": {
+      "value": "Enter your chrome profile folder name. example:'Default' , 'Profile 1' etc...",
       "required": true
     },
     "youtube_channel_id": {

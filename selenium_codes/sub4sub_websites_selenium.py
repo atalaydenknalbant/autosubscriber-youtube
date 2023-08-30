@@ -108,17 +108,24 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 
 def set_driver_opt(req_dict: dict,
                    headless: bool = True,
                    website: str = "",
-                   undetected: bool = False) -> webdriver:
+                   undetected: bool = False,
+                   ) -> webdriver:
     """Set driver options for chrome or firefox
     Args:
     - req_dict(dict): dictionary object of required parameters
-    - is_headless(bool): bool parameter to check for chrome headless or not
+    - is_headless(bool): bool parameter to check for chrome headless
     - website (string): string parameter to enable extensions corresponding to the Website.
+    - undetected (bool): bool parameter to run undetected_chromedriver.
     Returns:
     - webdriver: returns driver with options already added to it.
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
+    if website == "ytmonster":
+        chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
+    else:
+        chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
+        chrome_options.add_argument(f"--profile-directory={req_dict['chrome_profile_name']}")
     if headless:
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
@@ -138,8 +145,7 @@ def set_driver_opt(req_dict: dict,
         if not undetected:
             chrome_options.add_experimental_option('prefs', prefs)
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        if website == "ytmonster":
-            chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
+            pass
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--ignore-certificate-errors")
@@ -183,38 +189,38 @@ def yt_too_many_controller() -> int:
     return toomany_suborlike
 
 
-def google_login(driver: webdriver,
-                 req_dict: dict,
-                 has_login_btn: bool = True,
-                 already_in_website: bool = True) -> None:
-    """ Logins to Google with given credentials.
-    Args:
-    - driver(webdriver): webdriver parameter.
-    - req_dict(dict): dictionary object of required parameters
-    - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
-    Returns:
-    - None(NoneType)
-    """
-    if has_login_btn:
-        sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer")
-        EVENT.wait(secrets.choice(range(1, 6)))
-        ActionChains(driver).move_to_element(sign_in_button).click().perform()
-    if already_in_website:
-        EVENT.wait(secrets.choice(range(1, 6)))
-    else:
-        driver.get("https://accounts.google.com/signin")
-    EVENT.wait(secrets.choice(range(1, 6)))
-    email_area = driver.find_element(By.ID, "identifierId")
-    email_area.send_keys(req_dict['yt_email'])
-    EVENT.wait(secrets.choice(range(3, 6)))
-    driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
-    EVENT.wait(secrets.choice(range(2, 6)))
-    pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
-    pw_area.send_keys(req_dict['yt_pw'])
-    EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
-    EVENT.wait(secrets.choice(range(1, 4)))
-    logging.info("YouTube login completed")
+# # def google_login(driver: webdriver,
+# #                  req_dict: dict,
+# #                  has_login_btn: bool = True,
+# #                  already_in_website: bool = True) -> None:
+# #     """ Logins to Google with given credentials.
+# #     Args:
+# #     - driver(webdriver): webdriver parameter.
+# #     - req_dict(dict): dictionary object of required parameters
+# #     - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
+# #     Returns:
+# #     - None(NoneType)
+# #     """
+# #     if has_login_btn:
+# #         sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer")
+# #         EVENT.wait(secrets.choice(range(1, 6)))
+# #         ActionChains(driver).move_to_element(sign_in_button).click().perform()
+# #     if already_in_website:
+# #         EVENT.wait(secrets.choice(range(1, 6)))
+# #     else:
+# #         driver.get("https://accounts.google.com/signin")
+# #     EVENT.wait(secrets.choice(range(1, 6)))
+# #     email_area = driver.find_element(By.ID, "identifierId")
+# #     email_area.send_keys(req_dict['yt_email'])
+# #     EVENT.wait(secrets.choice(range(3, 6)))
+# #     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
+# #     EVENT.wait(secrets.choice(range(2, 6)))
+# #     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
+# #     pw_area.send_keys(req_dict['yt_pw'])
+# #     EVENT.wait(secrets.choice(range(1, 4)))
+# #     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
+# #     EVENT.wait(secrets.choice(range(1, 4)))
+# #     logging.info("YouTube login completed")
 
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
@@ -373,10 +379,8 @@ def subpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='subpals')
     driver.implicitly_wait(4.5)
-    driver.get("https://accounts.google.com/signin")
-    google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.subpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     # driver.save_screenshot("screenshots/screenshot.png")
@@ -418,10 +422,8 @@ def sonuker_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='sonuker')
     driver.implicitly_wait(4.5)
-    driver.get("https://accounts.google.com/signin")
-    google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.sonuker.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     # driver.save_screenshot("screenshots/screenshot.png")
@@ -458,10 +460,8 @@ def ytpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='ytpals')
     driver.implicitly_wait(5)
-    driver.get("https://accounts.google.com/signin")
-    google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.ytpals.com/login/final/" + req_dict['yt_channel_id'] + "/")  # Type_1
     driver.find_element(By.NAME, "password").send_keys(req_dict['pw_ytpals'])
@@ -495,9 +495,8 @@ def subscribersvideo_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website="subscribersvideo")
     driver.implicitly_wait(8)
-    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     driver.get("https://www.subscribers.video/signin.html")  # Type_2
     driver.set_window_size(1920, 1080)
     try:
@@ -664,10 +663,9 @@ def submenow_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='submenow')
     driver.set_window_size(1920, 1080)
     driver.implicitly_wait(6)
-    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     driver.get("https://www.submenow.com/signin.html")  # Type_2
     try:
         if len(driver.find_elements(By.PARTIAL_LINK_TEXT, "Service Temporarily Unavailable")) > 0:
@@ -858,17 +856,17 @@ def ytmonster_functions(req_dict: dict) -> None:
             driver.set_window_size(1200, 900)
             EVENT.wait(secrets.choice(range(1, 4)))
             driver.find_element(By.ID, "startBtn").click()
+            EVENT.wait(secrets.choice(range(4, 6)))
             if i == 0:
-                EVENT.wait(secrets.choice(range(4, 6)))
                 while True:
                     try:
                         driver.switch_to.window(driver.window_handles[1])
                         break
                     except IndexError:
                         driver.switch_to.window(driver.window_handles[0])
-                        driver.refresh()
                 yt_change_resolution(driver)
-                driver.switch_to.window(driver.window_handles[i])
+            if i != 2:
+                driver.switch_to.window(driver.window_handles[2 * i])
             EVENT.wait(secrets.choice(range(3, 4)))
     open_windows()
 
@@ -897,7 +895,7 @@ def ytbpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website="ytbpals")
     driver.implicitly_wait(7)
     driver.get("https://ytbpals.com/")  # Type_Undefined
     driver.find_element(By.CSS_SELECTOR, "#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
@@ -952,8 +950,6 @@ def ytbpals_functions(req_dict: dict) -> None:
                 EVENT.wait(secrets.choice(range(1, 4)))
                 window_after = driver.window_handles[1]
                 driver.switch_to.window(window_after)
-                google_login(driver, req_dict)
-                logging.info("login completed")
                 if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
                     driver.execute_script("window.scrollTo(0, 400);")
                     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1117,9 +1113,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     click_delay.clear()
     click_delay.send_keys("8000")
     EVENT.wait(secrets.choice(range(3, 6)))
-    driver.get("https://accounts.google.com/signin")
     driver.maximize_window()
-    google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
@@ -1296,10 +1290,8 @@ def like4like_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='like4like')
     driver.implicitly_wait(12)
-    driver.get("https://accounts.google.com/signin")
-    google_login(driver, req_dict, has_login_btn=False)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.like4like.org/login/")  # Type_Undefined
     driver.find_element(By.ID, "username").send_keys(req_dict['username_like4like'])
@@ -1390,11 +1382,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, undetected=True)
+    driver: webdriver = set_driver_opt(req_dict, website="ytmonsterru", headless=True, undetected=True)
     driver.implicitly_wait(6.5)
-    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.get("https://ytmonster.ru//")
+    driver.get("https://ytmonster.ru//")  # Type_Undefined
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.CSS_SELECTOR, "#nav > li:nth-child(2) > a").click()
     EVENT.wait(secrets.choice(range(2, 4)))
@@ -1474,11 +1465,10 @@ def view2be_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict)
+    driver: webdriver = set_driver_opt(req_dict, website='view2be')
     driver.implicitly_wait(6.5)
-    google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.get(f"https://app.view2.be/login/final/{req_dict['email_view2be']}/")
+    driver.get(f"https://app.view2.be/login/final/{req_dict['email_view2be']}/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.NAME, "password").send_keys(req_dict['pw_view2be'])
     EVENT.wait(secrets.choice(range(1, 4)))

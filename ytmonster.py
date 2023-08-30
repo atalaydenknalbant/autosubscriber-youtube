@@ -13,8 +13,9 @@ except KeyError:
 # Heroku
 if heroku == "available":
     required_dict = {
-        "yt_pw": os.environ["youtube_password"],
         "yt_email": os.environ["youtube_email"],
+        "chrome_userdata_directory": os.environ["chrome_userdata_directory"],
+        "chrome_profile_name": os.environ["chrome_profile_name"],
         "yt_channel_id": os.environ["youtube_channel_id"],
         "username_ytmonster": os.environ["ytmonster_com_username"],
         "pw_ytmonster": os.environ["ytmonster_com_password"],
@@ -29,8 +30,9 @@ else:
     userinfo = config_object["USERINFO"]
 
     required_dict = {
-        "yt_pw": userinfo["youtube_password"],
         "yt_email": userinfo["youtube_email"],
+        "chrome_userdata_directory": userinfo["chrome_userdata_directory"],
+        "chrome_profile_name": userinfo["chrome_profile_name"],
         "yt_channel_id": userinfo["youtube_channel_id"],
         "username_ytmonster": userinfo["ytmonster_com_username"],
         "pw_ytmonster": userinfo["ytmonster_com_password"],
