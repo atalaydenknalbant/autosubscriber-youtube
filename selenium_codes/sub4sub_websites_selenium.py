@@ -666,7 +666,7 @@ def submenow_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict)
     driver.set_window_size(1920, 1080)
-    driver.implicitly_wait(4.5)
+    driver.implicitly_wait(6)
     google_login(driver, req_dict, has_login_btn=False, already_in_website=False)
     driver.get("https://www.submenow.com/signin.html")  # Type_2
     try:
@@ -887,7 +887,7 @@ def ytmonster_functions(req_dict: dict) -> None:
         driver.quit()
 
     # Determines how many hours program will run
-    timer(16)
+    timer(12)
 
 
 def ytbpals_functions(req_dict: dict) -> None:
