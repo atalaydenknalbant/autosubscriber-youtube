@@ -121,8 +121,8 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website == "ytmonster":
-        chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
+    if website == "ytmonster" or website == "view2be":
+        pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
         chrome_options.add_argument(f"--profile-directory={req_dict['chrome_profile_name']}")
@@ -133,6 +133,8 @@ def set_driver_opt(req_dict: dict,
     else:
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
+    if website == "ytmonster":
+        chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
     if website == "YOULIKEHITS":
         chrome_options.add_extension('extensions/hektCaptcha.crx')
     else:

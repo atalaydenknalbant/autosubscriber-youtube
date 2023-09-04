@@ -43,9 +43,9 @@ else:
 
 
 if __name__ == "__main__":
-    t1 = Thread(target=sws.submenow_functions, args=[required_dict])
+    t1 = Thread(target=sws.subscribersvideo_functions, args=[required_dict])
     t1.start()
     t1.join()
-    t2 = Thread(target=sws.subscribersvideo_functions, args=[required_dict])
+    t2 = Thread(target=sws.submenow_functions, args=[required_dict])
     t2.start()
     t2.join()
