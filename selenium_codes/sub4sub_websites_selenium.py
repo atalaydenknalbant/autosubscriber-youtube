@@ -1468,7 +1468,7 @@ def view2be_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, website='view2be')
-    driver.implicitly_wait(6.5)
+    driver.implicitly_wait(10)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get(f"https://app.view2.be/login/final/{req_dict['email_view2be']}/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
