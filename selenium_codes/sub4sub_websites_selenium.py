@@ -68,7 +68,7 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
-def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 0, website: str = "") -> int:
+def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: bool = False, website: str = "") -> bool:
     """Change YouTube video resolution to given resolution.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -101,7 +101,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: int = 
             .click()
     except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
             StaleElementReferenceException, AttributeError, NoSuchWindowException):
-        retry = 1
+        retry = True
     return retry
 
 
@@ -1102,21 +1102,22 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
+    # driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
+    driver: webdriver = set_driver_opt(req_dict, headless=True)
     driver.implicitly_wait(5.75)
-    driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
-    solve_delay = driver.find_element(By.CSS_SELECTOR,
-                                      "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
-                                      " div.settings_description_container.bbflex > input")
-    solve_delay.clear()
-    solve_delay.send_keys("15000")
-    click_delay = driver.find_element(By.CSS_SELECTOR, "body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
-                                                       " div.settings_description_container.bbflex > input")
-    click_delay.clear()
-    click_delay.send_keys("8000")
-    EVENT.wait(secrets.choice(range(3, 6)))
-    driver.maximize_window()
-    EVENT.wait(secrets.choice(range(3, 6)))
+    # driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
+    # solve_delay = driver.find_element(By.CSS_SELECTOR,
+    #                                   "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
+    #                                   " div.settings_description_container.bbflex > input")
+    # solve_delay.clear()
+    # solve_delay.send_keys("15000")
+    # click_delay = driver.find_element(By.CSS_SELECTOR, "body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
+    #                                                    " div.settings_description_container.bbflex > input")
+    # click_delay.clear()
+    # click_delay.send_keys("8000")
+    # EVENT.wait(secrets.choice(range(3, 6)))
+    # driver.maximize_window()
+    # EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     # driver.save_screenshot("screenshots/screenshot.png")
@@ -1149,39 +1150,46 @@ def youlikehits_functions(req_dict: dict) -> None:
 
     def while_loop_watch(hours_time: int) -> None:
         logging.info("Loop Started")
-        EVENT.wait(secrets.choice(range(60, 70)))
-        try:
-            driver.find_element(By.CSS_SELECTOR, '#captcha > table > tbody > tr > td > input[type=submit]').click()
-        except NoSuchElementException:
-            pass
-        video_name: str = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
-        i = 1
-        j = 2
+        yt_resolution_lowered = False
         while True:
             if datetime.now() > future:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
-            logging.info('Flag1')
+            #  # logging.info('Flag1')
             try:
-                driver.switch_to.window(driver.window_handles[1])
-                driver.close()
-            except (NoSuchWindowException, IndexError):
-                pass
+                if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
+                        'There are no videos available to view at this time. Try coming back or refreshing.':
+                    logging.info('No videos available quitting...')
+                    return
+            except NoSuchElementException:
+                EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
+            video_name = driver.find_element(By.CSS_SELECTOR, f'#listall > center > b:nth-child(1) > font').text
             try:
-                driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
+                driver.find_element(By.CLASS_NAME, 'followbutton').click()
+                EVENT.wait(0.25)
+                driver.find_element(By.CLASS_NAME, 'followbutton').click()
+                EVENT.wait(1)
+                driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
-                EVENT.wait(0.25)
-                logging.info('Flag1.1')
-            EVENT.wait(3.25)
+                EVENT.wait(10)
+                #  # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
-                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) == 0:
+                #  # logging.info('Flag1.5555')
+                try:
+                    WebDriverWait(driver, 20)\
+                     .until(ec.visibility_of_element_located((By.XPATH,
+                                                             "//*[@id='title']/h1/yt-formatted-string")))
+                except TimeoutException:
+                    #  # logging.info('Flag1.11')
+                    pass
+                if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
                     try:
                         driver.close()
                     except NoSuchWindowException:
@@ -1190,95 +1198,65 @@ def youlikehits_functions(req_dict: dict) -> None:
                     driver.switch_to.default_content()
                     EVENT.wait(secrets.choice(range(1, 2)))
                     try:
-                        video_name = driver.find_element(By.XPATH,
-                                                         f"//*[@id='showresult']/table/tbody/tr[{i}]/td/center/b")\
-                            .text.split('"')[1::2][0]
-                    except NoSuchElementException:
-                        EVENT.wait(0.25)
-                    driver.refresh()
-                    EVENT.wait(secrets.choice(range(1, 4)))
-                    driver.find_element(By.XPATH, '/html/body/div/table[2]/'
-                                                  'tbody/tr/td/table[1]/tbody/tr/'
-                                                  'td/center/table/tbody/tr[2]/td/'
-                                                  'center/div[2]/div/center/a[2]').click()
-                    EVENT.wait(secrets.choice(range(1, 3)))
-                    driver.find_element(By.XPATH, '/html/body/div/table[2]/'
-                                                  'tbody/tr/td/table[1]/tbody/tr/'
-                                                  'td/center/table/tbody/tr[2]/td/'
-                                                  'center/div[2]/div/center/a[2]').send_keys(Keys.ENTER)
-                    EVENT.wait(secrets.choice(range(1, 3)))
-                    logging.info('Flag4.2')
+                        driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
+                        EVENT.wait(3)
+                        driver.refresh()
+                        #  # logging.info('Flag1.1232')
+                    except (NoSuchElementException, ElementNotInteractableException):
+                        driver.refresh()
+                        #  # logging.info('Flag1.2')
+                    #  # logging.info('Flag1.3')
                     continue
                 else:
-                    if i == 1:
-                        i = yt_change_resolution(driver, website='YOULIKEHITS')
+                    if not yt_resolution_lowered:
+                        yt_resolution_lowered = yt_change_resolution(driver, website='YOULIKEHITS')
 
-            except (NoSuchElementException, IndexError, NoSuchWindowException):
-                logging.info('Flag4.2')
+            except (NoSuchElementException, IndexError, NoSuchWindowException) as ex:
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.default_content()
+                #  # logging.info('Flag4')
+                if type(ex) == 'NoSuchWindowException':
+                    #  # logging.info('Flag4.1')
+                    try:
+                        driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
+                        EVENT.wait(3.25)
+                        driver.refresh()
+                        j = 2
+                    except (NoSuchElementException, ElementNotInteractableException):
+                        driver.refresh()
+                        j = 2
+                        #  # logging.info('Flag4.3')
+                    continue
                 EVENT.wait(0.25)
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
             driver.switch_to.window(driver.window_handles[0])
             driver.switch_to.default_content()
             try:
-                WebDriverWait(driver, 100)\
-                    .until(ec.visibility_of_element_located((By.XPATH,
-                                                            f"//*[@id='showresult']/table/tbody/tr[{j}]/td/center/b")))\
-                    .get_attribute("value")
-
-            except (TimeoutException, IndexError, NoSuchWindowException):
+                counter = 0
+                while (video_name ==
+                       driver.find_element(By.CSS_SELECTOR, f'#listall > center > b:nth-child(1) > font').text):
+                    EVENT.wait(5)
+                    counter += 1
+                    if counter >= 60:
+                        try:
+                            driver.refresh()
+                            driver.switch_to.window(driver.window_handles[1])
+                            driver.close()
+                            break
+                        except NoSuchWindowException:
+                            break
+            except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
                 EVENT.wait(0.25)
-            EVENT.wait(secrets.choice(range(4, 8)))
+                # #   logging.info('Flag4.5')
+                if type(ex) == 'NoSuchElementException':
+                    driver.refresh()
             try:
-                c = 0
-
-                while video_name != \
-                        driver.find_element(By.XPATH,
-                                            f"//*[@id='showresult']/table/tbody/tr[{j}]/td/center/b")\
-                        .text.split('"')[1::2][0]:
-                    EVENT.wait(2)
-                    c += 1
-                    if c == 50:
-                        break
-            except NoSuchElementException:
-                EVENT.wait(0.25)
-            EVENT.wait(secrets.choice(range(3, 5)))
-            logging.info('Flag5.1')
-            try:
-                if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
-                        'There are no videos available to view at this time. Try coming back or refreshing.':
-                    logging.info('No videos available quitting...')
-                    return
-            except NoSuchElementException:
-                EVENT.wait(0.25)
-            try:
-                video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
-            except NoSuchElementException:
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close()
+            except IndexError:
                 pass
-            z = 0
-            logging.info('Flag6')
-            while len(driver.window_handles) == 1:
-                try:
-                    driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
-                except (NoSuchElementException, JavascriptException):
-                    pass
-                logging.info('Flag7')
-                z += 1
-                if z == 15:
-                    # driver.execute_script("window.scrollTo(0, 600);")
-                    try:
-                        driver.find_element(By.CSS_SELECTOR, '#listall > center > a:nth-child(11)').click()
-                    except (NoSuchElementException, ElementNotInteractableException):
-                        break
-                    driver.execute_script("arguments[0].click();", driver.find_element(By.CLASS_NAME, 'followbutton'))
-                    logging.info('Flag8')
-                    if z == 15:
-                        j += 1
-                logging.info('Flag8.9')
-            EVENT.wait(secrets.choice(range(3, 4)))
-            logging.info('Flag9')
-            # driver.execute_script("window.scrollTo(0, 600);")
-
+            # # logging.info('Flag5')
     while_loop_watch(14)
     collect_bonus_points()
     logging.info("Finished Viewing Videos...")
@@ -1496,7 +1474,7 @@ def view2be_functions(req_dict: dict) -> None:
     try:
         while float(driver.find_element(By.ID, "userMinutes").text) < 240:
             sec = driver.find_element(By.ID, "userSeconds").text
-            EVENT.wait(30)
+            EVENT.wait(15)
             if sec == driver.find_element(By.ID, "userSeconds").text:
                 driver.switch_to.window(driver.window_handles[1])
                 driver.close()
@@ -1506,7 +1484,12 @@ def view2be_functions(req_dict: dict) -> None:
                 driver.switch_to.window(driver.window_handles[1])
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
-    except (NoSuchElementException, NoSuchWindowException):
+    except (NoSuchElementException, NoSuchWindowException, TimeoutException) as ex:
+        print(ex)
+        if ex == "TimeoutException":
+            driver.quit()
+            view2be_functions(req_dict)
+            return
         pass
     logging.info("View2be - Completed Watching Videos")
     driver.quit()
