@@ -1202,7 +1202,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
                 #  # logging.info('Flag4')
-                if type(ex) is 'NoSuchWindowException':
+                if type(ex) is NoSuchWindowException:
                     #  # logging.info('Flag4.1')
                     try:
                         driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
@@ -1234,7 +1234,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
                 EVENT.wait(0.25)
                 # #   logging.info('Flag4.5')
-                if type(ex) is 'NoSuchElementException':
+                if type(ex) is NoSuchElementException:
                     driver.refresh()
             try:
                 driver.switch_to.window(driver.window_handles[1])
