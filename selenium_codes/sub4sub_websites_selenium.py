@@ -1105,22 +1105,9 @@ def youlikehits_functions(req_dict: dict) -> None:
     # driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     driver: webdriver = set_driver_opt(req_dict, headless=True)
     driver.implicitly_wait(5.75)
-    # driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
-    # solve_delay = driver.find_element(By.CSS_SELECTOR,
-    #                                   "body > div > div:nth-child(2) > div > div > div:nth-child(4) >"
-    #                                   " div.settings_description_container.bbflex > input")
-    # solve_delay.clear()
-    # solve_delay.send_keys("15000")
-    # click_delay = driver.find_element(By.CSS_SELECTOR, "body > div > div:nth-child(2) > div > div > div:nth-child(3) >"
-    #                                                    " div.settings_description_container.bbflex > input")
-    # click_delay.clear()
-    # click_delay.send_keys("8000")
-    # EVENT.wait(secrets.choice(range(3, 6)))
-    # driver.maximize_window()
-    # EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
-    # driver.save_screenshot("screenshots/screenshot.png")
+    # # driver.save_screenshot("screenshots/screenshot.png")
     WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "username")))\
         .send_keys(req_dict['username_youlikehits'])
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
@@ -1168,7 +1155,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
-            video_name = driver.find_element(By.CSS_SELECTOR, f'#listall > center > b:nth-child(1) > font').text
+            video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
             try:
                 driver.find_element(By.CLASS_NAME, 'followbutton').click()
                 EVENT.wait(0.25)
@@ -1215,16 +1202,14 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
                 #  # logging.info('Flag4')
-                if type(ex) == 'NoSuchWindowException':
+                if type(ex) is 'NoSuchWindowException':
                     #  # logging.info('Flag4.1')
                     try:
                         driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
                         EVENT.wait(3.25)
                         driver.refresh()
-                        j = 2
                     except (NoSuchElementException, ElementNotInteractableException):
                         driver.refresh()
-                        j = 2
                         #  # logging.info('Flag4.3')
                     continue
                 EVENT.wait(0.25)
@@ -1235,7 +1220,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             try:
                 counter = 0
                 while (video_name ==
-                       driver.find_element(By.CSS_SELECTOR, f'#listall > center > b:nth-child(1) > font').text):
+                       driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
                     EVENT.wait(5)
                     counter += 1
                     if counter >= 60:
@@ -1249,7 +1234,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
                 EVENT.wait(0.25)
                 # #   logging.info('Flag4.5')
-                if type(ex) == 'NoSuchElementException':
+                if type(ex) is 'NoSuchElementException':
                     driver.refresh()
             try:
                 driver.switch_to.window(driver.window_handles[1])
