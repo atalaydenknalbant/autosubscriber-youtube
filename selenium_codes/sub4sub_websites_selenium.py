@@ -121,7 +121,7 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website == "ytmonster" or website == "view2be":
+    if website == "ytmonster" or website == "view2be" or website == 'YOULIKEHITS':
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
@@ -1102,8 +1102,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    # driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
-    driver: webdriver = set_driver_opt(req_dict, headless=True)
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     driver.implicitly_wait(5.75)
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
@@ -1173,7 +1172,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                     WebDriverWait(driver, 20)\
                      .until(ec.visibility_of_element_located((By.XPATH,
                                                              "//*[@id='title']/h1/yt-formatted-string")))
-                except TimeoutException:
+                except (TimeoutException, AttributeError):
                     #  # logging.info('Flag1.11')
                     pass
                 if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
