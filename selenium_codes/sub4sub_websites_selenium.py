@@ -121,7 +121,7 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website == "ytmonster" or website == "view2be" or website == 'YOULIKEHITS':
+    if website in ("ytmonster", "YOULIKEHITS", "view2be"):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
@@ -1154,7 +1154,11 @@ def youlikehits_functions(req_dict: dict) -> None:
             except NoSuchElementException:
                 EVENT.wait(0.25)
             driver.switch_to.window(driver.window_handles[0])
-            video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            try:
+                video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            except Exception:
+                driver.refresh()
+                continue
             try:
                 driver.find_element(By.CLASS_NAME, 'followbutton').click()
                 EVENT.wait(0.25)
@@ -1167,6 +1171,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 #  # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
+                EVENT.wait(2)
                 #  # logging.info('Flag1.5555')
                 try:
                     WebDriverWait(driver, 20)\
