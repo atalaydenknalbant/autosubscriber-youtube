@@ -1156,7 +1156,7 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.switch_to.window(driver.window_handles[0])
             try:
                 video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
-            except Exception:
+            except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
                 driver.refresh()
                 continue
             try:
