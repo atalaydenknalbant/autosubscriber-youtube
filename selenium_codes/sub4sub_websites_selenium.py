@@ -136,7 +136,7 @@ def set_driver_opt(req_dict: dict,
     if website == "ytmonster":
         chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
     if website == "YOULIKEHITS":
-        chrome_options.add_extension('extensions/hektCaptcha.crx')
+        chrome_options.add_extension('extensions/hektCaptcha-hCaptcha-Solver.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {"profile.managed_default_content_settings.images": 2,
@@ -1103,13 +1103,29 @@ def youlikehits_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
-    driver.implicitly_wait(5.75)
+    # driver.implicitly_wait(5.75)
+    # driver.get("chrome-extension://bpfdbfnkjelhloljelooneehdalcmljb/popup.html")
+    # solve_delay = driver.find_element(By.CSS_SELECTOR,
+    #                                   "body > div > div:nth-child(2) > div > div > div:nth-child(2) >"
+    #                                   " div:nth-child(4) > div.settings_description_container.bbflex > input")
+    # solve_delay.clear()
+    # solve_delay.send_keys("15000")
+    # click_delay = driver.find_element(By.CSS_SELECTOR, "body > div > div:nth-child(2) > div > div > div:nth-child(2) >"
+    #                                                    " div:nth-child(3) >"
+    #                                                    " div.settings_description_container.bbflex > input")
+    # click_delay.clear()
+    # click_delay.send_keys("8000")
+    # EVENT.wait(secrets.choice(range(3, 6)))
+    # driver.maximize_window()
+    # EVENT.wait(secrets.choice(range(3, 6)))
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     # # driver.save_screenshot("screenshots/screenshot.png")
-    WebDriverWait(driver, 10).until(ec.element_to_be_clickable((By.ID, "username")))\
+    WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
         .send_keys(req_dict['username_youlikehits'])
+    EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
+    EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").send_keys(Keys.ENTER)
     EVENT.wait(secrets.choice(range(2, 4)))
 
@@ -1174,7 +1190,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                 EVENT.wait(2)
                 #  # logging.info('Flag1.5555')
                 try:
-                    WebDriverWait(driver, 20)\
+                    WebDriverWait(driver, 40)\
                      .until(ec.visibility_of_element_located((By.XPATH,
                                                              "//*[@id='title']/h1/yt-formatted-string")))
                 except (TimeoutException, AttributeError):
