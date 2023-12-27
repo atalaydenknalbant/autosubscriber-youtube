@@ -19,7 +19,7 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
 
 ## Included sub4sub Websites
-### Type 1 Websites 
+### Type 1 Websites(Currently Websites are inactive)
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
