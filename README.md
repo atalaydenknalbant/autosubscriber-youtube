@@ -19,12 +19,15 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
 
 ## Included sub4sub Websites
-### Type 1 Websites(Currently Websites are inactive)
-[![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
 ### Type 2 Websites 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) [![ytmonsterru](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/) [![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/)  
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) [![ytmonsterru](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/) 
+## Inactive Websites
+### Type 1 Websites
+[![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
+### Undefined Type Websites
+[![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/) 
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
