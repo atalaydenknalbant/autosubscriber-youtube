@@ -14,7 +14,6 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)
 <a href="https://pypi.org/project/undetected-chromedriver/"><img src="https://opengraph.githubassets.com/2a3011a7c39f28995d4bb68f8b03888999482d7b8fd4e250c9cec7839b7ec87e/ultrafunkamsterdam/undetected-chromedriver" width="100" height="100"></a>
 
-
 ## Usage
 1. Edit config.ini file to match with your accounts(You can use new google account to do engagements).
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
