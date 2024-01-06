@@ -1085,7 +1085,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS', undetected=False)
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
