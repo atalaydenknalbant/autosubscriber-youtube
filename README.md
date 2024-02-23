@@ -23,18 +23,18 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 ### Type 2 Websites(Requires Google Login) 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/)(Requires Google Login)[![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892)
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892)
 <div style="text-align: center;">
     <div style="display: inline-block; margin-right: 20px;">
-        <p>Requires Google Login</p>
+        <h3>Requires Google Login</h3>
      <a href="https://ytmonster.ru/">
             <img src="https://i.imgur.com/Z9qA6ea.png" />
         </a>
-    </div>
-    <div style="display: inline-block;">
-                <p>Requires Google Login</p>
-     <a href="https://www.like4like.org">
+          <a href="https://www.like4like.org">
             <img src="https://i.imgur.com/CiDYTMI.png" />
+        </a>
+          <a href="https://ytbpals.com/">
+            <img src="https://i.imgur.com/sGJgqfK.png" />
         </a>
     </div>
 </div>
@@ -42,7 +42,7 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 ## Inactive Websites
 ### Type 1 Websites(Requires Google Login) 
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
-### Undefined Type Websites(Requires Google Login) 
+### Undefined Type Websites
 [![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/) 
 
 ## License
