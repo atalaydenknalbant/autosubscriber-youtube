@@ -1,6 +1,8 @@
+import os
+os.chdir('C:/Users/yineh/VSProjects/autosubscriber-youtube')
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
-import os
+
 
 heroku = "not available"
 try:
@@ -17,8 +19,6 @@ if heroku == "available":
         "chrome_userdata_directory": os.environ["chrome_userdata_directory"],
         "chrome_profile_name": os.environ["chrome_profile_name"],
         "yt_channel_id": os.environ["youtube_channel_id"],
-        "username_youlikehits": os.environ["youlikehits_username"],
-        "pw_youlikehits": os.environ["youlikehits_password"],
         "yt_useragent": os.environ["youtube_useragent"],
         "github_token": os.environ["github_token"]
     }
@@ -33,12 +33,9 @@ else:
         "chrome_userdata_directory": userinfo["chrome_userdata_directory"],
         "chrome_profile_name": userinfo["chrome_profile_name"],
         "yt_channel_id": userinfo["youtube_channel_id"],
-        "username_youlikehits": userinfo["youlikehits_username"],
-        "pw_youlikehits": userinfo["youlikehits_password"],
         "yt_useragent": userinfo["youtube_useragent"],
         "github_token": userinfo["github_token"]
     }
 
 if __name__ == "__main__":
-    sws.youlikehits_functions(required_dict)
-    
+    sws.test_ytbuttons("unsubscribe_button",required_dict)

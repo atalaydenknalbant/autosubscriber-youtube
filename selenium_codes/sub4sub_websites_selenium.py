@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 import secrets
 import undetected_chromedriver as uc
 
+
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -27,6 +28,7 @@ YT_JAVASCRIPT = False
 
 # Locations For YouTube button elements
 ytbutton_elements_location_dict = {
+    "yt_css_confirm_button": "#confirm-button > yt-button-shape > button",
     "yt_id_like_button": "segmented-like-button",
     "yt_id_sub_button_type1": "subscribe-button",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
@@ -37,11 +39,35 @@ ytbutton_elements_location_dict = {
                          " ytd-toggle-button-renderer:nth-child(1)').click()",
     "yt_js_sub_button": 'document.querySelector("#subscribe-button >'
                         ' ytd-subscribe-button-renderer > tp-yt-paper-button").click()',
-
+    "yt_css_subscribed_text": "#notification-preference-button > ytd-subscription-notification-toggle-button-renderer-next > "
+      "yt-button-shape > button >"
+        " div.yt-spec-button-shape-next__button-text-content > span",
+    "yt_css_unsubscribe_button": "#items > ytd-menu-service-item-renderer:nth-child(4)"
 }
+
+def test_ytbuttons(youtube_url: str, button_to_test: str, req_dict: dict) -> None:
+    driver: webdriver = set_driver_opt(req_dict, headless=False)
+    driver.implicitly_wait(5)
+    driver.get(youtube_url)
+    if driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_subscribed_text']).text == "Subscribed":
+        sub_button = driver.find_element(By.ID,
+                ytbutton_elements_location_dict['yt_id_sub_button_type1'])
+        ActionChains(driver).move_to_element(sub_button).click().perform()
+        EVENT.wait(secrets.choice(range(3, 4)))
+        unsubscribe_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_unsubscribe_button'])
+        ActionChains(driver).move_to_element(unsubscribe_button).click().perform()
+        EVENT.wait(secrets.choice(range(3, 4)))
+        confirm_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_confirm_button'])
+        ActionChains(driver).move_to_element(confirm_button).click().perform()
+    else:
+        logging.info("Not Subscribed")  
+    EVENT.wait(secrets.choice(range(3, 4)))
+    driver.quit()
+
 
 
 def get_clear_browsing_button(driver: webdriver) -> webdriver:
+
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -884,13 +910,16 @@ def ytbpals_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, website="ytbpals")
+    driver: webdriver = set_driver_opt(req_dict, website="ytbpals", headless=False)
     driver.implicitly_wait(7)
     driver.get("https://ytbpals.com/")  # Type_Undefined
     driver.find_element(By.CSS_SELECTOR, "#main_menu > ul > li:nth-child(6) > a").send_keys(Keys.ENTER)
-    driver.find_element(By.ID, 'email').send_keys(req_dict['email_ytbpals'])
-    driver.find_element(By.ID, "password").send_keys(req_dict['pw_ytbpals'])
-    driver.find_element(By.CSS_SELECTOR, "#form_login > div:nth-child(3) > button").send_keys(Keys.ENTER)
+    try:
+            driver.find_element(By.ID, 'email').send_keys(req_dict['email_ytbpals'])
+            driver.find_element(By.ID, "password").send_keys(req_dict['pw_ytbpals'])
+            driver.find_element(By.CSS_SELECTOR, "#form_login > div:nth-child(3) > button").send_keys(Keys.ENTER)
+    except NoSuchElementException:
+        pass        
     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div > ul.navbar-nav >"
                                          " li:nth-child(5) > a").send_keys(Keys.ENTER)
     # driver.save_screenshot("screenshots/screenshot.png")
@@ -901,180 +930,125 @@ def ytbpals_functions(req_dict: dict) -> None:
                      skip_btn: str = "#ytbpals-channels > div > div > div > div.col-sm-4.text-center >"
                                      " button.skip.yt-btn.ytb-subscribe.ytb-skip",
                      confirm_btn: str = "ytbconfirm",
+                     channel: str = "#ytbpals-channels > div > div > div > div.col-sm-8 > h4 > a",
                      ) -> None:
         current_remaining_time = 0
         current_remaining = ""
+        current_channel = ""
         for i in range(0, 10000):
             logging.info("Loop Started")
             window_before = driver.window_handles[0]
             driver.switch_to.window(window_before)
             driver.switch_to.default_content()
-            EVENT.wait(secrets.choice(range(1, 4)))
-
-            if i == 0:
-                i += 1
-                try:
-                    driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
-                    logging.info("clicked Subscribe btn")
-                except NoSuchElementException:
-                    logging.info("No such Element Exception(sub_btn)")
-                    driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
-                                                         " ul.navbar-nav > li:nth-child(4) > a") \
-                        .send_keys(Keys.ENTER)
-                    try:
-                        driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table > table >"
-                                                             " tbody > tr > td:nth-child(8) > button")\
-                            .send_keys(Keys.ENTER)
-
-                        driver.find_element(By.ID, "start-now")\
-                            .send_keys(Keys.ENTER)
-                        logging.info("Started plan successfully")
-
-                    except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException) \
-                            as ex:
-                        logging.info("Error: Exception: %s", str(ex))
-                    driver.quit()
-                    break
-                EVENT.wait(secrets.choice(range(1, 4)))
-                window_after = driver.window_handles[1]
-                driver.switch_to.window(window_after)
-                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    driver.execute_script("window.scrollTo(0, 400);")
-                    EVENT.wait(secrets.choice(range(1, 4)))
-                    driver.switch_to.default_content()
-                    j = 0
-                    if YT_JAVASCRIPT:
-                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                    else:
-                        for _ in range(3):
-                            try:
-                                sub_button = driver.find_elements(By.ID,
-                                                                  ytbutton_elements_location_dict[
-                                                                      'yt_id_sub_button_type1'])[_]
-                                ActionChains(driver).move_to_element(sub_button).click().perform()
-                            except (NoSuchElementException, ElementNotInteractableException,
-                                    ElementClickInterceptedException):
-                                j += 1
-                    if j > 2:
-                        logging.info("Couldn't find sub button in: " + "ytbpals")
-                    driver.close()
-                    driver.switch_to.window(window_before)
-                    driver.switch_to.default_content()
-                    logging.info("Subbed to Channel")
-                    driver.switch_to.default_content()
-                    try:
-                        EVENT.wait(secrets.choice(range(1, 4)))
-                        driver.find_element(By.ID, confirm_btn).click()
-
-                        logging.info("confirm button was clicked")
-                        i += 1
-                        continue
-                    except NoSuchElementException:
-                        EVENT.wait(secrets.choice(range(1, 4)))
-                        window_after = driver.window_handles[1]
-                        driver.switch_to.window(window_after)
-                        driver.close()
-                        driver.switch_to.window(window_before)
-                        logging.info("couldn't find confirm button")
-                        i += 1
-                        continue
-
-                else:
-                    driver.switch_to.window(window_before)
-                    driver.switch_to.default_content()
+            EVENT.wait(secrets.choice(range(6, 8)))
+            try:
+                if current_channel == driver.find_element(By.CSS_SELECTOR, channel).text:
+                    logging.info("same channel 2 times, skipping channel")
                     driver.find_element(By.CSS_SELECTOR, skip_btn).send_keys(Keys.ENTER)
-
-                    i += 1
+                    while current_channel == driver.find_element(By.CSS_SELECTOR, channel).text:
+                        EVENT.wait(secrets.choice(range(2, 4)))
                     continue
+                current_channel = driver.find_element(By.CSS_SELECTOR, channel).text
+                print(current_channel)
+            except NoSuchElementException:
+                pass   
+            try:
+                driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
+                logging.info("Remaining Videos:" + driver.find_element(By.ID, "ytbbal").text)
+                if driver.find_element(By.ID, "ytbbal").text == current_remaining:
+                    current_remaining_time += 1
+                    if current_remaining_time > 3:
+                        logging.info("same remaining videos 4 times, resetting to begin function")
+                        driver.quit()
+                        ytbpals_functions(req_dict)
+                        break
+                else:
+                    current_remaining = driver.find_element(By.ID, "ytbbal").text
+                    current_remaining_time = 0
 
-            else:
-                driver.switch_to.window(window_before)
+            except NoSuchElementException:
+                logging.info("All channels were subscribed, activating free plan")
+                driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
+                                                        " ul.navbar-nav > li:nth-child(4) > a")\
+                    .send_keys(Keys.ENTER)
+                EVENT.wait(secrets.choice(range(1, 4)))
+                driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
+                                                        " div.panel-options > a:nth-child(2)")\
+                    .send_keys(Keys.ENTER)
+                EVENT.wait(secrets.choice(range(1, 4)))
+                driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
+                                                        " div.panel-options > a:nth-child(2)") \
+                    .send_keys(Keys.ENTER)
+                EVENT.wait(secrets.choice(range(1, 4)))
+                try:
+                    button = driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
+                                                                    " table > tbody > tr >"
+                                                                    " td:nth-child(8) > button")
+                    button.send_keys(Keys.ENTER)
+                    EVENT.wait(secrets.choice(range(1, 4)))
+                    button = driver.find_element(By.ID, "start-now")
+                    ActionChains(driver).move_to_element(button).click(button).perform()
+
+                    logging.info("Started plan successfully")
+                except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as ex:
+                    # logging.info("Error:" + str(ex))
+                    logging.info("Couldn't Press Activate Button, Closing Driver")
+                driver.quit()
+                break
+            EVENT.wait(secrets.choice(range(1, 4)))
+            window_after = driver.window_handles[1]
+            driver.switch_to.window(window_after)
+            if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
+                driver.execute_script("window.scrollTo(0, 600);")
+                EVENT.wait(secrets.choice(range(1, 4)))
                 driver.switch_to.default_content()
                 EVENT.wait(secrets.choice(range(1, 4)))
-                try:
-                    driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
-                    logging.info("Remaining Videos:" + driver.find_element(By.ID, "ytbbal").text)
-                    if driver.find_element(By.ID, "ytbbal").text == current_remaining:
-                        current_remaining_time += 1
-                        if current_remaining_time > 3:
-                            logging.info("same remaining videos 4 times, resetting to begin function")
-                            driver.quit()
-                            ytbpals_functions(req_dict)
-                            break
-                    else:
-                        current_remaining = driver.find_element(By.ID, "ytbbal").text
-                        current_remaining_time = 0
-
-                except NoSuchElementException:
-                    logging.info("All channels were subscribed, activating free plan")
-                    driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div >"
-                                                         " ul.navbar-nav > li:nth-child(4) > a")\
-                        .send_keys(Keys.ENTER)
-                    EVENT.wait(secrets.choice(range(1, 4)))
-                    driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
-                                                         " div.panel-options > a:nth-child(2)")\
-                        .send_keys(Keys.ENTER)
-                    EVENT.wait(secrets.choice(range(1, 4)))
-                    driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-heading >"
-                                                         " div.panel-options > a:nth-child(2)") \
-                        .send_keys(Keys.ENTER)
-                    EVENT.wait(secrets.choice(range(1, 4)))
+                j = 0
+                if YT_JAVASCRIPT:
+                    driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
+                else:
                     try:
-                        button = driver.find_element(By.CSS_SELECTOR, "#inactive-plans > div.panel-body.with-table >"
-                                                                      " table > tbody > tr >"
-                                                                      " td:nth-child(8) > button")
-                        button.send_keys(Keys.ENTER)
-                        EVENT.wait(secrets.choice(range(1, 4)))
-                        button = driver.find_element(By.ID, "start-now")
-                        ActionChains(driver).move_to_element(button).click(button).perform()
-
-                        logging.info("Started plan successfully")
-                    except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as ex:
-                        logging.info("Error:" + str(ex))
-                    driver.quit()
-                    break
-                EVENT.wait(secrets.choice(range(1, 4)))
-                window_after = driver.window_handles[1]
-                driver.switch_to.window(window_after)
-                if len(driver.find_elements(By.XPATH, "//*[@id='container']/h1/yt-formatted-string")) > 0:
-                    driver.execute_script("window.scrollTo(0, 600);")
+                        if driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_subscribed_text']).text == "Subscribed":
+                            sub_button = driver.find_element(By.ID,
+                                    ytbutton_elements_location_dict['yt_id_sub_button_type1'])
+                            ActionChains(driver).move_to_element(sub_button).click().perform()
+                            EVENT.wait(secrets.choice(range(3, 4)))
+                            unsubscribe_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_unsubscribe_button'])
+                            ActionChains(driver).move_to_element(unsubscribe_button).click().perform()
+                            EVENT.wait(secrets.choice(range(3, 4)))
+                            confirm_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_confirm_button'])
+                            ActionChains(driver).move_to_element(confirm_button).click().perform()
+                        else:
+                            pass
+                    except NoSuchElementException:
+                        pass      
+                    for _ in range(3):
+                        try:
+                            sub_button = driver.find_elements(By.ID,
+                                                                ytbutton_elements_location_dict[
+                                                                    'yt_id_sub_button_type1'])[_]
+                            ActionChains(driver).move_to_element(sub_button).click().perform()
+                        except (NoSuchElementException, ElementNotInteractableException,
+                                ElementClickInterceptedException, IndexError):
+                            j += 1
+                if j > 2:
+                    logging.info("Couldn't find sub button in: " + "ytbpals")
+                driver.switch_to.window(window_before)
+                driver.switch_to.default_content()
+                logging.info("Subbed to Channel")
+                try:
                     EVENT.wait(secrets.choice(range(1, 4)))
-                    driver.switch_to.default_content()
+                    driver.find_element(By.ID, confirm_btn).click()
+                    logging.info("confirm button was clicked")
+                    continue
+                except NoSuchElementException:
                     EVENT.wait(secrets.choice(range(1, 4)))
-                    j = 0
-                    if YT_JAVASCRIPT:
-                        driver.execute_script(ytbutton_elements_location_dict['yt_js_sub_button'])
-                    else:
-                        for _ in range(3):
-                            try:
-                                sub_button = driver.find_elements(By.ID,
-                                                                  ytbutton_elements_location_dict[
-                                                                      'yt_id_sub_button_type1'])[_]
-                                ActionChains(driver).move_to_element(sub_button).click().perform()
-                            except (NoSuchElementException, ElementNotInteractableException,
-                                    ElementClickInterceptedException):
-                                j += 1
-                    if j > 2:
-                        logging.info("Couldn't find sub button in: " + "ytbpals")
+                    window_after = driver.window_handles[1]
+                    driver.switch_to.window(window_after)
                     driver.close()
                     driver.switch_to.window(window_before)
-                    driver.switch_to.default_content()
-                    logging.info("Subbed to Channel")
-                    driver.switch_to.default_content()
-                    try:
-                        EVENT.wait(secrets.choice(range(1, 4)))
-                        driver.find_element(By.ID, confirm_btn).click()
-                        logging.info("confirm button was clicked")
-                        continue
-                    except NoSuchElementException:
-                        EVENT.wait(secrets.choice(range(1, 4)))
-                        window_after = driver.window_handles[1]
-                        driver.switch_to.window(window_after)
-                        driver.close()
-                        driver.switch_to.window(window_before)
-                        logging.info("couldn't find confirm button")
-                        continue
-
+                    logging.info("couldn't find confirm button")
+                    continue
     for_loop_sub()
 
 

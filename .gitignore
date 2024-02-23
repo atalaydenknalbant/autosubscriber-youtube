@@ -21,3 +21,5 @@
 /.wdm
 /selenium_codes/__pycache__
 autosubscriber-youtube.code-workspace
+config.ini
+
