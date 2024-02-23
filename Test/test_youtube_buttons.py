@@ -1,5 +1,4 @@
 import os
-os.chdir('C:/Users/yineh/VSProjects/autosubscriber-youtube')
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
 
@@ -38,4 +37,4 @@ else:
     }
 
 if __name__ == "__main__":
-    sws.test_ytbuttons("unsubscribe_button",required_dict)
+    sws.test_ytbuttons("youtube_url", "unsubscribe_button", required_dict)
