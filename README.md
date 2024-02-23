@@ -8,7 +8,8 @@
 Python Selenium-based automated subscribing, liking, viewing functions for youtube sub4sub websites.
 
 ## Warning
-If you are using Linux or Ubuntu it might delete your saved passwords and autofills make sure backup those credentials 
+If you are using Linux or Ubuntu it might delete your saved passwords and autofills make sure backup those credentials.
+Some websites require Google login; due to this fact, you can’t run an instance of them while you are using Chrome, until the script is finished.
 
 ## Pre-requisites
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)
@@ -19,14 +20,29 @@ If you are using Linux or Ubuntu it might delete your saved passwords and autofi
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
 
 ## Included sub4sub Websites
-### Type 2 Websites 
+### Type 2 Websites(Requires Google Login) 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Like4Like](https://i.imgur.com/CiDYTMI.png)](https://www.like4like.org/) [![ytmonsterru](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/) 
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YTBPALS](https://i.imgur.com/sGJgqfK.png)](https://ytbpals.com/)(Requires Google Login)[![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892)
+<div style="text-align: center;">
+    <div style="display: inline-block; margin-right: 20px;">
+        <p>Requires Google Login</p>
+     <a href="https://ytmonster.ru/">
+            <img src="https://i.imgur.com/Z9qA6ea.png" />
+        </a>
+    </div>
+    <div style="display: inline-block;">
+                <p>Requires Google Login</p>
+     <a href="https://www.like4like.org">
+            <img src="https://i.imgur.com/CiDYTMI.png" />
+        </a>
+    </div>
+</div>
+
 ## Inactive Websites
-### Type 1 Websites
+### Type 1 Websites(Requires Google Login) 
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
-### Undefined Type Websites
+### Undefined Type Websites(Requires Google Login) 
 [![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/) 
 
 ## License
