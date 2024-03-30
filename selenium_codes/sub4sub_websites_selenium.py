@@ -31,6 +31,7 @@ ytbutton_elements_location_dict = {
     "yt_css_confirm_button": "#confirm-button > yt-button-shape > button",
     "yt_id_like_button": "segmented-like-button",
     "yt_id_sub_button_type1": "subscribe-button",
+    "yt_id_sub_button_alt1": "subscribe-button-shape",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
                                  "ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button.style"
                                  "-default-active",
@@ -51,7 +52,7 @@ def test_ytbuttons(youtube_url: str, button_to_test: str, req_dict: dict) -> Non
     driver.get(youtube_url)
     if driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_subscribed_text']).text == "Subscribed":
         sub_button = driver.find_element(By.ID,
-                ytbutton_elements_location_dict['yt_id_sub_button_type1'])
+                ytbutton_elements_location_dict['yt_id_sub_button_alt1'])
         ActionChains(driver).move_to_element(sub_button).click().perform()
         EVENT.wait(secrets.choice(range(3, 4)))
         unsubscribe_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_unsubscribe_button'])
@@ -357,7 +358,7 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         try:
                             sub_button = driver.find_elements(By.ID,
                                                               ytbutton_elements_location_dict
-                                                              ['yt_id_sub_button_type1'])[i]
+                                                              ['yt_id_sub_button_alt1'])[i]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         except (NoSuchElementException,
                                 ElementNotInteractableException,
@@ -631,7 +632,7 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                 try:
                                     sub_button = driver.find_elements(By.ID,
                                                                       ytbutton_elements_location_dict[
-                                                                          'yt_id_sub_button_type1'])[i]
+                                                                          'yt_id_sub_button_alt1'])[i]
                                     ActionChains(driver).move_to_element(sub_button).click().perform()
                                 except (NoSuchElementException, ElementNotInteractableException,
                                         ElementClickInterceptedException, IndexError):
@@ -708,7 +709,7 @@ def submenow_functions(req_dict: dict) -> None:
         EVENT.wait(0.25)
     if len(driver.find_elements(By.ID, "buttonPlan6")) > 0:
         try:
-            driver.find_element(By.CSS_SELECTOR, "#reviewDialog > div.headerPlan > div > a > img").click()
+            driver.find_element(By.CSS_SELECTOR, "#reviewDialog > div.headerPlan > div").click()
         except (NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException):
             EVENT.wait(0.25)
         driver.find_element(By.ID, "buttonPlan8").click()
@@ -787,7 +788,7 @@ def submenow_functions(req_dict: dict) -> None:
                                 try:
                                     sub_button = driver.find_elements(By.ID,
                                                                       ytbutton_elements_location_dict[
-                                                                          'yt_id_sub_button_type1'])[i]
+                                                                          'yt_id_sub_button_alt1'])[i]
                                     ActionChains(driver).move_to_element(sub_button).click().perform()
                                 except (NoSuchElementException, ElementNotInteractableException,
                                         ElementClickInterceptedException,
@@ -1010,7 +1011,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     try:
                         if driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_subscribed_text']).text == "Subscribed":
                             sub_button = driver.find_element(By.ID,
-                                    ytbutton_elements_location_dict['yt_id_sub_button_type1'])
+                                    ytbutton_elements_location_dict['yt_id_sub_button_alt1'])
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                             EVENT.wait(secrets.choice(range(3, 4)))
                             unsubscribe_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_unsubscribe_button'])
@@ -1026,7 +1027,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         try:
                             sub_button = driver.find_elements(By.ID,
                                                                 ytbutton_elements_location_dict[
-                                                                    'yt_id_sub_button_type1'])[_]
+                                                                    'yt_id_sub_button_alt1'])[_]
                             ActionChains(driver).move_to_element(sub_button).click().perform()
                         except (NoSuchElementException, ElementNotInteractableException,
                                 ElementClickInterceptedException, IndexError):
