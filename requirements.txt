@@ -1,3 +1,3 @@
-selenium==4.18.1
-setuptools==69.1.1
+selenium==4.20.0
+setuptools==69.5.1
 undetected_chromedriver==3.5.5
