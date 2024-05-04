@@ -29,7 +29,7 @@ YT_JAVASCRIPT = False
 # Locations For YouTube button elements
 ytbutton_elements_location_dict = {
     "yt_css_confirm_button": "#confirm-button > yt-button-shape > button",
-    "yt_id_like_button": "segmented-like-button",
+    "yt_class_like_button": "YtLikeButtonViewModelHost",
     "yt_id_sub_button_type1": "subscribe-button",
     "yt_id_sub_button_alt1": "subscribe-button-shape",
     "yt_css_like_button_active": "#top-level-buttons-computed > "
@@ -343,9 +343,9 @@ def type_1_for_loop_like_and_sub(driver: webdriver,
                         driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                     else:
                         try:
-                            like_button = driver.find_elements(By.ID,
+                            like_button = driver.find_elements(By.CLASS_NAME,
                                                                ytbutton_elements_location_dict
-                                                               ['yt_id_like_button'])[0]
+                                                               ['yt_class_like_button'])[0]
                             ActionChains(driver).move_to_element(like_button).click().perform()
                         except (NoSuchElementException, IndexError, ElementNotInteractableException):
                             logging.info("Couldn't find like button in: " + d)
@@ -617,9 +617,9 @@ def subscribersvideo_functions(req_dict: dict) -> None:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 try:
-                                    like_button = driver.find_elements(By.ID,
+                                    like_button = driver.find_elements(By.CLASS_NAME,
                                                                        ytbutton_elements_location_dict
-                                                                       ['yt_id_like_button'])[0]
+                                                                       ['yt_class_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
                                 except (IndexError, ElementNotInteractableException):
                                     pass
@@ -772,9 +772,9 @@ def submenow_functions(req_dict: dict) -> None:
                                 driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                             else:
                                 try:
-                                    like_button = driver.find_elements(By.ID,
+                                    like_button = driver.find_elements(By.CLASS_NAME,
                                                                        ytbutton_elements_location_dict
-                                                                       ['yt_id_like_button'])[0]
+                                                                       ['yt_class_like_button'])[0]
                                     ActionChains(driver).move_to_element(like_button).click().perform()
                                 except (IndexError, NoSuchElementException, ElementNotInteractableException):
                                     EVENT.wait(0.25)
@@ -1272,9 +1272,9 @@ def like4like_functions(req_dict: dict) -> None:
                             driver.execute_script(ytbutton_elements_location_dict['yt_js_like_button'])
                         else:
                             try:
-                                ActionChains(driver).move_to_element(driver.find_elements(By.ID,
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME,
                                                                      ytbutton_elements_location_dict
-                                                                     ['yt_id_like_button'])[0]).click().perform()
+                                                                     ['yt_class_like_button'])[0]).click().perform()
                                 logging.info("Liked the Video")
                             except (NoSuchElementException, IndexError):
                                 logging.info("Couldn't find like button")
