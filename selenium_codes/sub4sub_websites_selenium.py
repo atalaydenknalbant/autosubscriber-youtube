@@ -165,7 +165,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_extension('extensions/hektCaptcha-hCaptcha-Solver.crx')
     else:
         chrome_options.add_argument("--disable-extensions")
-        prefs = {"profile.managed_default_content_settings.images": 2,
+        prefs = {
                  "disk-cache-size": 4096,
                  "profile.password_manager_enabled": False,
                  "credentials_enable_service": False}
@@ -1068,7 +1068,12 @@ def youlikehits_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
     EVENT.wait(secrets.choice(range(2, 4)))
-    driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").send_keys(Keys.ENTER)
+    EVENT.wait(secrets.choice(range(20, 22)))
+    try:
+        driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").send_keys(Keys.ENTER)
+    except NoSuchElementException:
+        driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/center/form/table/tbody/tr[4]/td/span/input").send_keys(Keys.ENTER)
+
     EVENT.wait(secrets.choice(range(2, 4)))
 
     def collect_bonus_points() -> None:
