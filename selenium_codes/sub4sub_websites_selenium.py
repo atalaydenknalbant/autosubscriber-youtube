@@ -935,7 +935,7 @@ def ytbpals_functions(req_dict: dict) -> None:
         current_remaining_time = 0
         current_remaining = ""
         current_channel = ""
-        for i in range(0, 10000):
+        for _ in range(0, 10000):
             logging.info("Loop Started")
             window_before = driver.window_handles[0]
             driver.switch_to.window(window_before)
@@ -990,7 +990,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                     ActionChains(driver).move_to_element(button).click(button).perform()
 
                     logging.info("Started plan successfully")
-                except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as ex:
+                except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException):
                     logging.info("Couldn't Press Activate Button, Closing Driver")
                 driver.quit()
                 break
