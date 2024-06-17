@@ -923,7 +923,6 @@ def ytbpals_functions(req_dict: dict) -> None:
         pass        
     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div > ul.navbar-nav >"
                                          " li:nth-child(5) > a").send_keys(Keys.ENTER)
-    # driver.save_screenshot("screenshots/screenshot.png")
 
     def for_loop_sub(sub_btn: str = "#ytbpals-channels > div > div > div >"
                                     " div.col-sm-4.text-center >"
@@ -992,7 +991,6 @@ def ytbpals_functions(req_dict: dict) -> None:
 
                     logging.info("Started plan successfully")
                 except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException) as ex:
-                    # logging.info("Error:" + str(ex))
                     logging.info("Couldn't Press Activate Button, Closing Driver")
                 driver.quit()
                 break
