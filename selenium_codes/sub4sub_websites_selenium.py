@@ -162,7 +162,7 @@ def set_driver_opt(req_dict: dict,
     if website == "ytmonster":
         chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
     if website == "YOULIKEHITS":
-        chrome_options.add_extension('extensions/hektCaptcha-hCaptcha-Solver.crx')
+        pass
     else:
         chrome_options.add_argument("--disable-extensions")
         prefs = {
@@ -1060,20 +1060,16 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
         .send_keys(req_dict['username_youlikehits'])
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
-    EVENT.wait(secrets.choice(range(2, 4)))
     EVENT.wait(secrets.choice(range(20, 22)))
-    try:
-        driver.find_element(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]").send_keys(Keys.ENTER)
-    except NoSuchElementException:
-        driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/center/form/table/tbody/tr[4]/td/span/input").send_keys(Keys.ENTER)
-
+    login_button = driver.find_elements(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]")
+    login_button[0].send_keys(Keys.ENTER) if len(login_button) > 0 else driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/center/form/table/tbody/tr[4]/td/span/input").send_keys(Keys.ENTER) 
     EVENT.wait(secrets.choice(range(2, 4)))
 
     def collect_bonus_points() -> None:
