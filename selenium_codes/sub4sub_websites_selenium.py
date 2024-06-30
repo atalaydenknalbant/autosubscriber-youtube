@@ -1097,6 +1097,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
         yt_resolution_lowered = False
+        EVENT.wait(secrets.choice(range(15, 20)))
         while True:
             if datetime.now() > future:
                 break
