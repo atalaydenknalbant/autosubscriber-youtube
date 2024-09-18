@@ -1,6 +1,5 @@
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
-import os
 
 
 config_object = ConfigParser()
