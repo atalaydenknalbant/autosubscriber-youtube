@@ -1529,8 +1529,8 @@ def pandalikes_functions(req_dict: dict) -> None:
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
+        logging.info("Watch Loop Started")
         while True:
-            logging.info("Watch Loop Started")
             if datetime.now() > future:
                 break
             try:
