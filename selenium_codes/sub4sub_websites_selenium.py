@@ -1537,14 +1537,14 @@ def pandalikes_functions(req_dict: dict) -> None:
                 driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                 EVENT.wait(secrets.choice(range(4, 6)))
                 while True:
-                    title = driver.title()
+                    title = driver.title
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
                         logging.info("No more videos to watch")
                         driver.save_screenshot("screenshots/screenshot.png")                        
                         return
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(4, 6)))
-                    if title != driver.title():
+                    if title != driver.title:
                         break
                 EVENT.wait(secrets.choice(range(6, 8)))
                 driver.execute_script("window.scrollTo(0, 600)")
