@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, JavascriptException
+    NoSuchWindowException, JavascriptException, NoSuchFrameException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -114,8 +114,15 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: bool =
                     StaleElementReferenceException, NoSuchWindowException):
                 logging.debug('No Ad Found')
                 pass
-        ActionChains(driver).move_to_element(driver.find_element(By.ID, "movie_player"))\
-            .click().send_keys(Keys.SPACE).perform()
+        if website == "ytmonster":
+            try:
+                ActionChains(driver).move_to_element(driver.find_element(By.ID, "movie_player"))\
+                    .click().send_keys(Keys.SPACE).perform()
+            except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException):
+                pass
+        else:
+            ActionChains(driver).move_to_element(driver.find_element(By.ID, "movie_player"))\
+                .click().send_keys(Keys.SPACE).perform()
         WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, "ytp-settings-button")))\
             .click()
         WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
@@ -147,15 +154,13 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website in ("ytmonster", "YOULIKEHITS", "view2be"):
+    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes"):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
         chrome_options.add_argument(f"--profile-directory={req_dict['chrome_profile_name']}")
     if headless:
         chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        pass
     else:
         EVENT.wait(0.25)
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
@@ -165,6 +170,8 @@ def set_driver_opt(req_dict: dict,
         pass
     else:
         chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-component-extensions-with-background-pages")  
+        chrome_options.add_argument("--disable-default-apps")             
         prefs = {
                  "disk-cache-size": 4096,
                  "profile.password_manager_enabled": False,
@@ -183,6 +190,15 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-running-insecure-content")
         chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-features=InterestFeedContentSuggestion")
+        chrome_options.add_argument("--disable-features=Translate")
+        chrome_options.add_argument("--no-default-browser-check")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--disable-search-engine-choice-screen")
+        chrome_options.add_argument("--ash-no-nudges")
+        chrome_options.add_argument("--propagate-iph-for-testing")
+
     chrome_options.add_argument("--mute-audio")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--start-maximized")
@@ -204,7 +220,7 @@ def set_driver_opt(req_dict: dict,
 
 
 def yt_too_many_controller() -> int:
-    """ Checks user's Google account if there are too many subscriptions or likes for the given google account and
+    """ TODO Checks user's Google account if there are too many subscriptions or likes for the given google account and
     returns boolean that represents condition
         Args:
         - driver(webdriver): webdriver parameter.
@@ -848,7 +864,7 @@ def ytmonster_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website="ytmonster")
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website="ytmonster")
     driver.implicitly_wait(6)
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.get("https://www.ytmonster.net/login")  # Type_Undefined
@@ -865,12 +881,12 @@ def ytmonster_functions(req_dict: dict) -> None:
     def open_windows(total_tabs: int = 3) -> None:
         for i in range(total_tabs):
             if i == 0:
-                EVENT.wait(0.25)
+                EVENT.wait(secrets.choice(range(3, 6)))
             else:
                 driver.switch_to.new_window('window')
             driver.get("https://www.ytmonster.net/client")
             driver.set_window_size(1200, 900)
-            EVENT.wait(secrets.choice(range(1, 4)))
+            EVENT.wait(secrets.choice(range(2, 4)))
             driver.find_element(By.ID, "startBtn").click()
             EVENT.wait(secrets.choice(range(4, 6)))
             if i == 0:
@@ -880,7 +896,7 @@ def ytmonster_functions(req_dict: dict) -> None:
                         break
                     except IndexError:
                         driver.switch_to.window(driver.window_handles[0])
-                yt_change_resolution(driver)
+                yt_change_resolution(driver, website='ytmonster')
             if i != 2:
                 driver.switch_to.window(driver.window_handles[2 * i])
             EVENT.wait(secrets.choice(range(3, 4)))
@@ -1092,18 +1108,17 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.execute_script("window.scrollTo(0, 600);")
 
     def while_loop_watch(hours_time: int) -> None:
-        logging.info("Loop Started")
+        logging.info("Watch Loop Started")
         now = datetime.now()
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
         yt_resolution_lowered = False
-        EVENT.wait(secrets.choice(range(15, 20)))
+        # # EVENT.wait(secrets.choice(range(15, 20)))
         while True:
             if datetime.now() > future:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
-            #  # logging.info('Flag1')
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                         'There are no videos available to view at this time. Try coming back or refreshing.':
@@ -1126,17 +1141,14 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
                 EVENT.wait(10)
-                #  # logging.info('Flag1.1')
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 EVENT.wait(2)
-                #  # logging.info('Flag1.5555')
                 try:
                     WebDriverWait(driver, 40)\
                      .until(ec.visibility_of_element_located((By.XPATH,
                                                              "//*[@id='title']/h1/yt-formatted-string")))
                 except (TimeoutException, AttributeError):
-                    #  # logging.info('Flag1.11')
                     pass
                 if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
                     try:
@@ -1150,11 +1162,8 @@ def youlikehits_functions(req_dict: dict) -> None:
                         driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
                         EVENT.wait(3)
                         driver.refresh()
-                        #  # logging.info('Flag1.1232')
                     except (NoSuchElementException, ElementNotInteractableException):
                         driver.refresh()
-                        #  # logging.info('Flag1.2')
-                    #  # logging.info('Flag1.3')
                     continue
                 else:
                     if not yt_resolution_lowered:
@@ -1163,16 +1172,13 @@ def youlikehits_functions(req_dict: dict) -> None:
             except (NoSuchElementException, IndexError, NoSuchWindowException) as ex:
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
-                #  # logging.info('Flag4')
                 if type(ex) is NoSuchWindowException:
-                    #  # logging.info('Flag4.1')
                     try:
                         driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
                         EVENT.wait(3.25)
                         driver.refresh()
                     except (NoSuchElementException, ElementNotInteractableException):
                         driver.refresh()
-                        #  # logging.info('Flag4.3')
                     continue
                 EVENT.wait(0.25)
                 driver.switch_to.window(driver.window_handles[0])
@@ -1195,7 +1201,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                             break
             except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
                 EVENT.wait(0.25)
-                # #   logging.info('Flag4.5')
                 if type(ex) is NoSuchElementException:
                     driver.refresh()
             try:
@@ -1204,7 +1209,66 @@ def youlikehits_functions(req_dict: dict) -> None:
             except IndexError:
                 pass
             # # logging.info('Flag5')
+    def while_loop_listen(hours_time: int) -> None:
+        driver.get("https://www.youlikehits.com/soundcloudplays.php")
+        logging.info("Listen Loop Started")
+        now = datetime.now()
+        hours_added = timedelta(hours=hours_time)
+        future = now + hours_added
+        # # EVENT.wait(secrets.choice(range(15, 20)))
+        while True:
+            if datetime.now() > future:
+                break
+            EVENT.wait(secrets.choice(range(3, 4)))
+            driver.switch_to.window(driver.window_handles[0])
+            try:
+                if driver.find_element(By.CSS_SELECTOR, '#listall').text == \
+                        'There are no more songs to play for points. Check back later!':
+                    logging.info('No songs available quitting...')
+                    return
+            except NoSuchElementException:
+                EVENT.wait(0.25)
+            driver.switch_to.window(driver.window_handles[0])
+            try:
+                song_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+            except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
+                driver.refresh()
+                continue
+            try:
+                driver.find_element(By.CLASS_NAME, 'followbutton').click()
+                EVENT.wait(0.25)
+                driver.find_element(By.CLASS_NAME, 'followbutton').click()
+                EVENT.wait(1)
+                driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
+            except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
+                    JavascriptException):
+                EVENT.wait(10)
+            driver.switch_to.default_content()
+            try:
+                counter = 0
+                while (song_name ==
+                       driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
+                    EVENT.wait(5)
+                    counter += 1
+                    if counter >= 60:
+                        try:
+                            driver.refresh()
+                            driver.switch_to.window(driver.window_handles[1])
+                            driver.close()
+                            break
+                        except NoSuchWindowException:
+                            break
+            except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
+                EVENT.wait(0.25)
+                if type(ex) is NoSuchElementException:
+                    driver.refresh()
+            try:
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close()
+            except IndexError:
+                pass
     while_loop_watch(14)
+    while_loop_listen(14)
     collect_bonus_points()
     logging.info("Finished Viewing Videos...")
     driver.quit()
@@ -1438,3 +1502,68 @@ def view2be_functions(req_dict: dict) -> None:
     driver.quit()
     return
 
+
+def pandalikes_functions(req_dict: dict) -> None:
+    """pandalikes.xyz login and then earn credits by engaging videos
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
+    driver.implicitly_wait(10)
+    driver.get("https://pandalikes.xyz/")  # Type_Undefined
+    EVENT.wait(secrets.choice(range(1, 4)))
+    driver.find_element(By.CSS_SELECTOR, "#navbar > ul > div > ul > li:nth-child(2) > a").click()
+    EVENT.wait(secrets.choice(range(1, 4)))
+    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Username/Email']").send_keys(req_dict['username_pandalikes'])
+    EVENT.wait(secrets.choice(range(1, 4)))
+    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Your Password']").send_keys(req_dict['pw_pandalikes'])
+    EVENT.wait(secrets.choice(range(1, 4)))
+    driver.find_element(By.ID, "connect-btn").click()
+    EVENT.wait(secrets.choice(range(1, 4)))
+    driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")
+    EVENT.wait(secrets.choice(range(1, 4)))
+    
+    def watch_loop(hours_time: int) -> None:
+        now = datetime.now()
+        hours_added = timedelta(hours=hours_time)
+        future = now + hours_added
+        while True:
+            logging.info("Watch Loop Started")
+            if datetime.now() > future:
+                break
+            try:
+                driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
+                EVENT.wait(secrets.choice(range(4, 6)))
+                while True:
+                    title = driver.getTitle()
+                    if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
+                        logging.info("No more videos to watch")
+                        driver.save_screenshot("screenshots/screenshot.png")                        
+                        return
+                    ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
+                    EVENT.wait(secrets.choice(range(4, 6)))
+                    if title != driver.getTitle():
+                        break
+                EVENT.wait(secrets.choice(range(6, 8)))
+                driver.execute_script("window.scrollTo(0, 600)")
+                EVENT.wait(secrets.choice(range(4, 6)))
+                try:
+                    driver.switch_to.frame("ytPlayer")
+                except NoSuchFrameException:
+                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()    
+                    continue
+                driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg").click()
+                EVENT.wait(secrets.choice(range(4, 6)))
+                driver.switch_to.default_content()
+                EVENT.wait(secrets.choice(range(2, 4)))
+                WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
+                EVENT.wait(secrets.choice(range(4, 6)))
+            except Exception as ex:
+                print(f"Exception Type: {type(ex).__name__}")
+                print(f"Exception Message: {ex}")
+                driver.save_screenshot("screenshots/screenshot.png")
+                break
+
+    watch_loop(14)

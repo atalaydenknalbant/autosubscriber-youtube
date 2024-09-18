@@ -11,11 +11,11 @@ required_dict = {
     "chrome_userdata_directory": userinfo["chrome_userdata_directory"],
     "chrome_profile_name": userinfo["chrome_profile_name"],
     "yt_channel_id": userinfo["youtube_channel_id"],
-    "email_ytbpals": userinfo["ytbpals_com_email"],
-    "pw_ytbpals": userinfo["ytbpals_com_password"],
+    "username_pandalikes": userinfo["pandalikes_xyz_username"],
+    "pw_pandalikes": userinfo["pandalikes_xyz_password"],
     "yt_useragent": userinfo["youtube_useragent"],
     "github_token": userinfo["github_token"]
 }
 
 if __name__ == "__main__":
-    sws.ytbpals_functions(required_dict)
+    sws.pandalikes_functions(required_dict)

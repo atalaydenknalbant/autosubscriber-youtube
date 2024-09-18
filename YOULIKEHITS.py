@@ -1,7 +1,6 @@
 from selenium_codes import sub4sub_websites_selenium as sws
 from configparser import ConfigParser
 
-
 config_object = ConfigParser()
 config_object.read("config.ini")
 userinfo = config_object["USERINFO"]
