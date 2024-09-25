@@ -94,7 +94,7 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
-def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: bool = False, website: str = "") -> bool:
+def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str = "") -> bool:
     """Change YouTube video resolution to given resolution.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -134,8 +134,8 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, retry: bool =
             .click()
     except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
             StaleElementReferenceException, AttributeError, NoSuchWindowException):
-        retry = True
-    return retry
+        return False
+    return True
 
 
 def set_driver_opt(req_dict: dict,
@@ -197,6 +197,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--no-first-run")
         chrome_options.add_argument("--disable-search-engine-choice-screen")
         chrome_options.add_argument("--ash-no-nudges")
+        chrome_options.add_argument("--disable-gpu")  
         chrome_options.add_argument("--propagate-iph-for-testing")
 
     chrome_options.add_argument("--mute-audio")
@@ -1540,7 +1541,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     current_url = driver.current_url
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
                         logging.info("No more videos to watch")
-                        driver.save_screenshot("screenshots/screenshot.png")                        
+                        # driver.save_screenshot("screenshots/screenshot.png")                        
                         return
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(4, 6)))
@@ -1554,8 +1555,17 @@ def pandalikes_functions(req_dict: dict) -> None:
                 except NoSuchFrameException:
                     driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()    
                     continue
-                driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg").click()
+                try:
+                    driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg").click()
+                except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException):
+                    driver.switch_to.default_content()
+                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
+                    continue    
                 EVENT.wait(secrets.choice(range(4, 6)))
+                driver.switch_to.default_content()
+                if len(driver.find_elements(By.CSS_SELECTOR, "#played > font > font")) > 0:
+                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
+                    continue
                 driver.switch_to.default_content()
                 EVENT.wait(secrets.choice(range(2, 4)))
                 WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
@@ -1563,7 +1573,7 @@ def pandalikes_functions(req_dict: dict) -> None:
             except Exception as ex:
                 print(f"Exception Type: {type(ex).__name__}")
                 print(f"Exception Message: {ex}")
-                driver.save_screenshot("screenshots/screenshot.png")
+                # driver.save_screenshot("screenshots/screenshot.png")
                 break
 
     watch_loop(14)
