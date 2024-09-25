@@ -1540,8 +1540,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                 while True:
                     current_url = driver.current_url
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
-                        logging.info("No more videos to watch")
-                        # driver.save_screenshot("screenshots/screenshot.png")                        
+                        logging.info("No more videos to watch")                    
                         return
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(4, 6)))
@@ -1573,7 +1572,6 @@ def pandalikes_functions(req_dict: dict) -> None:
             except Exception as ex:
                 print(f"Exception Type: {type(ex).__name__}")
                 print(f"Exception Message: {ex}")
-                # driver.save_screenshot("screenshots/screenshot.png")
                 break
 
     watch_loop(14)
