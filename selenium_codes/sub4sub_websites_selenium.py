@@ -1536,42 +1536,43 @@ def pandalikes_functions(req_dict: dict) -> None:
                 break
             try:
                 driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
-                EVENT.wait(secrets.choice(range(4, 6)))
+                EVENT.wait(secrets.choice(range(2, 4)))
                 while True:
                     current_url = driver.current_url
+                    EVENT.wait(secrets.choice(range(4, 6)))
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
-                        logging.info("No more videos to watch")                    
+                        logging.info("No more 56 seconds videos to watch")
+                        # # driver.save_screenshot("screenshots/screenshot.png")                        
                         return
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
-                    EVENT.wait(secrets.choice(range(4, 6)))
-                    if current_url != driver.current_url:
+                    EVENT.wait(secrets.choice(range(2, 4)))
+                    if current_url != driver.current_url and len(driver.find_elements(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > h3 > font > font")) > 0:
                         break
-                EVENT.wait(secrets.choice(range(6, 8)))
+                EVENT.wait(secrets.choice(range(2, 4)))  
                 driver.execute_script("window.scrollTo(0, 600)")
-                EVENT.wait(secrets.choice(range(4, 6)))
                 try:
                     driver.switch_to.frame("ytPlayer")
                 except NoSuchFrameException:
                     driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()    
                     continue
+                EVENT.wait(secrets.choice(range(2, 4)))  
                 try:
-                    driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg").click()
-                except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException):
+                    ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
+                except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException, JavascriptException):
                     driver.switch_to.default_content()
                     driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
                     continue    
-                EVENT.wait(secrets.choice(range(4, 6)))
                 driver.switch_to.default_content()
-                if len(driver.find_elements(By.CSS_SELECTOR, "#played > font > font")) > 0:
+                try:
+                    WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
+                except (TimeoutException):    
                     driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
-                    continue
-                driver.switch_to.default_content()
-                EVENT.wait(secrets.choice(range(2, 4)))
-                WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
-                EVENT.wait(secrets.choice(range(4, 6)))
+                    continue  
+                EVENT.wait(secrets.choice(range(2, 4)))     
             except Exception as ex:
                 print(f"Exception Type: {type(ex).__name__}")
                 print(f"Exception Message: {ex}")
+                # # driver.save_screenshot("screenshots/screenshot.png")    
                 break
 
     watch_loop(14)
