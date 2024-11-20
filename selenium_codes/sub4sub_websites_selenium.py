@@ -102,7 +102,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
     - None(NoneType)
     """
     try:
-        if website == "YOULIKEHITS":
+        if website == "YOULIKEHITS" or "pandalikes":
             pass
         else:
             try:
@@ -114,21 +114,20 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
                     StaleElementReferenceException, NoSuchWindowException):
                 logging.debug('No Ad Found')
                 pass
-        if website == "ytmonster":
+        if website == "pandalikes":
+            pass
+        else:
             try:
                 ActionChains(driver).move_to_element(driver.find_element(By.ID, "movie_player"))\
                     .click().send_keys(Keys.SPACE).perform()
             except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException):
                 pass
-        else:
-            ActionChains(driver).move_to_element(driver.find_element(By.ID, "movie_player"))\
-                .click().send_keys(Keys.SPACE).perform()
-        WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.CLASS_NAME, "ytp-settings-button")))\
+        WebDriverWait(driver, 3).until(ec.element_to_be_clickable((By.CLASS_NAME, "ytp-settings-button")))\
             .click()
-        WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
+        WebDriverWait(driver, 3).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Quality')]")))\
             .click()
         EVENT.wait(secrets.choice(range(2, 3)))
-        WebDriverWait(driver, 7.75) \
+        WebDriverWait(driver, 3) \
             .until(ec.visibility_of_element_located((By.XPATH,
                                                      f"//span[contains(string(),'{resolution}p')]"))) \
             .click()
@@ -1531,21 +1530,49 @@ def pandalikes_functions(req_dict: dict) -> None:
         hours_added = timedelta(hours=hours_time)
         future = now + hours_added
         logging.info("Watch Loop Started")
+        yt_resolution_lowered = False
+        ways_of_earning = ["Youtube Watch 56s","Youtube Watch shorts", "Tiktok Watch"]
+        way = 0
+        def youtube_skip_video(current_way: str) -> None:
+            if current_way == "Watch 56s":
+                driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
+            elif current_way == "Youtube Watch shorts":
+                driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-dangerz.mb-1.w-100").click()
         while True:
-            if datetime.now() > future:
-                break
             try:
                 driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                 EVENT.wait(secrets.choice(range(2, 4)))
                 while True:
+                    if datetime.now() > future:
+                        logging.info("Time limit reached, ending watch loop.")
+                        return                    
                     current_url = driver.current_url
                     EVENT.wait(secrets.choice(range(4, 6)))
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
-                        logging.info("No more 56 seconds videos to watch")
-                        # # driver.save_screenshot("screenshots/screenshot.png")                        
-                        return
+                        logging.info(f"No more {ways_of_earning[way]} videos to watch")
+                        # # driver.save_screenshot("screenshots/screenshot.png")   
+                        way+=1
+                        if way > len(ways_of_earning) - 1:
+                            return
+                        if ways_of_earning[way] == "Youtube Watch shorts":
+                            driver.get("https://pandalikes.xyz/?page=module&md=yfav")
+                        if ways_of_earning[way] == "Tiktok Watch":
+                            driver.get("https://pandalikes.xyz/?page=module&md=tiktokviews") 
+                        continue    
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(2, 4)))
+                    if ways_of_earning[way] == "Tiktok Watch":
+                         if len(driver.window_handles) > 1:
+                            while len(driver.window_handles) > 1:
+                                EVENT.wait(secrets.choice(range(2, 4)))
+                            continue
+                         else:
+                            try: 
+                                driver.switch_to.window(driver.window_handles[1])
+                                driver.close()
+                            except NoSuchWindowException:
+                                pass
+                            continue
                     if current_url != driver.current_url and len(driver.find_elements(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > h3 > font > font")) > 0:
                         break
                 EVENT.wait(secrets.choice(range(2, 4)))  
@@ -1553,20 +1580,25 @@ def pandalikes_functions(req_dict: dict) -> None:
                 try:
                     driver.switch_to.frame("ytPlayer")
                 except NoSuchFrameException:
-                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()    
+                    youtube_skip_video(ways_of_earning[way])
                     continue
                 EVENT.wait(secrets.choice(range(2, 4)))  
                 try:
-                    ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
+                    if ways_of_earning[way] == "Watch 56s":
+                        ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
+                    elif ways_of_earning[way] == "Youtube Watch shorts":
+                        ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-shorts-mode")).click().perform()
+                    if not yt_resolution_lowered:
+                        yt_resolution_lowered = yt_change_resolution(driver, website='pandalikes')
                 except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException, JavascriptException):
                     driver.switch_to.default_content()
-                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
-                    continue    
+                    youtube_skip_video(ways_of_earning[way])
+                    continue                                                                                        
                 driver.switch_to.default_content()
                 try:
                     WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
-                except (TimeoutException):    
-                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
+                except (TimeoutException):                                               
+                    youtube_skip_video(ways_of_earning[way])        
                     continue  
                 EVENT.wait(secrets.choice(range(2, 4)))     
             except Exception as ex:
