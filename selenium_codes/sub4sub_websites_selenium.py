@@ -1534,7 +1534,7 @@ def pandalikes_functions(req_dict: dict) -> None:
         ways_of_earning = ["Youtube Watch 56s","Youtube Watch shorts", "Tiktok Watch"]
         way = 0
         def youtube_skip_video(current_way: str) -> None:
-            if current_way == "Watch 56s":
+            if current_way == "Youtube Watch 56s":
                 driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
             elif current_way == "Youtube Watch shorts":
                 driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-dangerz.mb-1.w-100").click()
@@ -1584,7 +1584,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     continue
                 EVENT.wait(secrets.choice(range(2, 4)))  
                 try:
-                    if ways_of_earning[way] == "Watch 56s":
+                    if ways_of_earning[way] == "Youtube Watch 56s":
                         ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
                     elif ways_of_earning[way] == "Youtube Watch shorts":
                         ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-shorts-mode")).click().perform()
