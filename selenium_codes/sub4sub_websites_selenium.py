@@ -1533,6 +1533,7 @@ def pandalikes_functions(req_dict: dict) -> None:
         yt_resolution_lowered = False
         ways_of_earning = ["Youtube Watch 56s","Youtube Watch shorts", "Tiktok Watch"]
         way = 0
+        i = 1
         def youtube_skip_video(current_way: str) -> None:
             if current_way == "Youtube Watch 56s":
                 driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
@@ -1541,7 +1542,7 @@ def pandalikes_functions(req_dict: dict) -> None:
         while True:
             try:
                 EVENT.wait(secrets.choice(range(2, 4)))
-                # driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
+                driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                 EVENT.wait(secrets.choice(range(2, 4)))
                 while True:
                     if datetime.now() > future:
@@ -1562,7 +1563,16 @@ def pandalikes_functions(req_dict: dict) -> None:
                             driver.get("https://pandalikes.xyz/?page=module&md=tiktokviews") 
                             driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                         continue    
-                    ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
+                    try:
+                        ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
+                    except JavascriptException:
+                        driver.refresh()
+                        i+=1
+                        if i >= 5:
+                            logging.info("Repeated Javascript Errors Closing Website")
+                            return
+                        continue
+                    i = 1
                     EVENT.wait(secrets.choice(range(2, 4)))
                     if ways_of_earning[way] == "Tiktok Watch":
                         if len(driver.window_handles) > 1:
@@ -1575,7 +1585,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                             try: 
                                 driver.switch_to.window(driver.window_handles[1])
                                 driver.close()
-                            except NoSuchWindowException:
+                            except (NoSuchWindowException, IndexError):
                                 pass
                             continue
                     if current_url != driver.current_url and len(driver.find_elements(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > h3 > font > font")) > 0:
@@ -1605,8 +1615,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                     continue  
                 EVENT.wait(secrets.choice(range(2, 4)))     
             except Exception as ex:
-                print(f"Exception Type: {type(ex).__name__}")
-                print(f"Exception Message: {ex}")
+                logging.info(f"Exception Type: {type(ex).__name__}")
+                logging.info(f"Exception Message: {ex}")
                 driver.save_screenshot("screenshots/screenshot.png")    
                 break
 
