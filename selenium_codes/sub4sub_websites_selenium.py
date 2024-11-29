@@ -1510,7 +1510,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='pandalikes')
     driver.implicitly_wait(10)
     driver.get("https://pandalikes.xyz/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1540,7 +1540,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                 driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-dangerz.mb-1.w-100").click()
         while True:
             try:
-                driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
+                EVENT.wait(secrets.choice(range(2, 4)))
+                # driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                 EVENT.wait(secrets.choice(range(2, 4)))
                 while True:
                     if datetime.now() > future:
@@ -1550,23 +1551,27 @@ def pandalikes_functions(req_dict: dict) -> None:
                     EVENT.wait(secrets.choice(range(4, 6)))
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
                         logging.info(f"No more {ways_of_earning[way]} videos to watch")
-                        # # driver.save_screenshot("screenshots/screenshot.png")   
+                        driver.save_screenshot("screenshots/screenshot.png")   
                         way+=1
                         if way > len(ways_of_earning) - 1:
                             return
                         if ways_of_earning[way] == "Youtube Watch shorts":
                             driver.get("https://pandalikes.xyz/?page=module&md=yfav")
+                            driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                         if ways_of_earning[way] == "Tiktok Watch":
                             driver.get("https://pandalikes.xyz/?page=module&md=tiktokviews") 
+                            driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                         continue    
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(2, 4)))
                     if ways_of_earning[way] == "Tiktok Watch":
-                         if len(driver.window_handles) > 1:
+                        if len(driver.window_handles) > 1:
                             while len(driver.window_handles) > 1:
                                 EVENT.wait(secrets.choice(range(2, 4)))
+                            driver.switch_to.window(driver.window_handles[0])
+                            driver.switch_to.default_content()
                             continue
-                         else:
+                        else:
                             try: 
                                 driver.switch_to.window(driver.window_handles[1])
                                 driver.close()
@@ -1584,11 +1589,9 @@ def pandalikes_functions(req_dict: dict) -> None:
                     continue
                 EVENT.wait(secrets.choice(range(2, 4)))  
                 try:
-                    if ways_of_earning[way] == "Youtube Watch 56s":
+                    if ways_of_earning[way] == "Youtube Watch 56s" or ways_of_earning[way] == "Youtube Watch shorts":
                         ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
-                    elif ways_of_earning[way] == "Youtube Watch shorts":
-                        ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-shorts-mode")).click().perform()
-                    if not yt_resolution_lowered:
+                    if not yt_resolution_lowered and ways_of_earning[way] == "Youtube Watch 56s":
                         yt_resolution_lowered = yt_change_resolution(driver, website='pandalikes')
                 except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException, JavascriptException):
                     driver.switch_to.default_content()
@@ -1604,7 +1607,7 @@ def pandalikes_functions(req_dict: dict) -> None:
             except Exception as ex:
                 print(f"Exception Type: {type(ex).__name__}")
                 print(f"Exception Message: {ex}")
-                # # driver.save_screenshot("screenshots/screenshot.png")    
+                driver.save_screenshot("screenshots/screenshot.png")    
                 break
 
     watch_loop(14)
