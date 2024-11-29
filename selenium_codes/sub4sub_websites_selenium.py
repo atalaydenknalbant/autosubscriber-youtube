@@ -1615,8 +1615,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                     continue  
                 EVENT.wait(secrets.choice(range(2, 4)))     
             except Exception as ex:
-                logging.info(f"Exception Type: {type(ex).__name__}")
-                logging.info(f"Exception Message: {ex}")
+                logging.info("Exception Type: %s", type(ex).__name__)
+                logging.info("Exception Message: %s", ex)
                 driver.save_screenshot("screenshots/screenshot.png")    
                 break
 
