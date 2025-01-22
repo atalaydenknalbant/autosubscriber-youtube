@@ -1672,30 +1672,16 @@ def traffup_functions(req_dict: dict) -> None:
             opt2 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(2)").text
             opt3 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(3)").text
         
-            try:
-                image = Image.open(BytesIO(image_screenshot)).convert("RGB")
-            except:
-                pass
-
+            image = Image.open(BytesIO(image_screenshot)).convert("RGB")
+  
             options = [opt1, opt2, opt3]
+            inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
+            with torch.no_grad():
+                outputs = model(**inputs)
+            logits_per_image = outputs.logits_per_image
+            probs = logits_per_image.softmax(dim=1)
+            best_option_idx = probs.argmax().item()
 
-            try:
-                inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
-            except:
-                pass
-
-            try:
-                with torch.no_grad():
-                    outputs = model(**inputs)
-                logits_per_image = outputs.logits_per_image
-                probs = logits_per_image.softmax(dim=1)
-            except:
-                pass
-
-            try:
-                best_option_idx = probs.argmax().item()
-            except:
-                pass
 
             ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child({best_option_idx + 1})")).click().perform()
             EVENT.wait(secrets.choice(range(1, 3)))
