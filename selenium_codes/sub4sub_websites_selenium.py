@@ -1702,14 +1702,14 @@ def traffup_functions(req_dict: dict) -> None:
             try:
                 image = Image.open(BytesIO(image_screenshot)).convert("RGB")
             except Exception as e:
-                raise
+                pass
 
             options = [opt1, opt2, opt3]
 
             try:
                 inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
             except Exception as e:
-                raise
+                pass
 
             try:
                 with torch.no_grad():
@@ -1717,12 +1717,12 @@ def traffup_functions(req_dict: dict) -> None:
                 logits_per_image = outputs.logits_per_image
                 probs = logits_per_image.softmax(dim=1)
             except Exception as e:
-                raise
+                pass
 
             try:
                 best_option_idx = probs.argmax().item()
             except Exception as e:
-                raise
+                pass
             ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child({best_option_idx + 1})")).click().perform()
             EVENT.wait(secrets.choice(range(1, 3)))
             if current_way == "Youtube Watch":
