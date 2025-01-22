@@ -17,7 +17,7 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 <a href="https://pypi.org/project/transformers/"><img src="https://i.imgur.com/DmyP8po.png/2a3011a7c39f28995d4bb68f8b03888999482d7b8fd4e250c9cec7839b7ec87e/ultrafunkamsterdam/undetected-chromedriver" width="100" height="100"></a>
 
 ## Usage
-1. Edit config.ini file to match with your accounts(You can use new google account to do engagements).
+1. Edit config.ini file to fill with your account credentials(You can use new google account to do engagements).
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
 
 ## Included sub4sub Websites
