@@ -14,7 +14,11 @@ from threading import Event
 from datetime import datetime, timedelta
 import secrets
 import undetected_chromedriver as uc
-
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel, CLIPProcessor, CLIPModel
+from PIL import Image
+from io import BytesIO
+import re
+import torch
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -102,7 +106,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
     - None(NoneType)
     """
     try:
-        if website == "YOULIKEHITS" or "pandalikes":
+        if website == "YOULIKEHITS" or website == "pandalikes" or website == "traffup":
             pass
         else:
             try:
@@ -114,7 +118,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
                     StaleElementReferenceException, NoSuchWindowException):
                 logging.debug('No Ad Found')
                 pass
-        if website == "pandalikes":
+        if website == "pandalikes" or website == "traffup":
             pass
         else:
             try:
@@ -153,7 +157,7 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes"):
+    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes", 'traffup'):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
@@ -965,7 +969,7 @@ def ytbpals_functions(req_dict: dict) -> None:
                         EVENT.wait(secrets.choice(range(2, 4)))
                     continue
                 current_channel = driver.find_element(By.CSS_SELECTOR, channel).text
-                print(current_channel)
+                logging.info(current_channel)
             except NoSuchElementException:
                 pass   
             try:
@@ -1074,7 +1078,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
@@ -1082,7 +1086,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
     EVENT.wait(secrets.choice(range(20, 22)))
-    login_button = driver.find_elements(By.XPATH, "//tbody/tr[3]/td[1]/span[1]/input[1]")
+    login_button = driver.find_elements(By.CSS_SELECTOR, "input[value='Log in']")
     login_button[0].send_keys(Keys.ENTER) if len(login_button) > 0 else driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/center/form/table/tbody/tr[4]/td/span/input").send_keys(Keys.ENTER) 
     EVENT.wait(secrets.choice(range(2, 4)))
 
@@ -1492,7 +1496,7 @@ def view2be_functions(req_dict: dict) -> None:
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
     except (NoSuchElementException, NoSuchWindowException, TimeoutException) as ex:
-        print(ex)
+        logging.info(ex)
         if ex == "TimeoutException":
             driver.quit()
             view2be_functions(req_dict)
@@ -1544,6 +1548,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                 EVENT.wait(secrets.choice(range(2, 4)))
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.default_content()
                 while True:
                     if datetime.now() > future:
                         logging.info("Time limit reached, ending watch loop.")
@@ -1552,7 +1558,6 @@ def pandalikes_functions(req_dict: dict) -> None:
                     EVENT.wait(secrets.choice(range(4, 6)))
                     if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
                         logging.info(f"No more {ways_of_earning[way]} videos to watch")
-                        driver.save_screenshot("screenshots/screenshot.png")   
                         way+=1
                         if way > len(ways_of_earning) - 1:
                             return
@@ -1564,6 +1569,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                             driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                         continue    
                     try:
+                        EVENT.wait(secrets.choice(range(2, 3)))   
                         ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
                     except JavascriptException:
                         driver.refresh()
@@ -1573,7 +1579,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                             return
                         continue
                     i = 1
-                    EVENT.wait(secrets.choice(range(2, 4)))
+                    EVENT.wait(secrets.choice(range(3, 5)))
                     if ways_of_earning[way] == "Tiktok Watch":
                         if len(driver.window_handles) > 1:
                             while len(driver.window_handles) > 1:
@@ -1609,7 +1615,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     continue                                                                                        
                 driver.switch_to.default_content()
                 try:
-                    WebDriverWait(driver, 70).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
+                    WebDriverWait(driver, 80).until(ec.element_to_be_clickable((By.XPATH, "/html/body/main/div/div[2]/div/div/div[2]/div/a/font"))).click()
                 except (TimeoutException):                                               
                     youtube_skip_video(ways_of_earning[way])        
                     continue  
@@ -1617,7 +1623,186 @@ def pandalikes_functions(req_dict: dict) -> None:
             except Exception as ex:
                 logging.info("Exception Type: %s", type(ex).__name__)
                 logging.info("Exception Message: %s", ex)
-                driver.save_screenshot("screenshots/screenshot.png")    
+                tb = ex.__traceback__
+                while tb is not None:
+                    filename = tb.tb_frame.f_code.co_filename
+                    lineno = tb.tb_lineno
+                    func_name = tb.tb_frame.f_code.co_name
+                    logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
+                    tb = tb.tb_next  
+                    driver.save_screenshot("screenshots/screenshot.png")
                 break
+
+    watch_loop(14)
+
+
+def traffup_functions(req_dict: dict) -> None:
+    """traffup.net login and then earn credits by engaging videos
+    Args:
+    - req_dict(dict): dictionary object of required parameters
+    Returns:
+    - None(NoneType)
+    """
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='traffup')
+    driver.implicitly_wait(10)
+    driver.get("https://traffup.net/login/")  # Type_Undefined
+    EVENT.wait(secrets.choice(range(1, 4)))
+    captcha_processor = TrOCRProcessor.from_pretrained('microsoft/trocr-small-printed')
+    captcha_model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-small-printed')
+    while True:
+        driver.find_element(By.ID, "email").send_keys(req_dict['email_traffup'])
+        EVENT.wait(secrets.choice(range(1, 4)))
+        driver.find_element(By.ID, "password").send_keys(req_dict['pw_traffup'])
+        EVENT.wait(secrets.choice(range(1, 4)))
+        captcha_element  = driver.find_element(By.CSS_SELECTOR, "[alt='Code']")
+        captcha_screenshot = captcha_element.screenshot_as_png
+        captcha_image = Image.open(BytesIO(captcha_screenshot)).convert("RGB")
+        pixel_values = captcha_processor(captcha_image, return_tensors="pt").pixel_values
+        generated_ids = captcha_model.generate(pixel_values)
+        generated_text = captcha_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        corrected_text = re.sub(r'\D', '', generated_text)
+        driver.find_element(By.ID, "code").send_keys(corrected_text)
+        EVENT.wait(secrets.choice(range(2, 4)))
+        driver.find_element(By.CLASS_NAME, "frm_btn").click()
+        EVENT.wait(secrets.choice(range(3, 5)))
+        if driver.current_url == "https://traffup.net/websites/":
+            break
+    driver.get("https://traffup.net/youtube/?type=posts&mode=watchtime")    
+    EVENT.wait(secrets.choice(range(3, 5)))
+    del captcha_processor
+    del captcha_model
+    model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    model.eval()
+    def watch_loop(hours_time: int) -> None:
+        now = datetime.now()
+        hours_added = timedelta(hours=hours_time)
+        future = now + hours_added
+        logging.info("Watch Loop Started")
+        yt_resolution_lowered = False
+        ways_of_earning = ["Youtube Watch","Website Visit"]
+        way = 0
+        skip = False
+        i = 0
+        def predict_image(current_way: str) -> None:
+            css_dict = {"Youtube Watch": "#msg_area", "Website Visit":"#iframe1_msg"}
+            try:
+                WebDriverWait(driver, 52)\
+            .until(ec.visibility_of_element_located((By.CSS_SELECTOR,
+                                                    f"{css_dict[current_way]} > div > div.res_cb2 > div > img")))
+            except TimeoutException:
+                return
+            EVENT.wait(secrets.choice(range(2, 4)))
+            image_element  = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb2 > div > img")
+            image_screenshot = image_element.screenshot_as_png
+            opt1 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(1)").text
+            opt2 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(2)").text
+            opt3 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(3)").text
+        
+            try:
+                image = Image.open(BytesIO(image_screenshot)).convert("RGB")
+            except Exception as e:
+                raise
+
+            options = [opt1, opt2, opt3]
+
+            try:
+                inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
+            except Exception as e:
+                raise
+
+            try:
+                with torch.no_grad():
+                    outputs = model(**inputs)
+                logits_per_image = outputs.logits_per_image
+                probs = logits_per_image.softmax(dim=1)
+            except Exception as e:
+                raise
+
+            try:
+                best_option_idx = probs.argmax().item()
+            except Exception as e:
+                raise
+            ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child({best_option_idx + 1})")).click().perform()
+            EVENT.wait(secrets.choice(range(1, 3)))
+            if current_way == "Youtube Watch":
+                ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#box_close > a")).click().perform()
+            elif current_way == "Website Visit":
+                ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
+            
+        while True:
+            try:
+                EVENT.wait(secrets.choice(range(2, 4)))
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.default_content()
+                if datetime.now() > future:
+                    logging.info("Time limit reached, ending watch loop.")
+                    return                    
+                if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
+                    logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                    way+=1
+                    i = 0
+                    if way > len(ways_of_earning) - 1:
+                        return
+                    if ways_of_earning[way] == "Website Visit":
+                        driver.get("https://traffup.net/websites/")
+                        continue
+                if ways_of_earning[way] == "Website Visit":
+                        if i+1 > len(driver.find_elements(By.CLASS_NAME, "open_iframe1")):
+                            i=0
+                            try:
+                                if driver.find_element(By.CSS_SELECTOR, "#main > p").text == "No records found. Please use a different search criteria.":
+                                    logging.info("Finished visiting websites exiting...")
+                                    return
+                            except NoSuchElementException:
+                                pass
+                            ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
+                            continue
+                        try:
+                            ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "open_iframe1")[i]).click().perform()
+                        except Exception:
+                            logging.info('skipped website')
+
+                        i+=1
+                        predict_image(ways_of_earning[way])
+
+                if ways_of_earning[way] == "Youtube Watch":
+                    if skip:
+                        ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "skipbtn")[0]).click().perform()
+                        skip = False
+                        ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
+                    EVENT.wait(secrets.choice(range(3, 5)))
+                    ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "new_act_btn")[0]).click().perform()
+                    EVENT.wait(secrets.choice(range(3, 5)))
+                    driver.switch_to.window(driver.window_handles[1])
+                    try:
+                        driver.switch_to.frame("player")
+                    except:
+                        driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
+                        skip = True
+                        continue
+                    if not yt_resolution_lowered and ways_of_earning[way] == "Youtube Watch":
+                        yt_resolution_lowered = yt_change_resolution(driver, website='traffup')
+                    if len(driver.find_elements(By.CSS_SELECTOR, "#movie_player > div.ytp-error > div.ytp-error-content > div.ytp-error-content-wrap > div.ytp-error-content-wrap-reason > span")) > 0:
+                        driver.switch_to.default_content()
+                        driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
+                        logging.info('flag 1.5')
+                        skip = True
+                        continue
+                    driver.switch_to.default_content()
+                    predict_image(ways_of_earning[way])
+            except Exception as ex:
+                logging.info("Exception Type: %s", type(ex).__name__)
+                logging.info("Exception Message: %s", ex)
+                tb = ex.__traceback__
+                while tb is not None:
+                    filename = tb.tb_frame.f_code.co_filename
+                    lineno = tb.tb_lineno
+                    func_name = tb.tb_frame.f_code.co_name
+                    logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
+                    tb = tb.tb_next  
+                    driver.save_screenshot("screenshots/screenshot.png")
+                break
+
 
     watch_loop(14)

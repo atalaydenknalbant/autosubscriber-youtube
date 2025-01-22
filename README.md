@@ -14,6 +14,7 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 ## Pre-requisites
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)
 <a href="https://pypi.org/project/undetected-chromedriver/"><img src="https://opengraph.githubassets.com/2a3011a7c39f28995d4bb68f8b03888999482d7b8fd4e250c9cec7839b7ec87e/ultrafunkamsterdam/undetected-chromedriver" width="100" height="100"></a>
+<a href="https://pypi.org/project/transformers/"><img src="https://i.imgur.com/DmyP8po.png/2a3011a7c39f28995d4bb68f8b03888999482d7b8fd4e250c9cec7839b7ec87e/ultrafunkamsterdam/undetected-chromedriver" width="100" height="100"></a>
 
 ## Usage
 1. Edit config.ini file to match with your accounts(You can use new google account to do engagements).
@@ -23,7 +24,7 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 ### Type 2 Websites(Requires Google Login) 
 [![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Pandalikes](https://i.imgur.com/UFdUYzP.png)](https://pandalikes.xyz/?ref=34939)
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Pandalikes](https://i.imgur.com/UFdUYzP.png)](https://pandalikes.xyz/?ref=34939) [![traffup](https://i.imgur.com/brIRpUl.png)](https://traffup.net/free/?rf=416827789)
 <div style="text-align: center;">
     <div style="display: inline-block; margin-right: 20px;">
         <h3>Requires Google Login</h3>
