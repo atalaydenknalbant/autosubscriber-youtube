@@ -51,6 +51,16 @@ ytbutton_elements_location_dict = {
 }
 
 def test_ytbuttons(youtube_url: str, button_to_test: str, req_dict: dict) -> None:
+    """Test the functionality of YouTube buttons.
+
+    Args:
+    - youtube_url (str): The URL of the YouTube video or channel to test.
+    - button_to_test (str): A placeholder for specifying the button to test (currently unused).
+    - req_dict (dict): Configuration dictionary for WebDriver setup (e.g., browser options).
+
+    Returns:
+    - None: The function does not return a value. It performs actions on the YouTube page.
+    """
     driver: webdriver = set_driver_opt(req_dict, headless=False)
     driver.implicitly_wait(5)
     driver.get(youtube_url)
@@ -72,7 +82,6 @@ def test_ytbuttons(youtube_url: str, button_to_test: str, req_dict: dict) -> Non
 
 
 def get_clear_browsing_button(driver: webdriver) -> webdriver:
-
     """Find the "CLEAR BROWSING BUTTON" on the Chrome settings page.
     Args:
     - driver (webdriver): webdriver parameter.
@@ -207,20 +216,12 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--start-maximized")
 
-    try:
-        if os.environ['HEROKU'] == 'available':
-            if undetected:
-                driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
-                return driver
-            driver = webdriver.Chrome(service=Service(), options=chrome_options)
-            return driver
-    except KeyError:
-        if undetected:
-            driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
-            return driver
-        driver = webdriver.Chrome(service=Service(),
-                                  options=chrome_options)
+    if undetected:
+        driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
         return driver
+    driver = webdriver.Chrome(service=Service(),
+                                options=chrome_options)
+    return driver
 
 
 def yt_too_many_controller() -> int:
@@ -235,41 +236,6 @@ def yt_too_many_controller() -> int:
         """
     toomany_suborlike = False
     return toomany_suborlike
-
-
-# # def google_login(driver: webdriver,
-# #                  req_dict: dict,
-# #                  has_login_btn: bool = True,
-# #                  already_in_website: bool = True) -> None:
-# #     """ Logins to Google with given credentials.
-# #     Args:
-# #     - driver(webdriver): webdriver parameter.
-# #     - req_dict(dict): dictionary object of required parameters
-# #     - has_sign_in_btn (bool): bool parameter to check if page has sign_in_button
-# #     Returns:
-# #     - None(NoneType)
-# #     """
-# #     if has_login_btn:
-# #         sign_in_button = driver.find_element(By.CSS_SELECTOR, "#buttons > ytd-button-renderer")
-# #         EVENT.wait(secrets.choice(range(1, 6)))
-# #         ActionChains(driver).move_to_element(sign_in_button).click().perform()
-# #     if already_in_website:
-# #         EVENT.wait(secrets.choice(range(1, 6)))
-# #     else:
-# #         driver.get("https://accounts.google.com/signin")
-# #     EVENT.wait(secrets.choice(range(1, 6)))
-# #     email_area = driver.find_element(By.ID, "identifierId")
-# #     email_area.send_keys(req_dict['yt_email'])
-# #     EVENT.wait(secrets.choice(range(3, 6)))
-# #     driver.find_element(By.CSS_SELECTOR, "#identifierNext > div > button").click()
-# #     EVENT.wait(secrets.choice(range(2, 6)))
-# #     pw_area = driver.find_element(By.CSS_SELECTOR, "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input")
-# #     pw_area.send_keys(req_dict['yt_pw'])
-# #     EVENT.wait(secrets.choice(range(1, 4)))
-# #     driver.find_element(By.CSS_SELECTOR, "#passwordNext > div > button").click()
-# #     EVENT.wait(secrets.choice(range(1, 4)))
-# #     logging.info("YouTube login completed")
-
 
 def type_1_for_loop_like_and_sub(driver: webdriver,
                                  d: str,
@@ -1685,6 +1651,13 @@ def traffup_functions(req_dict: dict) -> None:
         skip = False
         i = 0
         def predict_image(current_way: str) -> None:
+            """Predict and interact with an image on a webpage using OpenAI CLIP for zero-shot image classification.
+            Args:
+            - current_way (str): Specifies the context of the action, either "Youtube Watch" or "Website Visit."
+
+            Returns:
+            - None: The function performs actions on the page but does not return any value.
+             """
             css_dict = {"Youtube Watch": "#msg_area", "Website Visit":"#iframe1_msg"}
             try:
                 WebDriverWait(driver, 52)\
@@ -1701,14 +1674,14 @@ def traffup_functions(req_dict: dict) -> None:
         
             try:
                 image = Image.open(BytesIO(image_screenshot)).convert("RGB")
-            except Exception as e:
+            except:
                 pass
 
             options = [opt1, opt2, opt3]
 
             try:
                 inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
-            except Exception as e:
+            except:
                 pass
 
             try:
@@ -1716,13 +1689,14 @@ def traffup_functions(req_dict: dict) -> None:
                     outputs = model(**inputs)
                 logits_per_image = outputs.logits_per_image
                 probs = logits_per_image.softmax(dim=1)
-            except Exception as e:
+            except:
                 pass
 
             try:
                 best_option_idx = probs.argmax().item()
-            except Exception as e:
+            except:
                 pass
+
             ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child({best_option_idx + 1})")).click().perform()
             EVENT.wait(secrets.choice(range(1, 3)))
             if current_way == "Youtube Watch":
