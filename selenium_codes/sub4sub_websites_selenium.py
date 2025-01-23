@@ -1480,7 +1480,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='pandalikes')
     driver.implicitly_wait(10)
     driver.get("https://pandalikes.xyz/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1609,7 +1609,7 @@ def traffup_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='traffup')
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='traffup')
     driver.implicitly_wait(10)
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1709,12 +1709,23 @@ def traffup_functions(req_dict: dict) -> None:
                         continue
                 if ways_of_earning[way] == "Website Visit":
                         if i+1 > len(driver.find_elements(By.CLASS_NAME, "open_iframe1")):
-                            i=0
                             try:
                                 if driver.find_element(By.CSS_SELECTOR, "#main > p").text == "No records found. Please use a different search criteria.":
                                     logging.info("Finished visiting websites exiting...")
                                     return
                             except NoSuchElementException:
+                                pass
+                            if "traffup" not in driver.current_url:
+                                driver.get("https://traffup.net/websites/")
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "ico_reporting")[i]).click().perform()
+                                EVENT.wait(secrets.choice(range(2, 4)))
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CSS_SELECTOR, "#rep_1 > td:nth-child(1) > input[type=radio]")).click().perform()
+                                EVENT.wait(secrets.choice(range(1, 3)))
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "btn_small")).click().perform()
+                            i = 0 
+                            try:
+                                ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
+                            except (NoSuchElementException, ElementNotInteractableException):
                                 pass
                             ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
                             continue
@@ -1722,8 +1733,10 @@ def traffup_functions(req_dict: dict) -> None:
                             ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "open_iframe1")[i]).click().perform()
                         except Exception:
                             logging.info('skipped website')
-
                         i+=1
+                        if "traffup" not in driver.current_url:
+                            driver.get("https://traffup.net/websites/")
+                            continue                   
                         predict_image(ways_of_earning[way])
 
                 if ways_of_earning[way] == "Youtube Watch":
@@ -1746,7 +1759,6 @@ def traffup_functions(req_dict: dict) -> None:
                     if len(driver.find_elements(By.CSS_SELECTOR, "#movie_player > div.ytp-error > div.ytp-error-content > div.ytp-error-content-wrap > div.ytp-error-content-wrap-reason > span")) > 0:
                         driver.switch_to.default_content()
                         driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
-                        logging.info('flag 1.5')
                         skip = True
                         continue
                     driver.switch_to.default_content()
