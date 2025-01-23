@@ -1708,7 +1708,7 @@ def traffup_functions(req_dict: dict) -> None:
                         driver.get("https://traffup.net/websites/")
                         continue
                 if ways_of_earning[way] == "Website Visit":
-                        if i+1 > len(driver.find_elements(By.CLASS_NAME, "open_iframe1")):
+                        if i + 1 > len(driver.find_elements(By.CLASS_NAME, "open_iframe1")):
                             try:
                                 if driver.find_element(By.CSS_SELECTOR, "#main > p").text == "No records found. Please use a different search criteria.":
                                     logging.info("Finished visiting websites exiting...")
@@ -1733,7 +1733,7 @@ def traffup_functions(req_dict: dict) -> None:
                             ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "open_iframe1")[i]).click().perform()
                         except Exception:
                             logging.info('skipped website')
-                        i+=1
+                        i += 1
                         if "traffup" not in driver.current_url:
                             driver.get("https://traffup.net/websites/")
                             continue                   
