@@ -1480,7 +1480,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website='pandalikes')
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
     driver.implicitly_wait(10)
     driver.get("https://pandalikes.xyz/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1609,7 +1609,7 @@ def traffup_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website='traffup')
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='traffup')
     driver.implicitly_wait(10)
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
