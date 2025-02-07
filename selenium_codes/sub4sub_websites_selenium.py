@@ -20,7 +20,6 @@ from PIL import Image
 from io import BytesIO
 import re
 import torch
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -168,7 +167,6 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    caps = DesiredCapabilities().CHROME
     if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes", 'traffup'):
         pass
     else:
@@ -1532,7 +1530,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     logging.info("Time limit reached, ending watch loop.")
                     return                    
                 if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
-                    logging.info(f"No more {ways_of_earning[way]} videos to watch")
+                    logging.info("No more %s videos to watch" % ways_of_earning[way])
                     way+=1
                     if way > len(ways_of_earning) - 1:
                         return
