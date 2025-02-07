@@ -1530,7 +1530,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     logging.info("Time limit reached, ending watch loop.")
                     return                    
                 if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
-                    logging.info("No more %s videos to watch" % ways_of_earning[way])
+                    logging.info("No more %s videos to watch", ways_of_earning[way])
                     way+=1
                     if way > len(ways_of_earning) - 1:
                         return
