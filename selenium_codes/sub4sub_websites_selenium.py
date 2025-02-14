@@ -1500,7 +1500,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.ID, "connect-btn").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")
+    driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")   
     EVENT.wait(secrets.choice(range(1, 4)))
     
     def watch_loop(hours_time: int) -> None:
@@ -1509,7 +1509,7 @@ def pandalikes_functions(req_dict: dict) -> None:
         future = now + hours_added
         logging.info("Watch Loop Started")
         yt_resolution_lowered = False
-        ways_of_earning = ["Youtube Watch 56s","Youtube Watch shorts", "Tiktok Watch"]
+        ways_of_earning = ["Youtube Watch 56s", "Youtube Watch shorts", "Tiktok Watch", "Panda Surf"]
         way = 0
         i = 1
         driver.execute_script("window.scrollTo(0, 600)")
@@ -1529,11 +1529,19 @@ def pandalikes_functions(req_dict: dict) -> None:
                 if datetime.now() > future:
                     logging.info("Time limit reached, ending watch loop.")
                     return                    
-                if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0:
+                if way > len(ways_of_earning) - 1:
+                        return
+                if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0 and ways_of_earning[way] != "Panda Surf":
                     logging.info("No more %s videos to watch", ways_of_earning[way])
                     way+=1
                     if way > len(ways_of_earning) - 1:
                         return
+                    if ways_of_earning[way] == "Panda Surf":
+                        driver.get("https://pandalikes.xyz/index.php?page=module&md=surf")
+                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
+                    if ways_of_earning[way] == "Youtube Watch 56s":
+                        driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")
+                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                     if ways_of_earning[way] == "Youtube Watch shorts":
                         driver.get("https://pandalikes.xyz/?page=module&md=yfav")
                         driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
@@ -1541,21 +1549,57 @@ def pandalikes_functions(req_dict: dict) -> None:
                         driver.get("https://pandalikes.xyz/?page=module&md=tiktokviews") 
                         driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
                     continue    
-                try:
-                    driver.switch_to.window(driver.window_handles[0])
-                    driver.switch_to.default_content()
-                    EVENT.wait(secrets.choice(range(2, 4)))   
-                    current_url = driver.current_url
-                    ActionChains(driver, 1000).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
-                except (JavascriptException, ElementNotInteractableException):
-                    driver.refresh()
-                    i+=1
-                    if i >= 5:
-                        logging.info("Repeated Javascript Errors Closing Website")
-                        return
-                    continue
+                if len(driver.find_elements(By.CLASS_NAME, "visit_button")) > 0 and ways_of_earning[way] != "Panda Surf":
+                    try:
+                        driver.switch_to.window(driver.window_handles[0])
+                        driver.switch_to.default_content()
+                        EVENT.wait(secrets.choice(range(2, 4)))   
+                        current_url = driver.current_url
+                        ActionChains(driver, 1000).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
+                    except (JavascriptException, ElementNotInteractableException):
+                        driver.refresh()
+                        i+=1
+                        if i >= 5:
+                            logging.info("Repeated Javascript Errors Closing Website")
+                            return
+                        continue
                 i = 1
                 EVENT.wait(secrets.choice(range(2, 4)))
+                if ways_of_earning[way] == "Panda Surf":
+                    ActionChains(driver, 1000).move_to_element(driver.find_elements(By.ID, "surfButton")[0]).click().perform()
+                    EVENT.wait(secrets.choice(range(5, 7)))
+                    r = 0
+                    while True:
+                            if len(driver.window_handles) > 3:
+                                driver.switch_to.window(driver.window_handles[-2])
+                                driver.close()
+                                driver.switch_to.window(driver.window_handles[0])
+                            EVENT.wait(15) 
+                            if "Please keep the window open" in driver.find_element(By.CSS_SELECTOR, "#surfInfo > div > font > font").text:
+                                while len(driver.window_handles) > 1:
+                                    driver.switch_to.window(driver.window_handles[-1])
+                                    driver.close()
+                                    driver.switch_to.window(driver.window_handles[-1])
+                                    EVENT.wait(3)
+                                r+=1
+                            if r>4:
+                                way+=1
+                                break
+                            try:
+                                ActionChains(driver, 1000).move_to_element(driver.find_elements(By.ID, "surfButton")[0]).click().perform()
+                            except Exception as ex:
+                                logging.info("Exception Type: %s", type(ex).__name__)
+                                logging.info("Exception Message: %s", ex)
+                                tb = ex.__traceback__
+                                while tb is not None:
+                                    filename = tb.tb_frame.f_code.co_filename
+                                    lineno = tb.tb_lineno
+                                    func_name = tb.tb_frame.f_code.co_name
+                                    logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
+                                    tb = tb.tb_next  
+                                    driver.save_screenshot("screenshots/screenshot.png")
+                                break
+                    continue
                 if ways_of_earning[way] == "Tiktok Watch":
                     if len(driver.window_handles) > 1:
                         while len(driver.window_handles) > 1:
@@ -1597,7 +1641,6 @@ def pandalikes_functions(req_dict: dict) -> None:
                 try:
                     WebDriverWait(driver, 80).until(ec.element_to_be_clickable((By.CLASS_NAME, "text-danger")))
                     EVENT.wait(secrets.choice(range(1, 3)))
-                    # ActionChains(driver, 1000).move_to_element(driver.find_element(By.CLASS_NAME, "text-danger")).click().perform()
                     driver.find_element(By.CLASS_NAME, "text-danger").click()
                 except (NoSuchElementException, TimeoutException):
                     driver.switch_to.window(driver.window_handles[0])
@@ -1771,15 +1814,31 @@ def traffup_functions(req_dict: dict) -> None:
                         skip = False
                         ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(3, 5)))
+                    try:
+                        if "No records found." in driver.find_element(By.CSS_SELECTOR, "#main > p").text:
+                            logging.info("Exhausted watchable YouTube videos")
+                            way+=1
+                            i = 0
+                            if way > len(ways_of_earning) - 1:
+                                return
+                            if ways_of_earning[way] == "Website Visit":
+                                driver.get("https://traffup.net/websites/")
+                                continue
+                    except NoSuchElementException:
+                        pass
                     ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "new_act_btn")[0]).click().perform()
                     EVENT.wait(secrets.choice(range(3, 5)))
                     driver.switch_to.window(driver.window_handles[1])
                     try:
                         driver.switch_to.frame("player")
                     except:
-                        driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
-                        skip = True
-                        continue
+                        try:
+                            skip = True
+                            driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
+                            continue
+                        except NoSuchElementException:
+                             driver.close()
+                             continue
                     if not yt_resolution_lowered and ways_of_earning[way] == "Youtube Watch":
                         yt_resolution_lowered = yt_change_resolution(driver, website='traffup')
                     if len(driver.find_elements(By.CSS_SELECTOR, "#movie_player > div.ytp-error > div.ytp-error-content > div.ytp-error-content-wrap > div.ytp-error-content-wrap-reason > span")) > 0:
