@@ -1779,7 +1779,20 @@ def traffup_functions(req_dict: dict) -> None:
                                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
                             except (NoSuchElementException, ElementNotInteractableException):
                                 pass
-                            ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
+                            try:
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
+                            except IndexError:
+                                driver.get("https://traffup.net/websites/")
+                                EVENT.wait(secrets.choice(range(3, 5)))
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "ico_reporting")[0]).click().perform()
+                                EVENT.wait(secrets.choice(range(2, 4)))
+                                ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#rep_1 > td:nth-child(1) > input[type=radio]")).click().perform()
+                                EVENT.wait(secrets.choice(range(1, 3)))
+                                ActionChains(driver).move_to_element(driver.find_element(By.CLASS_NAME, "btn_small")).click().perform()
+                                EVENT.wait(secrets.choice(range(1, 3)))
+                                ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
+                                i = 0
+                                continue
                             continue
                         
                         try:
