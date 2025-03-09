@@ -21,8 +21,6 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 1. While editing the config.ini file make sure to add GitHub token to speed up general code speed.
 
 ## Included sub4sub Websites
-### Type 2 Websites(Requires Google Login) 
-[![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites 
 [![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Pandalikes](https://i.imgur.com/UFdUYzP.png)](https://pandalikes.xyz/?ref=34939) [![traffup](https://i.imgur.com/brIRpUl.png)](https://traffup.net/free/?rf=416827789)
 <div style="text-align: center;">
@@ -43,6 +41,8 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 ## Inactive Websites
 ### Type 1 Websites(Requires Google Login) 
 [![SubPals](https://i.imgur.com/LDLXnc3.png)](https://www.subpals.com/) [![SoNuker](https://i.imgur.com/6aiqMqU.png)](https://www.sonuker.com/) [![YTpals](https://i.imgur.com/Mshkf4A.png)](https://www.ytpals.com/) 
+### Type 2 Websites(Requires Google Login) 
+[![subsribers.video](https://i.imgur.com/wkV0Jwr.png)](https://www.subscribers.video/) [![submenow](https://i.imgur.com/mezgkwJ.png)](https://www.submenow.com/)
 ### Undefined Type Websites
 [![view2be](https://i.imgur.com/t3ZQzp6.png)](https://www.view2.be/) 
 
