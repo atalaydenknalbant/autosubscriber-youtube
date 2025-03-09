@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
-    UnexpectedAlertPresentException, ElementNotInteractableException, ElementClickInterceptedException, \
+    ElementNotInteractableException, ElementClickInterceptedException, \
     NoSuchWindowException, JavascriptException, NoSuchFrameException
 from requests.exceptions import ReadTimeout
 from selenium.webdriver.common.keys import Keys
