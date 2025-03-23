@@ -275,8 +275,8 @@ def ytmonster_functions(req_dict: dict) -> None:
                 driver.switch_to.new_window('window')
             driver.get("https://www.ytmonster.net/client")
             driver.set_window_size(1200, 900)
-            EVENT.wait(secrets.choice(range(2, 4)))
-            driver.find_element(By.ID, "startBtn").click()
+            EVENT.wait(secrets.choice(range(3, 5)))
+            ActionChains(driver).move_to_element(driver.find_element(By.ID, "startBtn")).click().perform()
             EVENT.wait(secrets.choice(range(4, 6)))
             if i == 0:
                 while True:
@@ -463,7 +463,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
+    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
@@ -1190,9 +1190,28 @@ def traffup_functions(req_dict: dict) -> None:
                             if ways_of_earning[way] == "Website Visit":
                                 driver.get("https://traffup.net/websites/")
                                 continue
+                        if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
+                            logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                            way+=1
+                            i = 0
+                            if way > len(ways_of_earning) - 1: 
+                                return
+                            if ways_of_earning[way] == "Website Visit":
+                                driver.get("https://traffup.net/websites/")
+                                continue
                     except NoSuchElementException:
                         pass
-                    ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "new_act_btn")[0]).click().perform()
+                    try:
+                        ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "new_act_btn")[0]).click().perform()
+                    except IndexError:
+                        logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                        way+=1
+                        i = 0
+                        if way > len(ways_of_earning) - 1: 
+                            return
+                        if ways_of_earning[way] == "Website Visit":
+                            driver.get("https://traffup.net/websites/")
+                            continue
                     EVENT.wait(secrets.choice(range(3, 5)))
                     driver.switch_to.window(driver.window_handles[1])
                     try:
