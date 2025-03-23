@@ -1111,7 +1111,7 @@ def traffup_functions(req_dict: dict) -> None:
                     logging.info("Time limit reached, ending watch loop.")
                     return                    
                 if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
-                    logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                    logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                     way+=1
                     i = 0
                     if way > len(ways_of_earning) - 1:
@@ -1191,7 +1191,7 @@ def traffup_functions(req_dict: dict) -> None:
                                 driver.get("https://traffup.net/websites/")
                                 continue
                         if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
-                            logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                            logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                             way+=1
                             i = 0
                             if way > len(ways_of_earning) - 1: 
@@ -1204,7 +1204,7 @@ def traffup_functions(req_dict: dict) -> None:
                     try:
                         ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "new_act_btn")[0]).click().perform()
                     except IndexError:
-                        logging.info(f"You have hit hourly limit for {ways_of_earning[way]}")
+                        logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                         way+=1
                         i = 0
                         if way > len(ways_of_earning) - 1: 
