@@ -1154,6 +1154,12 @@ def traffup_functions(req_dict: dict) -> None:
                             logging.info('skipped website')
                         EVENT.wait(secrets.choice(range(5, 7)))
                         try:
+                            WebDriverWait(driver, 3).until(ec.alert_is_present())  
+                            alert = driver.switch_to.alert  
+                            alert.accept()
+                        except TimeoutException:
+                            pass
+                        try:
                             if "traffup" not in driver.current_url:
                                 driver.get("https://traffup.net/websites/")
                                 EVENT.wait(secrets.choice(range(3, 5)))
