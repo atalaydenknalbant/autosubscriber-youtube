@@ -463,7 +463,7 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=False, website='YOULIKEHITS')
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
     driver.switch_to.default_content()
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
@@ -862,7 +862,7 @@ def pandalikes_functions(req_dict: dict) -> None:
         future = now + hours_added
         logging.info("Watch Loop Started")
         yt_resolution_lowered = False
-        ways_of_earning = ["Youtube Watch 56s", "Youtube Watch shorts", "Tiktok Watch", "Panda Surf"]
+        ways_of_earning = ["Youtube Watch 56s", "Youtube Watch shorts", "Tiktok Watch"]
         way = 0
         i = 1
         driver.execute_script("window.scrollTo(0, 600)")
