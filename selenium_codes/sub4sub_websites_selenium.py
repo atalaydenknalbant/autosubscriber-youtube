@@ -847,9 +847,9 @@ def pandalikes_functions(req_dict: dict) -> None:
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.CSS_SELECTOR, "#navbar > ul > div > ul > li:nth-child(2) > a").click()
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Username/Email']").send_keys(req_dict['username_pandalikes'])
+    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Usuário/Email']").send_keys(req_dict['username_pandalikes'])
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Your Password']").send_keys(req_dict['pw_pandalikes'])
+    driver.find_element(By.CSS_SELECTOR, "input[placeholder='Sua Senha']").send_keys(req_dict['pw_pandalikes'])
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.find_element(By.ID, "connect-btn").click()
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -950,7 +950,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                                     func_name = tb.tb_frame.f_code.co_name
                                     logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
                                     tb = tb.tb_next  
-                                    driver.save_screenshot("screenshots/screenshot.png")
+                                    # # driver.save_screenshot("screenshots/screenshot.png")
                                 break
                     continue
                 if ways_of_earning[way] == "Tiktok Watch":
