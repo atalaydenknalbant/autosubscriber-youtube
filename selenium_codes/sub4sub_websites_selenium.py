@@ -4,13 +4,11 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
     NoSuchWindowException, JavascriptException, NoSuchFrameException
-from requests.exceptions import ReadTimeout
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 import logging
-import os
 from threading import Event
 from datetime import datetime, timedelta
 import secrets
@@ -20,6 +18,7 @@ from PIL import Image
 from io import BytesIO
 import re
 import torch
+import gc
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -116,7 +115,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
     - None(NoneType)
     """
     try:
-        if website == "YOULIKEHITS" or website == "pandalikes" or website == "traffup":
+        if website in ('YOULIKEHITS', "pandalikes", "traffup"):
             pass
         else:
             try:
@@ -128,7 +127,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
                     StaleElementReferenceException, NoSuchWindowException):
                 logging.debug('No Ad Found')
                 pass
-        if website == "pandalikes" or website == "traffup":
+        if website in ("pandalikes", "traffup"):
             pass
         else:
             try:
@@ -1047,8 +1046,11 @@ def traffup_functions(req_dict: dict) -> None:
             break
     driver.get("https://traffup.net/youtube/?type=posts&mode=watchtime")    
     EVENT.wait(secrets.choice(range(3, 5)))
-    del captcha_processor
-    del captcha_model
+    captcha_model.to("cpu")                  
+    captcha_processor = None                  
+    captcha_model = None                      
+    torch.cuda.empty_cache()          
+    gc.collect()   
     model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     model.eval()
@@ -1222,7 +1224,7 @@ def traffup_functions(req_dict: dict) -> None:
                     driver.switch_to.window(driver.window_handles[1])
                     try:
                         driver.switch_to.frame("player")
-                    except:
+                    except NoSuchFrameException:
                         try:
                             skip = True
                             driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
@@ -1252,4 +1254,9 @@ def traffup_functions(req_dict: dict) -> None:
                     driver.save_screenshot("screenshots/screenshot.png")
                 break
     watch_loop(14)
+    model.to("cpu")                  
+    processor = None                  
+    model = None                      
+    torch.cuda.empty_cache()          
+    gc.collect()   
     driver.quit()
