@@ -18,7 +18,6 @@ from PIL import Image
 from io import BytesIO
 import re
 import torch
-import gc
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -1049,8 +1048,7 @@ def traffup_functions(req_dict: dict) -> None:
     captcha_model.to("cpu")                  
     captcha_processor = None                  
     captcha_model = None                      
-    torch.cuda.empty_cache()          
-    gc.collect()   
+    torch.cuda.empty_cache()            
     model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     model.eval()
@@ -1254,9 +1252,4 @@ def traffup_functions(req_dict: dict) -> None:
                     driver.save_screenshot("screenshots/screenshot.png")
                 break
     watch_loop(14)
-    model.to("cpu")                  
-    processor = None                  
-    model = None                      
-    torch.cuda.empty_cache()          
-    gc.collect()   
     driver.quit()
