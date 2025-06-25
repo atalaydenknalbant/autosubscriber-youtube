@@ -697,12 +697,12 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.execute_script("window.scrollTo(0, 600)")
         driver.switch_to.window(driver.window_handles[0])
         logging.info("Visit Loop Finished")
-    while_loop_visit(14)
+    
     while_loop_watch(14)
     while_loop_listen(14)
     while_loop_visit(14)
     collect_bonus_points()
-    logging.info("Finished Viewing Videos...")
+    logging.info("Finished Engagements...")
     driver.quit()
 
 
