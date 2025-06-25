@@ -495,14 +495,13 @@ def youlikehits_functions(req_dict: dict) -> None:
     driver.execute_script("window.scrollTo(0, 600);")
 
     def while_loop_watch(hours_time: int) -> None:
+        """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
         logging.info("Watch Loop Started")
-        now = datetime.now()
-        hours_added = timedelta(hours=hours_time)
-        future = now + hours_added
+        start = datetime.now()
+        cutoff = start + timedelta(hours=hours_time)
         yt_resolution_lowered = False
-        # # EVENT.wait(secrets.choice(range(15, 20)))
         while True:
-            if datetime.now() > future:
+            if datetime.now() < cutoff:
                 break
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
@@ -597,15 +596,12 @@ def youlikehits_functions(req_dict: dict) -> None:
                 pass
             # # logging.info('Flag5')
     def while_loop_listen(hours_time: int) -> None:
+        """Listen to tracks by clicking 'followbutton' on /soundcloudplays.php until time runs out"""
         driver.get("https://www.youlikehits.com/soundcloudplays.php")
         logging.info("Listen Loop Started")
-        now = datetime.now()
-        hours_added = timedelta(hours=hours_time)
-        future = now + hours_added
-        # # EVENT.wait(secrets.choice(range(15, 20)))
-        while True:
-            if datetime.now() > future:
-                break
+        start = datetime.now()
+        cutoff = start + timedelta(hours=hours_time)
+        while datetime.now() < cutoff:
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -654,8 +650,57 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.close()
             except IndexError:
                 pass
+    
+    def while_loop_visit(hours_time: int) -> None:
+        """Visit sites by clicking each 'followbutton' on /websites.php until time runs out"""
+        start = datetime.now()
+        cutoff = start + timedelta(hours=hours_time)
+        driver.get("https://www.youlikehits.com/websites.php")
+        EVENT.wait(secrets.choice(range(4, 6)))
+        driver.execute_script("window.scrollTo(0, 600)")
+        logging.info("Visit Loop Started")
+        while datetime.now() < cutoff:
+            driver.switch_to.window(driver.window_handles[0])
+            driver.switch_to.default_content()
+            buttons = driver.find_elements(By.CLASS_NAME, "followbutton")
+            if not buttons:
+                break
+            for btn in buttons:
+                try:
+                    EVENT.wait(secrets.choice(range(2, 4)))
+                    btn.click()
+                    EVENT.wait(0.25)
+                    btn.click()
+                    EVENT.wait(1)
+                    btn.send_keys(Keys.ENTER)
+                except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException, JavascriptException):
+                    EVENT.wait(secrets.choice(range(1, 3)))
+                EVENT.wait(secrets.choice(range(1, 3)))
+                driver.switch_to.window(driver.window_handles[-1])
+                try:
+                    driver.switch_to.frame("frame1")
+                    WebDriverWait(driver, 22).until(
+                        ec.visibility_of_element_located((By.CLASS_NAME, "alert"))
+                    )
+                    driver.switch_to.default_content()
+                except TimeoutException:
+                    driver.switch_to.default_content()
+                try:
+                    WebDriverWait(driver, 2).until(ec.alert_is_present())
+                    driver.switch_to.alert.accept()
+                except TimeoutException:
+                    pass
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+            driver.refresh()
+            EVENT.wait(secrets.choice(range(3, 5)))
+            driver.execute_script("window.scrollTo(0, 600)")
+        driver.switch_to.window(driver.window_handles[0])
+        logging.info("Visit Loop Finished")
+    while_loop_visit(14)
     while_loop_watch(14)
     while_loop_listen(14)
+    while_loop_visit(14)
     collect_bonus_points()
     logging.info("Finished Viewing Videos...")
     driver.quit()
