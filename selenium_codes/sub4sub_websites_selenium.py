@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, JavascriptException, NoSuchFrameException
+    NoSuchWindowException, JavascriptException, NoSuchFrameException, SessionNotCreatedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -177,8 +177,6 @@ def set_driver_opt(req_dict: dict,
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "ytmonster":
         chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
-
-       
     if website == "YOULIKEHITS":
         pass
     else:
@@ -224,8 +222,15 @@ def set_driver_opt(req_dict: dict,
     if undetected:
         driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
         return driver
-    driver = webdriver.Chrome(service=Service(),
+    try:
+        driver = webdriver.Chrome(service=Service(),
                                 options=chrome_options)
+    except SessionNotCreatedException:
+        chrome_options.arguments.remove("--user-data-dir")            
+        chrome_options.arguments.remove("--profile-directory")
+        driver = webdriver.Chrome(service=Service(),
+                                options=chrome_options)
+
     driver.command_executor.set_timeout(1000)
     return driver
 
@@ -481,28 +486,28 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.find_element(By.CLASS_NAME, "buybutton").click()
         except (NoSuchElementException, ElementNotInteractableException):
             EVENT.wait(0.25)
+    
     collect_bonus_points()
-    driver.get("https://www.youlikehits.com/youtubenew2.php")
-    EVENT.wait(secrets.choice(range(4, 6)))
-    try:
-        if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
-                'There are no videos available to view at this time. Try coming back or refreshing.':
-            logging.info('No videos available quitting...')
-            return
-    except NoSuchElementException:
-        EVENT.wait(0.25)
-    EVENT.wait(secrets.choice(range(4, 6)))
-    driver.execute_script("window.scrollTo(0, 600);")
-
+    
     def while_loop_watch(hours_time: int) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
         logging.info("Watch Loop Started")
+        driver.get("https://www.youlikehits.com/youtubenew2.php")
+        EVENT.wait(secrets.choice(range(4, 6)))
+        try:
+            if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
+                    'There are no videos available to view at this time. Try coming back or refreshing.':
+                logging.info('No videos available quitting...')
+                return
+        except NoSuchElementException:
+            EVENT.wait(0.25)
+        EVENT.wait(secrets.choice(range(4, 6)))
+        driver.execute_script("window.scrollTo(0, 600);")
         start = datetime.now()
         cutoff = start + timedelta(hours=hours_time)
         yt_resolution_lowered = False
-        while True:
-            if datetime.now() < cutoff:
-                break
+        logging.info('flag1')
+        while datetime.now() < cutoff:
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -594,7 +599,6 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.close()
             except IndexError:
                 pass
-            # # logging.info('Flag5')
     def while_loop_listen(hours_time: int) -> None:
         """Listen to tracks by clicking 'followbutton' on /soundcloudplays.php until time runs out"""
         driver.get("https://www.youlikehits.com/soundcloudplays.php")
@@ -683,7 +687,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         ec.visibility_of_element_located((By.CLASS_NAME, "alert"))
                     )
                     driver.switch_to.default_content()
-                except TimeoutException:
+                except (TimeoutException, NoSuchFrameException):
                     driver.switch_to.default_content()
                 try:
                     WebDriverWait(driver, 2).until(ec.alert_is_present())
