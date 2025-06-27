@@ -165,7 +165,7 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes", 'traffup'):
+    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes"):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
@@ -222,14 +222,10 @@ def set_driver_opt(req_dict: dict,
     if undetected:
         driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
         return driver
-    try:
-        driver = webdriver.Chrome(service=Service(),
+
+    driver = webdriver.Chrome(service=Service(),
                                 options=chrome_options)
-    except SessionNotCreatedException:
-        chrome_options.arguments.remove("--user-data-dir")            
-        chrome_options.arguments.remove("--profile-directory")
-        driver = webdriver.Chrome(service=Service(),
-                                options=chrome_options)
+
 
     driver.command_executor.set_timeout(1000)
     return driver
@@ -506,7 +502,6 @@ def youlikehits_functions(req_dict: dict) -> None:
         start = datetime.now()
         cutoff = start + timedelta(hours=hours_time)
         yt_resolution_lowered = False
-        logging.info('flag1')
         while datetime.now() < cutoff:
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
