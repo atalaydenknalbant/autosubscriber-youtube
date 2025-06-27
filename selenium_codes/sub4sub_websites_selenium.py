@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, JavascriptException, NoSuchFrameException, SessionNotCreatedException
+    NoSuchWindowException, JavascriptException, NoSuchFrameException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -165,7 +165,7 @@ def set_driver_opt(req_dict: dict,
     """
     # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes"):
+    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes", "traffup"):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
