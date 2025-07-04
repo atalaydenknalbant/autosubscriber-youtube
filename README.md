@@ -5,7 +5,7 @@
 
 
 # autosubscriber-youtube 
-Python Selenium-based automated subscribing, liking, viewing functions for youtube sub4sub websites.
+A Python Selenium framework autonomously handles YouTube channel subscriptions video likes and simulated views on sub4sub websites.
 
 ## Warning
 If you are using Linux or Ubuntu it might delete your saved passwords and autofills make sure backup those credentials.
