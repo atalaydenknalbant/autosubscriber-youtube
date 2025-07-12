@@ -950,7 +950,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                 )
                 nums = re.findall(r"\d+", q_el.text)
                 if len(nums) < 2:
-                    raise ValueError(f"Couldn’t parse numbers from {q_el.text!r}")
+                    raise ValueError("Couldn’t parse numbers from %r", q_el.text)
                 a, b = map(int, nums[:2])
                 ans = a + b
 
@@ -965,6 +965,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                                                 "//button[@type='submit' and normalize-space(text())='Submit']").click()
 
                 logging.info(f"Solved math prompt: {a} + {b} = {ans}")
+                logging.info("Solved math prompt: %d + %d = %d", a, b, ans)
                 EVENT.wait(secrets.choice(range(3, 5)))
 
             except (NoSuchElementException, ElementNotInteractableException):
@@ -994,7 +995,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                     )
                     nums = re.findall(r"\d+", q_el.text)
                     if len(nums) < 2:
-                        raise ValueError(f"Couldn’t parse numbers from {q_el.text!r}")
+                        raise ValueError("Couldn’t parse numbers from %r", q_el.text)
+                    logging.info("Solved math prompt: %d + %d = %d", a, b, ans)
                     a, b = map(int, nums[:2])
                     ans = a + b
 
@@ -1093,6 +1095,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                 total_sec   = to_seconds(total_str)
                 prev_sec    = start_sec
                 logging.info(f"[Monitor] Video total {total_sec}s, starting at {start_sec}s")
+                logging.info("[Monitor] Video total %ds, starting at %ds", total_sec, start_sec)
 
                 last_change = datetime.now()
 
@@ -1112,19 +1115,23 @@ def pandalikes_functions(req_dict: dict) -> None:
 
                     elapsed_sec = curr_sec - start_sec
                     logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
+                    logging.debug("[Monitor] curr_sec=%d, elapsed=%ds", curr_sec, elapsed_sec)
 
                     if curr_sec > prev_sec:
                         logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
+                        logging.info("[Monitor] advanced %ds -> %ds", prev_sec, curr_sec)
                         prev_sec    = curr_sec
                         last_change = now
 
                     elif (now - last_change).total_seconds() > 3:
                         logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
+                        logging.warning("[Monitor] stalled at %ds - replaying", prev_sec)
                         play_btn[0].send_keys(Keys.ENTER)
                         last_change = now
 
                     if elapsed_sec >= total_sec:
                         logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
+                        logging.info("[Monitor] reached total (%ds >= %ds)", elapsed_sec, total_sec)
                         break        
                 logging.info("[Monitor] waiting for timer span to disappear")
                 try:
@@ -1137,7 +1144,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                 except TimeoutException:
                     logging.warning("[Monitor] span still present proceeding anyway")
         except Exception as e:
-            logging.error(f"Error during watch loop: {e}")
+            logging.error("Error during watch loop: %s", e)
             driver.save_screenshot("screenshots/screenshot.png")
 
 
@@ -1156,10 +1163,10 @@ def pandalikes_functions(req_dict: dict) -> None:
         for btn in claim_buttons:
             try:
                 btn.click()
-                logging.info(f"Claimed marathon bonus: {btn.text}")
+                logging.info("Claimed marathon bonus: %s", btn.text)
                 EVENT.wait(secrets.choice(range(1, 3)))
             except Exception as e:
-                logging.warning(f"Couldn't click {btn.text}: {e}")
+                logging.warning("Couldn't click %s: %s", btn.text, e)
 
     except (NoSuchElementException, ElementClickInterceptedException):
         # # driver.save_screenshot("screenshots/screenshot.png")
