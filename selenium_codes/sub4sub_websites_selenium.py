@@ -126,7 +126,7 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
                     StaleElementReferenceException, NoSuchWindowException):
                 logging.debug('No Ad Found')
                 pass
-        if website in ("pandalikes", "traffup"):
+        if website == "traffup":
             pass
         else:
             try:
@@ -144,7 +144,8 @@ def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str 
                                                      f"//span[contains(string(),'{resolution}p')]"))) \
             .click()
     except (TimeoutException, ElementClickInterceptedException, ElementNotInteractableException,
-            StaleElementReferenceException, AttributeError, NoSuchWindowException):
+            StaleElementReferenceException, AttributeError, NoSuchWindowException, NoSuchFrameException):
+        # # logging.info("Couldn't Change Resolution")
         return False
     return True
 
@@ -163,9 +164,8 @@ def set_driver_opt(req_dict: dict,
     Returns:
     - webdriver: returns driver with options already added to it.
     """
-    # Chrome
     chrome_options = webdriver.ChromeOptions()
-    if website in ("ytmonster", "YOULIKEHITS", "view2be", "pandalikes", "traffup"):
+    if website in ("ytmonster", "YOULIKEHITS", "pandalikes", "view2be", "traffup"):
         pass
     else:
         chrome_options.add_argument(f"--user-data-dir={req_dict['chrome_userdata_directory']}")
@@ -211,6 +211,7 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--disable-features=Translate")
         chrome_options.add_argument("--no-default-browser-check")
         chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--force-device-scale-factor=1")
         chrome_options.add_argument("--disable-search-engine-choice-screen")
         chrome_options.add_argument("--ash-no-nudges")
         chrome_options.add_argument("--disable-gpu")  
@@ -505,6 +506,15 @@ def youlikehits_functions(req_dict: dict) -> None:
         while datetime.now() < cutoff:
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
+            try:
+                driver.find_element(
+                    By.XPATH,
+                    "//td[contains(@class,'maintableheader') and normalize-space(text())='Views Limit Reached']"
+                )
+                logging.info("Views limit banner found skip watch loop")
+                return
+            except NoSuchElementException:
+                pass              
             try:
                 if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
                         'There are no videos available to view at this time. Try coming back or refreshing.':
@@ -885,175 +895,283 @@ def pandalikes_functions(req_dict: dict) -> None:
     """
     driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
     driver.implicitly_wait(12)
-    driver.get("https://pandalikes.xyz/")  # Type_Undefined
+    driver.get("https://pandalikes.pro/")  # Type_Undefined
+    driver.execute_cdp_cmd("Emulation.setDeviceMetricsOverride", {
+    "mobile": False,
+    "width": 1920,
+    "height": 1080,
+    "deviceScaleFactor": 1,
+    })
+    EVENT.wait(secrets.choice(range(3, 5)))
+    ActionChains(driver).send_keys(Keys.ESCAPE).perform()
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "#navbar > ul > div > ul > li:nth-child(2) > a").click()
+    driver.find_element(By.CLASS_NAME, "px-3").send_keys(Keys.ENTER)
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "#login_box > div > div > div > div.col-lg-12.col-sm-12.col-12.form-input > form > div:nth-child(3) > div > input").send_keys(req_dict['username_pandalikes'])
+    driver.find_element(By.ID, "login-username").send_keys(req_dict['username_pandalikes'])
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.CSS_SELECTOR, "#login_box > div > div > div > div.col-lg-12.col-sm-12.col-12.form-input > form > div:nth-child(4) > div > input").send_keys(req_dict['pw_pandalikes'])
+    driver.find_element(By.ID, "login-password").send_keys(req_dict['pw_pandalikes'])
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.find_element(By.ID, "connect-btn").click()
-    EVENT.wait(secrets.choice(range(1, 4)))
-    driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")   
-    EVENT.wait(secrets.choice(range(1, 4)))
-    
+    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").send_keys(Keys.ENTER)
+    try:
+        watch_btn = WebDriverWait(driver, 50).until(
+            ec.element_to_be_clickable(
+                (By.XPATH, "//button[normalize-space(.)='Watch']")
+            )
+        )
+        watch_btn.send_keys(Keys.ENTER)
+    except TimeoutException:
+        return
+    EVENT.wait(secrets.choice(range(3, 5)))
+
+        
     def watch_loop(hours_time: int) -> None:
         now = datetime.now()
-        hours_added = timedelta(hours=hours_time)
-        future = now + hours_added
+        future = now + timedelta(hours=hours_time)
         logging.info("Watch Loop Started")
+
         yt_resolution_lowered = False
-        ways_of_earning = ["Youtube Watch 56s", "Youtube Watch shorts", "Tiktok Watch"]
-        way = 0
-        i = 1
         driver.execute_script("window.scrollTo(0, 600)")
-        def youtube_skip_video(current_way: str) -> None:
-            try:
-                if current_way == "Youtube Watch 56s":
-                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-danger.mb-1.w-100").click()
-                elif current_way == "Youtube Watch shorts":
-                    driver.find_element(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > a.btn.btn-sm.btn-dangerz.mb-1.w-100").click()
-            except (NoSuchElementException, TimeoutException):
-                pass
+        try:
+            claim_btn = WebDriverWait(driver, 5).until(
+            ec.element_to_be_clickable((
+                By.XPATH,
+                "//button[contains(@class, 'bg-green-500') and contains(@class, 'text-white') and normalize-space()='Claim 10 Pans']"
+            ))
+        )
+            claim_btn.send_keys(Keys.ENTER)
+        except (TimeoutException, NoSuchElementException):
+            pass
+
         while True:
             try:
-                EVENT.wait(secrets.choice(range(2, 4)))
+                q_el = driver.find_element(
+                        By.XPATH,
+                                    "//p[contains(@class,'text-4xl') and contains(@class,'font-bold') and contains(@class,'tracking-widest') and contains(@class,'text-white')]"
+                )
+                nums = re.findall(r"\d+", q_el.text)
+                if len(nums) < 2:
+                    raise ValueError(f"Couldn’t parse numbers from {q_el.text!r}")
+                a, b = map(int, nums[:2])
+                ans = a + b
+
+                inp = driver.find_element(
+                    By.XPATH,
+                    "//input[@type='number' and @placeholder='Your answer']"
+                )
+
+                inp.clear()
+                inp.send_keys(str(ans))
+                driver.find_element( By.XPATH,
+                                                "//button[@type='submit' and normalize-space(text())='Submit']").click()
+
+                logging.info(f"Solved math prompt: {a} + {b} = {ans}")
+                EVENT.wait(secrets.choice(range(3, 5)))
+
+            except (NoSuchElementException, ElementNotInteractableException):
+                break
+
+
+        try:
+            WebDriverWait(driver, 5) \
+                .until(ec.visibility_of_element_located((By.XPATH, "/html/body/div/div[1]/main/div/div/div[4]/div/div/div/button[3]"))).send_keys(Keys.ENTER)
+            EVENT.wait(secrets.choice(range(1, 4)))
+        except TimeoutException:
+            pass
+        
+        def to_seconds(mmss: str) -> int:
+            m, s = mmss.split(":")
+            return int(m) * 60 + int(s)
+
+        try:
+            while datetime.now() < future:
+                
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
-                if datetime.now() > future:
-                    logging.info("Time limit reached, ending watch loop.")
-                    return                    
-                if way > len(ways_of_earning) - 1:
-                        return
-                if len(driver.find_elements(By.CLASS_NAME, "visit_button")) == 0 and ways_of_earning[way] != "Panda Surf":
-                    logging.info("No more %s videos to watch", ways_of_earning[way])
-                    way+=1
-                    if way > len(ways_of_earning) - 1:
-                        return
-                    if ways_of_earning[way] == "Panda Surf":
-                        driver.get("https://pandalikes.xyz/index.php?page=module&md=surf")
-                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
-                    if ways_of_earning[way] == "Youtube Watch 56s":
-                        driver.get("https://pandalikes.xyz/index.php?page=module&md=youtube")
-                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
-                    if ways_of_earning[way] == "Youtube Watch shorts":
-                        driver.get("https://pandalikes.xyz/?page=module&md=yfav")
-                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
-                    if ways_of_earning[way] == "Tiktok Watch":
-                        driver.get("https://pandalikes.xyz/?page=module&md=tiktokviews") 
-                        driver.execute_script("window.scrollTo(0, -document.body.scrollHeight)")
-                    continue    
-                if len(driver.find_elements(By.CLASS_NAME, "visit_button")) > 0 and ways_of_earning[way] != "Panda Surf":
-                    try:
-                        driver.switch_to.window(driver.window_handles[0])
-                        driver.switch_to.default_content()
-                        EVENT.wait(secrets.choice(range(2, 4)))   
-                        current_url = driver.current_url
-                        ActionChains(driver, 1000).move_to_element(driver.find_elements(By.CLASS_NAME, "visit_button")[0]).click().perform()
-                    except (JavascriptException, ElementNotInteractableException):
-                        driver.refresh()
-                        i+=1
-                        if i >= 5:
-                            logging.info("Repeated Javascript Errors Closing Website")
-                            return
-                        continue
-                i = 1
-                EVENT.wait(secrets.choice(range(2, 4)))
-                if ways_of_earning[way] == "Panda Surf":
-                    ActionChains(driver, 1000).move_to_element(driver.find_elements(By.ID, "surfButton")[0]).click().perform()
-                    EVENT.wait(secrets.choice(range(5, 7)))
-                    r = 0
-                    while True:
-                            if len(driver.window_handles) > 3:
-                                driver.switch_to.window(driver.window_handles[-2])
-                                driver.close()
-                                driver.switch_to.window(driver.window_handles[0])
-                            EVENT.wait(15) 
-                            if "Please keep the window open" in driver.find_element(By.CSS_SELECTOR, "#surfInfo > div > font > font").text:
-                                while len(driver.window_handles) > 1:
-                                    driver.switch_to.window(driver.window_handles[-1])
-                                    driver.close()
-                                    driver.switch_to.window(driver.window_handles[-1])
-                                    EVENT.wait(3)
-                                r+=1
-                            if r>4:
-                                way+=1
-                                break
-                            try:
-                                ActionChains(driver, 1000).move_to_element(driver.find_elements(By.ID, "surfButton")[0]).click().perform()
-                            except Exception as ex:
-                                logging.info("Exception Type: %s", type(ex).__name__)
-                                logging.info("Exception Message: %s", ex)
-                                tb = ex.__traceback__
-                                while tb is not None:
-                                    filename = tb.tb_frame.f_code.co_filename
-                                    lineno = tb.tb_lineno
-                                    func_name = tb.tb_frame.f_code.co_name
-                                    logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
-                                    tb = tb.tb_next  
-                                    # # driver.save_screenshot("screenshots/screenshot.png")
-                                break
+                try:
+                    q_el = driver.find_element(
+                            By.XPATH,
+                                    "//p[contains(@class,'text-4xl') and contains(@class,'font-bold') and contains(@class,'tracking-widest') and contains(@class,'text-white')]"
+                    )
+                    nums = re.findall(r"\d+", q_el.text)
+                    if len(nums) < 2:
+                        raise ValueError(f"Couldn’t parse numbers from {q_el.text!r}")
+                    a, b = map(int, nums[:2])
+                    ans = a + b
+
+                    inp = driver.find_element(
+                        By.CSS_SELECTOR, "input[placeholder='Your answer']"
+                    )
+                    inp.clear()
+                    inp.send_keys(str(ans))
+                    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+
+                    logging.info(f"Solved math prompt: {a} + {b} = {ans}")
+                    EVENT.wait(secrets.choice(range(1, 4)))
                     continue
-                if ways_of_earning[way] == "Tiktok Watch":
-                    if len(driver.window_handles) > 1:
-                        while len(driver.window_handles) > 1:
-                            EVENT.wait(secrets.choice(range(2, 4)))
-                        driver.switch_to.window(driver.window_handles[0])
-                        driver.switch_to.default_content()
-                        continue
-                    else:
-                        try: 
-                            driver.switch_to.window(driver.window_handles[1])
-                            driver.close()
-                        except (NoSuchWindowException, IndexError):
-                            pass
-                        continue
-                if ways_of_earning[way] == "Youtube Watch shorts" or ways_of_earning[way] == "Youtube Watch 56s":
-                    for x in range(3):
-                        if current_url != driver.current_url and len(driver.find_elements(By.CSS_SELECTOR, "#blue-box > div.infobox.text-center > h3 > font > font")) > 0:
+                except NoSuchElementException:
+                    pass
+                try:
+                    claim_btn = WebDriverWait(driver, 2).until(
+                    ec.element_to_be_clickable((
+                        By.XPATH,
+                            "//button[contains(@class, 'bg-green-500') and contains(@class, 'text-white') and normalize-space()='Claim 10 Pans']"
+                        ))
+                    )
+                    claim_btn.send_keys(Keys.ENTER)
+                except (TimeoutException, NoSuchElementException):
+                    pass
+
+
+                tiles = driver.find_elements(
+                    By.XPATH,
+                    "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
+                )
+                if not tiles:
+                    try:
+                        load_more = driver.find_element(
+                            By.XPATH, "//button[normalize-space(text())='Load More']"
+                        )
+                        logging.info("No tiles – clicking Load More")
+                        driver.execute_script("arguments[0].scrollIntoView(true);", load_more)
+                        load_more.click()
+                        EVENT.wait(secrets.choice(range(2, 5)))
+
+                        # Retry getting tiles
+                        tiles = driver.find_elements(
+                            By.XPATH,
+                            "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
+                        )
+                        if not tiles:
+                            logging.warning("Still no tiles after Load More - exiting")
+
                             break
-                        EVENT.wait(secrets.choice(range(2, 4)))
-                    if x==2:
-                        continue
+                    except NoSuchElementException:
+                        logging.warning("Load More button not found - exiting")
+                        # # driver.save_screenshot("screenshots/no_tiles.png")
+                        break
+
+                tile = tiles[0]
+                ActionChains(driver).move_to_element(tile).click().perform()
+                EVENT.wait(secrets.choice(range(2, 4)))
+                ActionChains(driver).move_to_element(tile).click().perform()
+                EVENT.wait(secrets.choice(range(2, 4)))
                 driver.execute_script("window.scrollTo(0, 600)")
                 try:
-                    driver.switch_to.frame("ytPlayer")
-                except NoSuchFrameException:
-                    youtube_skip_video(ways_of_earning[way])
+                    logging.info("Clicking play button")
+                    play_btn = driver.find_elements(
+                        By.XPATH,      "//button[contains(@class, 'inline-flex') and contains(@class, 'text-purple-200') and contains(@class, 'bg-purple-600') and contains(@class, 'border-purple-500/30')]"
+
+                    )
+                    play_btn[0].send_keys(Keys.ENTER)
+                except (NoSuchElementException, IndexError):
+                    logging.info("Play button not found, skipping")
                     continue
-                EVENT.wait(secrets.choice(range(2, 4)))  
-                try:
-                    if ways_of_earning[way] == "Youtube Watch 56s" or ways_of_earning[way] == "Youtube Watch shorts":
-                        ActionChains(driver, 1000).move_to_element(driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg")).click().perform()
-                    if not yt_resolution_lowered and ways_of_earning[way] == "Youtube Watch 56s":
-                        yt_resolution_lowered = yt_change_resolution(driver, website='pandalikes')
-                except (NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException, JavascriptException):
-                    driver.switch_to.default_content()
-                    youtube_skip_video(ways_of_earning[way])
-                    continue                                                                                        
-                driver.switch_to.default_content()
-                try:
-                    WebDriverWait(driver, 80).until(ec.element_to_be_clickable((By.CLASS_NAME, "text-danger")))
-                    EVENT.wait(secrets.choice(range(1, 3)))
-                    driver.find_element(By.CLASS_NAME, "text-danger").click()
-                except (NoSuchElementException, TimeoutException):
+
+                EVENT.wait(secrets.choice(range(1, 4)))
+
+                if len(driver.window_handles) > 1:
+                    driver.switch_to.window(driver.window_handles[-1])
+                    EVENT.wait(15)
+                    driver.close()
                     driver.switch_to.window(driver.window_handles[0])
-                    youtube_skip_video(ways_of_earning[way])   
                     continue
-            except Exception as ex:
-                logging.info("Exception Type: %s", type(ex).__name__)
-                logging.info("Exception Message: %s", ex)
-                tb = ex.__traceback__
-                while tb is not None:
-                    filename = tb.tb_frame.f_code.co_filename
-                    lineno = tb.tb_lineno
-                    func_name = tb.tb_frame.f_code.co_name
-                    logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
-                    tb = tb.tb_next  
-                    driver.save_screenshot("screenshots/screenshot.png")
-                break
+
+
+                if not yt_resolution_lowered:
+                    try:
+                        frame = driver.find_element(By.ID, "video-player")
+                        driver.switch_to.frame(frame)
+                        yt_resolution_lowered = yt_change_resolution(driver, website="pandalikes")
+                    except NoSuchElementException:
+                        logging.info("Video player frame not found, skipping")
+
+                    
+                driver.switch_to.default_content()
+                raw         = driver.find_element(By.CSS_SELECTOR, "span.text-xs.font-mono").text
+                current_str, total_str = (p.strip() for p in raw.split("/"))
+                start_sec   = to_seconds(current_str)
+                total_sec   = to_seconds(total_str)
+                prev_sec    = start_sec
+                logging.info(f"[Monitor] Video total {total_sec}s, starting at {start_sec}s")
+
+                # 2) set up stall watchdog
+                last_change = datetime.now()
+
+                # 3) loop until span-derived elapsed reaches total
+                logging.info("[Monitor] Entering span-based timer loop")
+                while True:
+                    EVENT.wait(2)
+                    now = datetime.now()
+
+                    # read current displayed seconds
+                    try:
+                        raw      = driver.find_element(
+                            By.CSS_SELECTOR, "span.text-xs.font-mono"
+                        ).text
+                        curr_sec = to_seconds(raw.split("/")[0].strip())
+                    except NoSuchElementException:
+                        logging.info("[Monitor] Timer span vanished - exiting monitor")
+                        break
+
+                    elapsed_sec = curr_sec - start_sec
+                    logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
+
+                    # detect real progress
+                    if curr_sec > prev_sec:
+                        logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
+                        prev_sec    = curr_sec
+                        last_change = now
+
+                    # if display stalls for >3s, re-play
+                    elif (now - last_change).total_seconds() > 3:
+                        logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
+                        play_btn[0].send_keys(Keys.ENTER)
+                        last_change = now
+
+                    # break when span-derived elapsed meets total
+                    if elapsed_sec >= total_sec:
+                        logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
+                        break        
+                logging.info("[Monitor] waiting for timer span to disappear")
+                try:
+                    WebDriverWait(driver, 3).until(
+                        ec.invisibility_of_element_located(
+                            (By.CSS_SELECTOR, "span.text-xs.font-mono")
+                        )
+                    )
+                    logging.info("[Monitor] span gone - proceeding")
+                except TimeoutException:
+                    logging.warning("[Monitor] span still present proceeding anyway")
+        except Exception as e:
+            logging.error(f"Error during watch loop: {e}")
+            driver.save_screenshot("screenshots/screenshot.png")
+
+
+
     watch_loop(14)
+    try:
+        # 1) open the Marathons panel
+        marathon_toggle = driver.find_element(By.CLASS_NAME, "py-3")
+        marathon_toggle.click()
+        EVENT.wait(secrets.choice(range(1, 3)))
+
+        # 2) find all Claim-Bonus buttons with non-zero rewards
+        claim_buttons = driver.find_elements(
+            By.XPATH,
+            "//button[contains(text(),'Claim Bonus') and not(contains(text(),'(0)'))]"
+        )
+
+        for btn in claim_buttons:
+            try:
+                btn.click()
+                logging.info(f"Claimed marathon bonus: {btn.text}")
+                EVENT.wait(secrets.choice(range(1, 3)))
+            except Exception as e:
+                logging.warning(f"Couldn't click {btn.text}: {e}")
+
+    except (NoSuchElementException, ElementClickInterceptedException):
+        # # driver.save_screenshot("screenshots/screenshot.png")
+        logging.info("Marathons panel or claim buttons not found - skipping")
     driver.quit()
 
 def traffup_functions(req_dict: dict) -> None:
@@ -1275,7 +1393,7 @@ def traffup_functions(req_dict: dict) -> None:
                              driver.close()
                              continue
                     if not yt_resolution_lowered and ways_of_earning[way] == "Youtube Watch":
-                        yt_resolution_lowered = yt_change_resolution(driver, website='traffup')
+                        yt_resolution_lowered = yt_change_resolution(driver, resolution = 240, website= 'traffup')
                     if len(driver.find_elements(By.CSS_SELECTOR, "#movie_player > div.ytp-error > div.ytp-error-content > div.ytp-error-content-wrap > div.ytp-error-content-wrap-reason > span")) > 0:
                         driver.switch_to.default_content()
                         driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
@@ -1297,3 +1415,4 @@ def traffup_functions(req_dict: dict) -> None:
                 break
     watch_loop(14)
     driver.quit()
+    

@@ -22,7 +22,7 @@ Some websites require Google login; due to this fact, you can’t run an instanc
 
 ## Included sub4sub Websites
 ### Undefined Type Websites 
-[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Pandalikes](https://i.imgur.com/UFdUYzP.png)](https://pandalikes.xyz/?ref=34939) [![traffup](https://i.imgur.com/brIRpUl.png)](https://traffup.net/free/?rf=416827789)
+[![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1) [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892) [![Pandalikes](https://i.imgur.com/lhZwFuK.png)](https://pandalikes.xyz/?ref=34939) [![traffup](https://i.imgur.com/brIRpUl.png)](https://traffup.net/free/?rf=416827789)
 <div style="text-align: center;">
     <div style="display: inline-block; margin-right: 20px;">
         <h3>Requires Google Login</h3>
