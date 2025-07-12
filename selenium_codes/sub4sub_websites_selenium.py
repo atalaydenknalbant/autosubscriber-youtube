@@ -1094,16 +1094,13 @@ def pandalikes_functions(req_dict: dict) -> None:
                 prev_sec    = start_sec
                 logging.info(f"[Monitor] Video total {total_sec}s, starting at {start_sec}s")
 
-                # 2) set up stall watchdog
                 last_change = datetime.now()
 
-                # 3) loop until span-derived elapsed reaches total
                 logging.info("[Monitor] Entering span-based timer loop")
                 while True:
                     EVENT.wait(2)
                     now = datetime.now()
 
-                    # read current displayed seconds
                     try:
                         raw      = driver.find_element(
                             By.CSS_SELECTOR, "span.text-xs.font-mono"
@@ -1116,19 +1113,16 @@ def pandalikes_functions(req_dict: dict) -> None:
                     elapsed_sec = curr_sec - start_sec
                     logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
 
-                    # detect real progress
                     if curr_sec > prev_sec:
                         logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
                         prev_sec    = curr_sec
                         last_change = now
 
-                    # if display stalls for >3s, re-play
                     elif (now - last_change).total_seconds() > 3:
                         logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
                         play_btn[0].send_keys(Keys.ENTER)
                         last_change = now
 
-                    # break when span-derived elapsed meets total
                     if elapsed_sec >= total_sec:
                         logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
                         break        
@@ -1150,12 +1144,10 @@ def pandalikes_functions(req_dict: dict) -> None:
 
     watch_loop(14)
     try:
-        # 1) open the Marathons panel
         marathon_toggle = driver.find_element(By.CLASS_NAME, "py-3")
         marathon_toggle.click()
         EVENT.wait(secrets.choice(range(1, 3)))
 
-        # 2) find all Claim-Bonus buttons with non-zero rewards
         claim_buttons = driver.find_elements(
             By.XPATH,
             "//button[contains(text(),'Claim Bonus') and not(contains(text(),'(0)'))]"
