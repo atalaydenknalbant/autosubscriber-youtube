@@ -902,6 +902,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     "height": 1080,
     "deviceScaleFactor": 1,
     })
+    driver.maximize_window()
     EVENT.wait(secrets.choice(range(3, 5)))
     ActionChains(driver).send_keys(Keys.ESCAPE).perform()
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -985,7 +986,6 @@ def pandalikes_functions(req_dict: dict) -> None:
 
         try:
             while datetime.now() < future:
-                
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
                 try:
@@ -996,7 +996,6 @@ def pandalikes_functions(req_dict: dict) -> None:
                     nums = re.findall(r"\d+", q_el.text)
                     if len(nums) < 2:
                         raise ValueError("Couldn’t parse numbers from %r", q_el.text)
-                    logging.info("Solved math prompt: %d + %d = %d", a, b, ans)
                     a, b = map(int, nums[:2])
                     ans = a + b
 
@@ -1008,7 +1007,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
                     logging.info(f"Solved math prompt: {a} + {b} = {ans}")
-                    EVENT.wait(secrets.choice(range(1, 4)))
+                    EVENT.wait(secrets.choice(range(3, 5)))
                     continue
                 except NoSuchElementException:
                     pass
@@ -1060,11 +1059,13 @@ def pandalikes_functions(req_dict: dict) -> None:
                 driver.execute_script("window.scrollTo(0, 600)")
                 try:
                     logging.info("Clicking play button")
-                    play_btn = driver.find_elements(
-                        By.XPATH,      "//button[contains(@class, 'inline-flex') and contains(@class, 'text-purple-200') and contains(@class, 'bg-purple-600') and contains(@class, 'border-purple-500/30')]"
-
+                    play_btn = WebDriverWait(driver, 10).until(
+                        ec.element_to_be_clickable((
+                            By.XPATH,
+                            "(//button[contains(@class, 'inline-flex') and contains(@class, 'text-purple-200') and contains(@class, 'bg-purple-600') and contains(@class, 'border-purple-500/30')])[1]"
+                        ))
                     )
-                    play_btn[0].send_keys(Keys.ENTER)
+                    play_btn.send_keys(Keys.ENTER)
                 except (NoSuchElementException, IndexError):
                     logging.info("Play button not found, skipping")
                     continue
