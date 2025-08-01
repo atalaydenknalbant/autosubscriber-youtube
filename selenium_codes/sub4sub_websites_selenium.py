@@ -923,6 +923,13 @@ def pandalikes_functions(req_dict: dict) -> None:
     except TimeoutException:
         return
     EVENT.wait(secrets.choice(range(3, 5)))
+    try:
+        entendido_btn = WebDriverWait(driver, 5).until(
+            ec.element_to_be_clickable((By.XPATH, "//button[normalize-space(text())='Entendido!']"))
+        )
+        entendido_btn.click()
+    except (TimeoutException, ElementNotInteractableException, ElementClickInterceptedException, NoSuchElementException):
+        pass
 
         
     def watch_loop(hours_time: int) -> None:
@@ -1005,11 +1012,11 @@ def pandalikes_functions(req_dict: dict) -> None:
                     inp.clear()
                     inp.send_keys(str(ans))
                     driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
-
                     logging.info(f"Solved math prompt: {a} + {b} = {ans}")
                     EVENT.wait(secrets.choice(range(3, 5)))
+                    ActionChains(driver).send_keys(Keys.ESCAPE).perform()  
                     continue
-                except NoSuchElementException:
+                except (NoSuchElementException, StaleElementReferenceException):
                     pass
                 try:
                     claim_btn = WebDriverWait(driver, 2).until(
@@ -1019,10 +1026,8 @@ def pandalikes_functions(req_dict: dict) -> None:
                         ))
                     )
                     claim_btn.send_keys(Keys.ENTER)
-                except (TimeoutException, NoSuchElementException):
+                except (TimeoutException, NoSuchElementException, StaleElementReferenceException):
                     pass
-
-
                 tiles = driver.find_elements(
                     By.XPATH,
                     "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
@@ -1053,10 +1058,15 @@ def pandalikes_functions(req_dict: dict) -> None:
 
                 tile = tiles[0]
                 ActionChains(driver).move_to_element(tile).click().perform()
-                EVENT.wait(secrets.choice(range(2, 4)))
+                EVENT.wait(secrets.choice(range(3, 5)))
                 ActionChains(driver).move_to_element(tile).click().perform()
-                EVENT.wait(secrets.choice(range(2, 4)))
+                EVENT.wait(secrets.choice(range(3, 5)))
+                try:
+                    ActionChains(driver).move_to_element(tile).send_keys(Keys.ENTER).perform()
+                except (NoSuchElementException, ElementClickInterceptedException, StaleElementReferenceException):
+                    pass
                 driver.execute_script("window.scrollTo(0, 600)")
+                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
                 try:
                     logging.info("Clicking play button")
                     play_btn = WebDriverWait(driver, 10).until(
@@ -1066,10 +1076,10 @@ def pandalikes_functions(req_dict: dict) -> None:
                         ))
                     )
                     play_btn.send_keys(Keys.ENTER)
-                except (NoSuchElementException, IndexError):
+                except (NoSuchElementException, IndexError, StaleElementReferenceException):
                     logging.info("Play button not found, skipping")
                     continue
-
+                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
                 EVENT.wait(secrets.choice(range(1, 4)))
 
                 if len(driver.window_handles) > 1:
@@ -1106,34 +1116,48 @@ def pandalikes_functions(req_dict: dict) -> None:
                     now = datetime.now()
 
                     try:
-                        raw      = driver.find_element(
-                            By.CSS_SELECTOR, "span.text-xs.font-mono"
-                        ).text
-                        curr_sec = to_seconds(raw.split("/")[0].strip())
-                    except NoSuchElementException:
-                        logging.info("[Monitor] Timer span vanished - exiting monitor")
+                        try:
+                            raw = driver.find_element(
+                                By.CSS_SELECTOR, "span.text-xs.font-mono"
+                            ).text
+                            curr_sec = to_seconds(raw.split("/")[0].strip())
+                        except NoSuchElementException:
+                            logging.info("[Monitor] Timer span vanished - exiting monitor")
+                            break
+
+                        elapsed_sec = curr_sec - start_sec
+                        logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
+                        logging.debug("[Monitor] curr_sec=%d, elapsed=%ds", curr_sec, elapsed_sec)
+
+                        if curr_sec > prev_sec:
+                            logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
+                            logging.info("[Monitor] advanced %ds -> %ds", prev_sec, curr_sec)
+                            prev_sec    = curr_sec
+                            last_change = now
+
+                        elif (now - last_change).total_seconds() > 3:
+                            logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
+                            logging.warning("[Monitor] stalled at %ds - replaying", prev_sec)
+                            play_btn[0].send_keys(Keys.ENTER)
+                            last_change = now
+
+                        if elapsed_sec >= total_sec:
+                            logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
+                            logging.info("[Monitor] reached total (%ds >= %ds)", elapsed_sec, total_sec)
+                            break   
+                    except TypeError as e:
+                        driver.refresh()
+                        try:
+                            watch_btn = WebDriverWait(driver, 50).until(
+                                ec.element_to_be_clickable(
+                                    (By.XPATH, "//button[normalize-space(.)='Watch']")
+                                )
+                            )
+                            watch_btn.send_keys(Keys.ENTER)
+                        except TimeoutException:
+                            return
                         break
 
-                    elapsed_sec = curr_sec - start_sec
-                    logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
-                    logging.debug("[Monitor] curr_sec=%d, elapsed=%ds", curr_sec, elapsed_sec)
-
-                    if curr_sec > prev_sec:
-                        logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
-                        logging.info("[Monitor] advanced %ds -> %ds", prev_sec, curr_sec)
-                        prev_sec    = curr_sec
-                        last_change = now
-
-                    elif (now - last_change).total_seconds() > 3:
-                        logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
-                        logging.warning("[Monitor] stalled at %ds - replaying", prev_sec)
-                        play_btn[0].send_keys(Keys.ENTER)
-                        last_change = now
-
-                    if elapsed_sec >= total_sec:
-                        logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
-                        logging.info("[Monitor] reached total (%ds >= %ds)", elapsed_sec, total_sec)
-                        break        
                 logging.info("[Monitor] waiting for timer span to disappear")
                 try:
                     WebDriverWait(driver, 3).until(
@@ -1234,11 +1258,25 @@ def traffup_functions(req_dict: dict) -> None:
              """
             css_dict = {"Youtube Watch": "#msg_area", "Website Visit":"#iframe1_msg"}
             try:
-                WebDriverWait(driver, 52)\
+                WebDriverWait(driver, 5).until(ec.alert_is_present())  
+                alert = driver.switch_to.alert  
+                alert.accept()
+            except TimeoutException:
+                pass
+            try:
+                WebDriverWait(driver, 47)\
             .until(ec.visibility_of_element_located((By.CSS_SELECTOR,
                                                     f"{css_dict[current_way]} > div > div.res_cb2 > div > img")))
-            except TimeoutException:
+            except (TimeoutException, AttributeError):
+                driver.save_screenshot("screenshots/screenshot.png")
                 return
+            try:
+                WebDriverWait(driver, 5).until(ec.alert_is_present())  
+                alert = driver.switch_to.alert  
+                alert.accept()
+            except TimeoutException:
+                pass
+
             EVENT.wait(secrets.choice(range(2, 4)))
             image_element  = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb2 > div > img")
             image_screenshot = image_element.screenshot_as_png
@@ -1258,7 +1296,7 @@ def traffup_functions(req_dict: dict) -> None:
 
 
             ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child({best_option_idx + 1})")).click().perform()
-            EVENT.wait(secrets.choice(range(1, 3)))
+            EVENT.wait(secrets.choice(range(5, 8)))
             if current_way == "Youtube Watch":
                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#box_close > a")).click().perform()
             elif current_way == "Website Visit":
@@ -1280,6 +1318,8 @@ def traffup_functions(req_dict: dict) -> None:
                         return
                     if ways_of_earning[way] == "Website Visit":
                         driver.get("https://traffup.net/websites/")
+                        EVENT.wait(secrets.choice(range(3, 5)))
+                        driver.execute_script("window.scrollTo(0, 600)")
                         continue
                 if ways_of_earning[way] == "Website Visit":
                         if i + 1 > len(driver.find_elements(By.CLASS_NAME, "open_iframe1")):
@@ -1293,6 +1333,12 @@ def traffup_functions(req_dict: dict) -> None:
                             try:
                                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
                             except (NoSuchElementException, ElementNotInteractableException):
+                                pass
+                            try:
+                                WebDriverWait(driver, 5).until(ec.alert_is_present())  
+                                alert = driver.switch_to.alert  
+                                alert.accept()
+                            except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
                                 pass
                             try:
                                 ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "simplebtn")[0]).click().perform()
@@ -1379,6 +1425,7 @@ def traffup_functions(req_dict: dict) -> None:
                             return
                         if ways_of_earning[way] == "Website Visit":
                             driver.get("https://traffup.net/websites/")
+                            driver.execute_script("window.scrollTo(0, 600)")
                             continue
                     EVENT.wait(secrets.choice(range(3, 5)))
                     driver.switch_to.window(driver.window_handles[1])
