@@ -1105,7 +1105,6 @@ def pandalikes_functions(req_dict: dict) -> None:
                 start_sec   = to_seconds(current_str)
                 total_sec   = to_seconds(total_str)
                 prev_sec    = start_sec
-                logging.info(f"[Monitor] Video total {total_sec}s, starting at {start_sec}s")
                 logging.info("[Monitor] Video total %ds, starting at %ds", total_sec, start_sec)
 
                 last_change = datetime.now()
@@ -1126,26 +1125,22 @@ def pandalikes_functions(req_dict: dict) -> None:
                             break
 
                         elapsed_sec = curr_sec - start_sec
-                        logging.debug(f"[Monitor] curr_sec={curr_sec}, elapsed={elapsed_sec}s")
-                        logging.debug("[Monitor] curr_sec=%d, elapsed=%ds", curr_sec, elapsed_sec)
+                        logging.info("[Monitor] curr_sec=%d, elapsed=%ds", curr_sec, elapsed_sec)
 
                         if curr_sec > prev_sec:
-                            logging.info(f"[Monitor] advanced {prev_sec}s → {curr_sec}s")
                             logging.info("[Monitor] advanced %ds -> %ds", prev_sec, curr_sec)
                             prev_sec    = curr_sec
                             last_change = now
 
                         elif (now - last_change).total_seconds() > 3:
-                            logging.warning(f"[Monitor] stalled at {prev_sec}s - replaying")
-                            logging.warning("[Monitor] stalled at %ds - replaying", prev_sec)
+                            logging.info("[Monitor] stalled at %ds - replaying", prev_sec)
                             play_btn[0].send_keys(Keys.ENTER)
                             last_change = now
 
                         if elapsed_sec >= total_sec:
-                            logging.info(f"[Monitor] reached total ({elapsed_sec}s ≥ {total_sec}s)")
                             logging.info("[Monitor] reached total (%ds >= %ds)", elapsed_sec, total_sec)
                             break   
-                    except TypeError as e:
+                    except TypeError:
                         driver.refresh()
                         try:
                             watch_btn = WebDriverWait(driver, 50).until(
@@ -1167,7 +1162,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                     )
                     logging.info("[Monitor] span gone - proceeding")
                 except TimeoutException:
-                    logging.warning("[Monitor] span still present proceeding anyway")
+                    logging.info("[Monitor] span still present proceeding anyway")
         except Exception as e:
             logging.error("Error during watch loop: %s", e)
             driver.save_screenshot("screenshots/screenshot.png")
