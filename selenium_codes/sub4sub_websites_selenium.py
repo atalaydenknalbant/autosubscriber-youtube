@@ -106,6 +106,24 @@ def clear_cache(driver: webdriver, timeout: int = 60) -> None:
     wait.until_not(get_clear_browsing_button)
 
 
+def reset_device_metrics(driver: webdriver) -> None:
+    """Ensure Chrome device metrics are reset to defaults for a fresh session."""
+    try:
+        driver.execute_cdp_cmd("Emulation.clearDeviceMetricsOverride", {})
+    except Exception:
+        pass
+
+
+def normalize_headless_viewport(driver: webdriver) -> None:
+    """Force a clean, small viewport in headless to avoid stale overrides sticking around."""
+    try:
+        driver.execute_cdp_cmd("Emulation.clearDeviceMetricsOverride", {})
+        driver.set_window_size(1920, 1080)
+        driver.execute_cdp_cmd("Emulation.setVisibleSize", {"width": 1920, "height": 1080})
+    except Exception:
+        pass
+
+
 def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str = "") -> bool:
     """Change YouTube video resolution to given resolution.
     Args:
@@ -154,6 +172,7 @@ def set_driver_opt(req_dict: dict,
                    headless: bool = True,
                    website: str = "",
                    undetected: bool = False,
+                   force_default_view: bool = False,
                    ) -> webdriver:
     """Set driver options for chrome or firefox
     Args:
@@ -161,9 +180,13 @@ def set_driver_opt(req_dict: dict,
     - is_headless(bool): bool parameter to check for chrome headless
     - website (string): string parameter to enable extensions corresponding to the Website.
     - undetected (bool): bool parameter to run undetected_chromedriver.
+    - force_default_view (bool): skip custom viewport sizing so Chrome uses its defaults.
     Returns:
     - webdriver: returns driver with options already added to it.
     """
+    # In headless mode we prefer Chrome's native default viewport unless explicitly overridden.
+    if headless and not force_default_view:
+        force_default_view = True
     chrome_options = webdriver.ChromeOptions()
     if website in ("ytmonster", "YOULIKEHITS", "pandalikes", "view2be", "traffup"):
         pass
@@ -211,23 +234,30 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--disable-features=Translate")
         chrome_options.add_argument("--no-default-browser-check")
         chrome_options.add_argument("--no-first-run")
-        chrome_options.add_argument("--force-device-scale-factor=1")
+        if not force_default_view:
+            chrome_options.add_argument("--force-device-scale-factor=1")
         chrome_options.add_argument("--disable-search-engine-choice-screen")
         chrome_options.add_argument("--ash-no-nudges")
         chrome_options.add_argument("--disable-gpu")  
         chrome_options.add_argument("--propagate-iph-for-testing")
 
     chrome_options.add_argument("--mute-audio")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--start-maximized")
+    if not force_default_view:
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--start-maximized")
     if undetected:
         driver = uc.Chrome(service=Service(), options=chrome_options, headless=headless)
+        reset_device_metrics(driver)
+        if headless:
+            normalize_headless_viewport(driver)
         return driver
 
     driver = webdriver.Chrome(service=Service(),
                                 options=chrome_options)
 
-
+    reset_device_metrics(driver)
+    if headless:
+        normalize_headless_viewport(driver)
     driver.command_executor.set_timeout(1000)
     return driver
 
@@ -894,14 +924,16 @@ def pandalikes_functions(req_dict: dict) -> None:
     - None(NoneType)
     """
     driver: webdriver = set_driver_opt(req_dict, headless=True, website='pandalikes')
-    driver.implicitly_wait(12)
+    driver.implicitly_wait(10)
     driver.get("https://pandalikes.pro/")  # Type_Undefined
-    driver.execute_cdp_cmd("Emulation.setDeviceMetricsOverride", {
-    "mobile": False,
-    "width": 1920,
-    "height": 1080,
-    "deviceScaleFactor": 1,
-    })
+    device_metrics = {
+        "mobile": False,
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1,
+    }
+    driver.execute_cdp_cmd("Emulation.clearDeviceMetricsOverride", {})
+    driver.execute_cdp_cmd("Emulation.setDeviceMetricsOverride", device_metrics)
     driver.maximize_window()
     EVENT.wait(secrets.choice(range(3, 5)))
     ActionChains(driver).send_keys(Keys.ESCAPE).perform()
@@ -1028,43 +1060,87 @@ def pandalikes_functions(req_dict: dict) -> None:
                     claim_btn.send_keys(Keys.ENTER)
                 except (TimeoutException, NoSuchElementException, StaleElementReferenceException):
                     pass
-                tiles = driver.find_elements(
-                    By.XPATH,
-                    "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
-                )
-                if not tiles:
+                
+                wait = WebDriverWait(driver, 15)
+
+
+                TILES_XPATH = "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
+                LOAD_MORE_XPATH = "//button[normalize-space(text())='Load More']"
+                VIDEO_HDR_XPATH = ("//h3"
+                                "[contains(@class,'text-white') and contains(@class,'font-semibold') "
+                                " and contains(@class,'text-lg') and contains(@class,'lg:text-xl') "
+                                " and contains(@class,'flex') and contains(@class,'items-center')]")
+
+                def on_video_page(short_timeout=2):
                     try:
-                        load_more = driver.find_element(
-                            By.XPATH, "//button[normalize-space(text())='Load More']"
+                        WebDriverWait(driver, short_timeout).until(
+                            ec.presence_of_element_located((By.XPATH, VIDEO_HDR_XPATH))
                         )
-                        logging.info("No tiles – clicking Load More")
-                        driver.execute_script("arguments[0].scrollIntoView(true);", load_more)
-                        load_more.click()
-                        EVENT.wait(secrets.choice(range(2, 5)))
+                        return True
+                    except TimeoutException:
+                        return False
 
-                        # Retry getting tiles
-                        tiles = driver.find_elements(
-                            By.XPATH,
-                            "//div[contains(@class,'absolute') and contains(@class,'inset-0') and contains(@class,'bg-black/20')]"
-                        )
-                        if not tiles:
-                            logging.warning("Still no tiles after Load More - exiting")
+                def ensure_tiles():
+                    tiles = driver.find_elements(By.XPATH, TILES_XPATH)
+                    if tiles:
+                        return tiles
+                    try:
+                        load_more = driver.find_element(By.XPATH, LOAD_MORE_XPATH)
+                        ActionChains(driver).move_to_element(load_more).click().perform()
+                        wait.until(lambda d: len(d.find_elements(By.XPATH, TILES_XPATH)) > 0)
+                        return driver.find_elements(By.XPATH, TILES_XPATH)
+                    except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
+                        return []
 
+                def click_tile_actionchains(index=0):
+                    try:
+                        tile = wait.until(ec.element_to_be_clickable((By.XPATH, f"({TILES_XPATH})[{index+1}]")))
+                        ActionChains(driver).move_to_element(tile).click().perform()
+                        return True
+                    except (TimeoutException, StaleElementReferenceException):
+                        return False
+
+                def click_same_tile_twice(index=0, rest=(2, 4)):
+                    ok1 = click_tile_actionchains(index)
+                    if not ok1:
+                        return False
+                    EVENT.wait(secrets.choice(range(*rest)))
+                    ok2 = click_tile_actionchains(index)  
+                    return ok2
+
+                def run_until_video(max_steps=40):
+                    steps = 0
+                    while steps < max_steps:
+                        if on_video_page():
+                            logging.info("Video page detected")
                             break
-                    except NoSuchElementException:
-                        logging.warning("Load More button not found - exiting")
-                        # # driver.save_screenshot("screenshots/no_tiles.png")
-                        break
 
-                tile = tiles[0]
-                ActionChains(driver).move_to_element(tile).click().perform()
-                EVENT.wait(secrets.choice(range(3, 5)))
-                ActionChains(driver).move_to_element(tile).click().perform()
-                EVENT.wait(secrets.choice(range(3, 5)))
-                try:
-                    ActionChains(driver).move_to_element(tile).send_keys(Keys.ENTER).perform()
-                except (NoSuchElementException, ElementClickInterceptedException, StaleElementReferenceException):
-                    pass
+                        tiles = ensure_tiles()
+                        if not tiles:
+                            EVENT.wait(3)
+                            if on_video_page():
+                                logging.info("Video page detected after short wait")
+                                break
+                            tiles = ensure_tiles()
+                            if not tiles:
+                                steps += 1
+                                continue
+
+                        if click_same_tile_twice(0):
+                            logging.info("Double click done with ActionChains")
+                        else:
+                            logging.info("Double click failed, retrying")
+
+                        EVENT.wait(secrets.choice(range(2, 5)))
+                        steps += 1
+
+                    if on_video_page():
+                        # # driver.save_screenshot("screenshots/video_page.png")
+                        pass
+                    else:
+                        logging.warning("Stopped without finding video header")
+
+                run_until_video()
                 driver.execute_script("window.scrollTo(0, 600)")
                 ActionChains(driver).send_keys(Keys.ESCAPE).perform()
                 try:
@@ -1076,7 +1152,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                         ))
                     )
                     play_btn.send_keys(Keys.ENTER)
-                except (NoSuchElementException, IndexError, StaleElementReferenceException):
+                except (NoSuchElementException, IndexError, StaleElementReferenceException, TimeoutException):
                     logging.info("Play button not found, skipping")
                     continue
                 ActionChains(driver).send_keys(Keys.ESCAPE).perform()
@@ -1120,7 +1196,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                                 By.CSS_SELECTOR, "span.text-xs.font-mono"
                             ).text
                             curr_sec = to_seconds(raw.split("/")[0].strip())
-                        except NoSuchElementException:
+                        except (NoSuchElementException, ValueError):
                             logging.info("[Monitor] Timer span vanished - exiting monitor")
                             break
 
@@ -1134,9 +1210,29 @@ def pandalikes_functions(req_dict: dict) -> None:
 
                         elif (now - last_change).total_seconds() > 3:
                             logging.info("[Monitor] stalled at %ds - replaying", prev_sec)
-                            play_btn[0].send_keys(Keys.ENTER)
                             last_change = now
-
+                            try:
+                                play_btn[0].send_keys(Keys.ENTER)
+                            except ElementNotInteractableException:
+                                driver.get("https://pandalikes.pro/")
+                                EVENT.wait(secrets.choice(range(3, 5)))
+                                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                                try:
+                                    watch_btn = WebDriverWait(driver, 50).until(
+                                        ec.element_to_be_clickable(
+                                            (By.XPATH, "//button[normalize-space(.)='Watch']")
+                                        )
+                                    )
+                                    watch_btn.send_keys(Keys.ENTER)
+                                except TimeoutException:
+                                    return
+                                try:
+                                    WebDriverWait(driver, 5) \
+                                        .until(ec.visibility_of_element_located((By.XPATH, "/html/body/div/div[1]/main/div/div/div[4]/div/div/div/button[3]"))).send_keys(Keys.ENTER)
+                                    EVENT.wait(secrets.choice(range(1, 4)))
+                                except TimeoutException:
+                                    pass
+                                break
                         if elapsed_sec >= total_sec:
                             logging.info("[Monitor] reached total (%ds >= %ds)", elapsed_sec, total_sec)
                             break   
@@ -1164,7 +1260,7 @@ def pandalikes_functions(req_dict: dict) -> None:
                 except TimeoutException:
                     logging.info("[Monitor] span still present proceeding anyway")
         except Exception as e:
-            logging.error("Error during watch loop: %s", e)
+            logging.exception("Error during watch loop") 
             driver.save_screenshot("screenshots/screenshot.png")
 
 
@@ -1191,6 +1287,7 @@ def pandalikes_functions(req_dict: dict) -> None:
     except (NoSuchElementException, ElementClickInterceptedException):
         # # driver.save_screenshot("screenshots/screenshot.png")
         logging.info("Marathons panel or claim buttons not found - skipping")
+    driver.execute_cdp_cmd("Emulation.clearDeviceMetricsOverride", {})
     driver.quit()
 
 def traffup_functions(req_dict: dict) -> None:
@@ -1200,12 +1297,15 @@ def traffup_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
-    driver: webdriver = set_driver_opt(req_dict, headless=True, website='traffup')
+    driver: webdriver = set_driver_opt(req_dict, headless=True, website='traffup', force_default_view=True)
     driver.implicitly_wait(10)
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
+    driver.maximize_window()
     captcha_processor = TrOCRProcessor.from_pretrained('microsoft/trocr-small-printed')
     captcha_model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-small-printed')
+    # # driver.save_screenshot("screenshots/screenshot.png")
+    
     while True:
         driver.find_element(By.ID, "email").send_keys(req_dict['email_traffup'])
         EVENT.wait(secrets.choice(range(1, 4)))
@@ -1224,8 +1324,10 @@ def traffup_functions(req_dict: dict) -> None:
         EVENT.wait(secrets.choice(range(3, 5)))
         if driver.current_url == "https://traffup.net/websites/":
             break
+    # # driver.save_screenshot("screenshots/screenshot.png")
     driver.get("https://traffup.net/youtube/?type=posts&mode=watchtime")    
     EVENT.wait(secrets.choice(range(3, 5)))
+    # # driver.save_screenshot("screenshots/traffup_watch_home.png")
     captcha_model.to("cpu")                  
     captcha_processor = None                  
     captcha_model = None                      
@@ -1243,6 +1345,7 @@ def traffup_functions(req_dict: dict) -> None:
         way = 0
         skip = False
         i = 0
+        # # driver.save_screenshot("screenshots/inscreenshot.png")
         def predict_image(current_way: str) -> None:
             """Predict and interact with an image on a webpage using OpenAI CLIP for zero-shot image classification.
             Args:
@@ -1263,7 +1366,7 @@ def traffup_functions(req_dict: dict) -> None:
             .until(ec.visibility_of_element_located((By.CSS_SELECTOR,
                                                     f"{css_dict[current_way]} > div > div.res_cb2 > div > img")))
             except (TimeoutException, AttributeError):
-                driver.save_screenshot("screenshots/screenshot.png")
+                # # driver.save_screenshot("screenshots/screenshot.png")
                 return
             try:
                 WebDriverWait(driver, 5).until(ec.alert_is_present())  
@@ -1307,6 +1410,7 @@ def traffup_functions(req_dict: dict) -> None:
                     return                    
                 if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
                     logging.info("You have hit hourly limit for %s", ways_of_earning[way])
+                    # # driver.save_screenshot("screenshots/traffup_hourly_limit.png")
                     way+=1
                     i = 0
                     if way > len(ways_of_earning) - 1:
@@ -1321,6 +1425,7 @@ def traffup_functions(req_dict: dict) -> None:
                             try:
                                 if driver.find_element(By.CSS_SELECTOR, "#main > p").text == "No records found. Please use a different search criteria.":
                                     logging.info("Finished visiting websites exiting...")
+                                    # # driver.save_screenshot("screenshots/traffup_no_records.png")
                                     return
                             except NoSuchElementException:
                                 pass
@@ -1330,7 +1435,7 @@ def traffup_functions(req_dict: dict) -> None:
                             except (NoSuchElementException, ElementNotInteractableException):
                                 pass
                             try:
-                                WebDriverWait(driver, 5).until(ec.alert_is_present())  
+                                WebDriverWait(driver, 10).until(ec.alert_is_present())  
                                 alert = driver.switch_to.alert  
                                 alert.accept()
                             except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
@@ -1428,6 +1533,7 @@ def traffup_functions(req_dict: dict) -> None:
                         driver.switch_to.frame("player")
                     except NoSuchFrameException:
                         try:
+                            # # driver.save_screenshot("screenshots/traffup_no_frame.png")
                             skip = True
                             driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
                             continue
@@ -1438,10 +1544,14 @@ def traffup_functions(req_dict: dict) -> None:
                         yt_resolution_lowered = yt_change_resolution(driver, resolution = 240, website= 'traffup')
                     if len(driver.find_elements(By.CSS_SELECTOR, "#movie_player > div.ytp-error > div.ytp-error-content > div.ytp-error-content-wrap > div.ytp-error-content-wrap-reason > span")) > 0:
                         driver.switch_to.default_content()
+                        # # driver.save_screenshot("screenshots/traffup_yterror.png")
                         driver.find_element(By.CSS_SELECTOR, "#msg_area > div:nth-child(3) > a").click()
                         skip = True
                         continue
                     driver.switch_to.default_content()
+                    if ways_of_earning[way] == "Youtube Watch":
+                        driver.execute_script("window.scrollTo(0, 600);")
+                    # # driver.save_screenshot("screenshots/traffup_pre_predict.png")
                     predict_image(ways_of_earning[way])
             except Exception as ex:
                 logging.info("Exception Type: %s", type(ex).__name__)
@@ -1453,7 +1563,7 @@ def traffup_functions(req_dict: dict) -> None:
                     func_name = tb.tb_frame.f_code.co_name
                     logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
                     tb = tb.tb_next  
-                    driver.save_screenshot("screenshots/screenshot.png")
+                    # # driver.save_screenshot("screenshots/screenshot.png")
                 break
     watch_loop(14)
     driver.quit()
