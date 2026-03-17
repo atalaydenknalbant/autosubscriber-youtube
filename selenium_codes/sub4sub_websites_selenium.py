@@ -493,25 +493,45 @@ def youlikehits_functions(req_dict: dict) -> None:
     Returns:
     - None(NoneType)
     """
+    def log_youlikehits_state(message: str) -> None:
+        """Log the current browser state to trace where execution stalls."""
+        try:
+            current_url = driver.current_url
+        except Exception:
+            current_url = "<unavailable>"
+        try:
+            window_count = len(driver.window_handles)
+        except Exception:
+            window_count = -1
+        logging.info("[YouLikeHits] %s | url=%s | windows=%d", message, current_url, window_count)
+
     driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
+    logging.info("[YouLikeHits] Driver created")
     driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
-    driver.switch_to.default_content()
+    log_youlikehits_state("Opened login page")
+    driver.switch_to.default_content() 
     WebDriverWait(driver, 15).until(ec.element_to_be_clickable((By.ID, "username")))\
         .send_keys(req_dict['username_youlikehits'])
+    logging.info("[YouLikeHits] Username entered")
     EVENT.wait(secrets.choice(range(2, 4)))
     driver.find_element(By.ID, "password").send_keys(req_dict['pw_youlikehits'])
+    logging.info("[YouLikeHits] Password entered")
     EVENT.wait(secrets.choice(range(20, 22)))
     login_button = driver.find_elements(By.CSS_SELECTOR, "input[value='Log in']")
     login_button[0].send_keys(Keys.ENTER) if len(login_button) > 0 else driver.find_element(By.XPATH, "/html/body/table[2]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[2]/td/center/form/table/tbody/tr[4]/td/span/input").send_keys(Keys.ENTER) 
+    log_youlikehits_state("Login submitted")
     EVENT.wait(secrets.choice(range(2, 4)))
 
     def collect_bonus_points() -> None:
         """collect if bonus points are available"""
+        log_youlikehits_state("Opening bonus points page")
         driver.get("https://www.youlikehits.com/bonuspoints.php")
         EVENT.wait(secrets.choice(range(2, 4)))
         try:
             driver.find_element(By.CLASS_NAME, "buybutton").click()
+            logging.info("[YouLikeHits] Bonus points claimed")
         except (NoSuchElementException, ElementNotInteractableException):
+            logging.info("[YouLikeHits] No bonus points available")
             EVENT.wait(0.25)
     
     collect_bonus_points()
@@ -520,6 +540,7 @@ def youlikehits_functions(req_dict: dict) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
         logging.info("Watch Loop Started")
         driver.get("https://www.youlikehits.com/youtubenew2.php")
+        log_youlikehits_state("Opened watch page")
         EVENT.wait(secrets.choice(range(4, 6)))
         try:
             if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
@@ -533,7 +554,10 @@ def youlikehits_functions(req_dict: dict) -> None:
         start = datetime.now()
         cutoff = start + timedelta(hours=hours_time)
         yt_resolution_lowered = False
+        iteration = 0
         while datetime.now() < cutoff:
+            iteration += 1
+            logging.info("[YouLikeHits][Watch] Iteration %d started", iteration)
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -555,7 +579,9 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.switch_to.window(driver.window_handles[0])
             try:
                 video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+                logging.info("[YouLikeHits][Watch] Current video: %s", video_name)
             except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
+                logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
                 driver.refresh()
                 continue
             try:
@@ -564,19 +590,24 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.find_element(By.CLASS_NAME, 'followbutton').click()
                 EVENT.wait(1)
                 driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
+                log_youlikehits_state(f"[Watch] Follow button submitted for {video_name}")
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
+                logging.info("[YouLikeHits][Watch] Could not click follow button for %s", video_name)
                 EVENT.wait(10)
             try:
                 driver.switch_to.window(driver.window_handles[1])
+                log_youlikehits_state(f"[Watch] Switched to target window for {video_name}")
                 EVENT.wait(2)
                 try:
                     WebDriverWait(driver, 40)\
                      .until(ec.visibility_of_element_located((By.XPATH,
                                                              "//*[@id='title']/h1/yt-formatted-string")))
                 except (TimeoutException, AttributeError):
+                    logging.info("[YouLikeHits][Watch] Timed out waiting for YouTube title for %s", video_name)
                     pass
                 if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
+                    logging.info("[YouLikeHits][Watch] Target window is not a valid YouTube video for %s", video_name)
                     try:
                         driver.close()
                     except NoSuchWindowException:
@@ -589,13 +620,16 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(3)
                         driver.refresh()
                     except (NoSuchElementException, ElementNotInteractableException):
+                        logging.info("[YouLikeHits][Watch] Skip button unavailable after invalid target, refreshing")
                         driver.refresh()
                     continue
                 else:
                     if not yt_resolution_lowered:
                         yt_resolution_lowered = yt_change_resolution(driver, website='YOULIKEHITS')
+                        logging.info("[YouLikeHits][Watch] Resolution lowered result: %s", yt_resolution_lowered)
 
             except (NoSuchElementException, IndexError, NoSuchWindowException) as ex:
+                logging.info("[YouLikeHits][Watch] Failed switching to target window for %s: %s", video_name, type(ex).__name__)
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
                 if type(ex) is NoSuchWindowException:
@@ -604,6 +638,7 @@ def youlikehits_functions(req_dict: dict) -> None:
                         EVENT.wait(3.25)
                         driver.refresh()
                     except (NoSuchElementException, ElementNotInteractableException):
+                        logging.info("[YouLikeHits][Watch] Skip button unavailable after closed target window, refreshing")
                         driver.refresh()
                     continue
                 EVENT.wait(0.25)
@@ -617,30 +652,42 @@ def youlikehits_functions(req_dict: dict) -> None:
                        driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
                     EVENT.wait(5)
                     counter += 1
+                    if counter % 6 == 0:
+                        logging.info("[YouLikeHits][Watch] Waiting for next video after %s, waited %ds", video_name, counter * 5)
                     if counter >= 60:
                         try:
+                            logging.info("[YouLikeHits][Watch] Video list did not advance after %s, refreshing and closing child window", video_name)
                             driver.refresh()
                             driver.switch_to.window(driver.window_handles[1])
                             driver.close()
                             break
                         except NoSuchWindowException:
+                            logging.info("[YouLikeHits][Watch] Child window already closed while waiting for next video")
                             break
             except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
+                logging.info("[YouLikeHits][Watch] Exception while waiting for next video after %s: %s", video_name, type(ex).__name__)
                 EVENT.wait(0.25)
                 if type(ex) is NoSuchElementException:
+                    logging.info("[YouLikeHits][Watch] Video entry disappeared, refreshing watch page")
                     driver.refresh()
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 driver.close()
+                logging.info("[YouLikeHits][Watch] Closed target window for %s", video_name)
             except IndexError:
+                logging.info("[YouLikeHits][Watch] No target window left to close for %s", video_name)
                 pass
     def while_loop_listen(hours_time: int) -> None:
         """Listen to tracks by clicking 'followbutton' on /soundcloudplays.php until time runs out"""
         driver.get("https://www.youlikehits.com/soundcloudplays.php")
         logging.info("Listen Loop Started")
+        log_youlikehits_state("Opened listen page")
         start = datetime.now()
         cutoff = start + timedelta(hours=hours_time)
+        iteration = 0
         while datetime.now() < cutoff:
+            iteration += 1
+            logging.info("[YouLikeHits][Listen] Iteration %d started", iteration)
             EVENT.wait(secrets.choice(range(3, 4)))
             driver.switch_to.window(driver.window_handles[0])
             try:
@@ -653,7 +700,9 @@ def youlikehits_functions(req_dict: dict) -> None:
             driver.switch_to.window(driver.window_handles[0])
             try:
                 song_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+                logging.info("[YouLikeHits][Listen] Current song: %s", song_name)
             except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
+                logging.info("[YouLikeHits][Listen] Could not read current song name, refreshing")
                 driver.refresh()
                 continue
             try:
@@ -662,8 +711,10 @@ def youlikehits_functions(req_dict: dict) -> None:
                 driver.find_element(By.CLASS_NAME, 'followbutton').click()
                 EVENT.wait(1)
                 driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
+                log_youlikehits_state(f"[Listen] Follow button submitted for {song_name}")
             except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                     JavascriptException):
+                logging.info("[YouLikeHits][Listen] Could not click follow button for %s", song_name)
                 EVENT.wait(10)
             driver.switch_to.default_content()
             try:
@@ -672,22 +723,30 @@ def youlikehits_functions(req_dict: dict) -> None:
                        driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
                     EVENT.wait(5)
                     counter += 1
+                    if counter % 6 == 0:
+                        logging.info("[YouLikeHits][Listen] Waiting for next song after %s, waited %ds", song_name, counter * 5)
                     if counter >= 60:
                         try:
+                            logging.info("[YouLikeHits][Listen] Song list did not advance after %s, refreshing and closing child window", song_name)
                             driver.refresh()
                             driver.switch_to.window(driver.window_handles[1])
                             driver.close()
                             break
                         except NoSuchWindowException:
+                            logging.info("[YouLikeHits][Listen] Child window already closed while waiting for next song")
                             break
             except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
+                logging.info("[YouLikeHits][Listen] Exception while waiting for next song after %s: %s", song_name, type(ex).__name__)
                 EVENT.wait(0.25)
                 if type(ex) is NoSuchElementException:
+                    logging.info("[YouLikeHits][Listen] Song entry disappeared, refreshing listen page")
                     driver.refresh()
             try:
                 driver.switch_to.window(driver.window_handles[1])
                 driver.close()
+                logging.info("[YouLikeHits][Listen] Closed target window for %s", song_name)
             except IndexError:
+                logging.info("[YouLikeHits][Listen] No target window left to close for %s", song_name)
                 pass
     
     def while_loop_visit(hours_time: int) -> None:
@@ -698,13 +757,19 @@ def youlikehits_functions(req_dict: dict) -> None:
         EVENT.wait(secrets.choice(range(4, 6)))
         driver.execute_script("window.scrollTo(0, 600)")
         logging.info("Visit Loop Started")
+        log_youlikehits_state("Opened visit page")
+        iteration = 0
         while datetime.now() < cutoff:
+            iteration += 1
+            logging.info("[YouLikeHits][Visit] Iteration %d started", iteration)
             driver.switch_to.window(driver.window_handles[0])
             driver.switch_to.default_content()
             buttons = driver.find_elements(By.CLASS_NAME, "followbutton")
             if not buttons:
+                logging.info("[YouLikeHits][Visit] No visit buttons found, leaving loop")
                 break
-            for btn in buttons:
+            logging.info("[YouLikeHits][Visit] Found %d visit buttons", len(buttons))
+            for btn_index, btn in enumerate(buttons, start=1):
                 try:
                     EVENT.wait(secrets.choice(range(2, 4)))
                     btn.click()
@@ -712,26 +777,35 @@ def youlikehits_functions(req_dict: dict) -> None:
                     btn.click()
                     EVENT.wait(1)
                     btn.send_keys(Keys.ENTER)
+                    logging.info("[YouLikeHits][Visit] Submitted visit button %d/%d", btn_index, len(buttons))
                 except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException, JavascriptException):
+                    logging.info("[YouLikeHits][Visit] Could not activate visit button %d/%d", btn_index, len(buttons))
                     EVENT.wait(secrets.choice(range(1, 3)))
                 EVENT.wait(secrets.choice(range(1, 3)))
                 driver.switch_to.window(driver.window_handles[-1])
+                log_youlikehits_state(f"[Visit] Switched to target window for button {btn_index}/{len(buttons)}")
                 try:
                     driver.switch_to.frame("frame1")
                     WebDriverWait(driver, 22).until(
                         ec.visibility_of_element_located((By.CLASS_NAME, "alert"))
                     )
                     driver.switch_to.default_content()
+                    logging.info("[YouLikeHits][Visit] Frame alert detected for button %d/%d", btn_index, len(buttons))
                 except (TimeoutException, NoSuchFrameException):
                     driver.switch_to.default_content()
+                    logging.info("[YouLikeHits][Visit] No frame alert detected for button %d/%d", btn_index, len(buttons))
                 try:
                     WebDriverWait(driver, 2).until(ec.alert_is_present())
                     driver.switch_to.alert.accept()
+                    logging.info("[YouLikeHits][Visit] Browser alert accepted for button %d/%d", btn_index, len(buttons))
                 except TimeoutException:
+                    logging.info("[YouLikeHits][Visit] No browser alert present for button %d/%d", btn_index, len(buttons))
                     pass
                 driver.close()
+                logging.info("[YouLikeHits][Visit] Closed target window for button %d/%d", btn_index, len(buttons))
                 driver.switch_to.window(driver.window_handles[0])
             driver.refresh()
+            logging.info("[YouLikeHits][Visit] Refreshed visit page for next batch")
             EVENT.wait(secrets.choice(range(3, 5)))
             driver.execute_script("window.scrollTo(0, 600)")
         driver.switch_to.window(driver.window_handles[0])
