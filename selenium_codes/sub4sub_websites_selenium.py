@@ -1135,7 +1135,7 @@ def pandalikes_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 )
                 nums = re.findall(r"\d+", q_el.text)
                 if len(nums) < 2:
-                    raise ValueError("Could not parse numbers from %r" % q_el.text)
+                    raise ValueError(f"Could not parse numbers from {q_el.text!r}")
                 a, b = map(int, nums[:2])
                 ans = a + b
 
@@ -1178,7 +1178,7 @@ def pandalikes_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     )
                     nums = re.findall(r"\d+", q_el.text)
                     if len(nums) < 2:
-                        raise ValueError("Could not parse numbers from %r" % q_el.text)
+                        raise ValueError(f"Could not parse numbers from {q_el.text!r}")
                     a, b = map(int, nums[:2])
                     ans = a + b
 
