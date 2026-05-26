@@ -12,9 +12,16 @@ import logging
 from threading import Event
 from datetime import datetime, timedelta
 from pathlib import Path
+import os
 import secrets
+import shutil
+import time
 import traceback
 import undetected_chromedriver as uc
+
+# Prevent Transformers from spawning the online safetensors conversion thread.
+os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "1")
+
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel, CLIPProcessor, CLIPModel
 from PIL import Image
 from io import BytesIO
@@ -27,6 +34,76 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
 
 # Initializing EVENT to enable EVENT.wait() which is more effective than time.sleep()
 EVENT = Event()
+HF_MODEL_LOAD_RETRIES = 3
+HF_MODEL_LOAD_RETRY_SECONDS = 5
+TROCR_MODEL_NAME = "microsoft/trocr-small-printed"
+CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
+STALE_CHROME_TEMP_PATTERNS = ("scoped_dir*", "chrome_drag*")
+STALE_CHROME_TEMP_MAX_AGE_SECONDS = 12 * 60 * 60
+STALE_CHROME_TEMP_CLEANED = False
+
+
+def load_transformers_component(component, model_name: str, **kwargs):
+    last_error = None
+    for attempt in range(1, HF_MODEL_LOAD_RETRIES + 1):
+        try:
+            return component.from_pretrained(model_name, **kwargs)
+        except (OSError, RuntimeError) as error:
+            last_error = error
+            if not kwargs.get("local_files_only"):
+                try:
+                    cache_kwargs = {**kwargs, "local_files_only": True}
+                    return component.from_pretrained(model_name, **cache_kwargs)
+                except (OSError, RuntimeError):
+                    pass
+            if attempt == HF_MODEL_LOAD_RETRIES:
+                break
+            logging.warning(
+                "Failed to load %s from %s on attempt %d/%d: %s",
+                component.__name__,
+                model_name,
+                attempt,
+                HF_MODEL_LOAD_RETRIES,
+                error,
+            )
+            EVENT.wait(HF_MODEL_LOAD_RETRY_SECONDS)
+    raise last_error
+
+
+def cleanup_stale_chrome_temp_dirs() -> None:
+    global STALE_CHROME_TEMP_CLEANED
+    if STALE_CHROME_TEMP_CLEANED:
+        return
+    STALE_CHROME_TEMP_CLEANED = True
+
+    temp_dir = Path(os.environ.get("TEMP", ""))
+    if not temp_dir.is_dir():
+        return
+
+    cutoff_time = time.time() - STALE_CHROME_TEMP_MAX_AGE_SECONDS
+    removed_count = 0
+    removed_bytes = 0
+    skipped_count = 0
+
+    for pattern in STALE_CHROME_TEMP_PATTERNS:
+        for temp_path in temp_dir.glob(pattern):
+            try:
+                if not temp_path.is_dir() or temp_path.stat().st_mtime > cutoff_time:
+                    continue
+                dir_size = sum(file_path.stat().st_size for file_path in temp_path.rglob("*") if file_path.is_file())
+                shutil.rmtree(temp_path)
+                removed_count += 1
+                removed_bytes += dir_size
+            except (OSError, PermissionError):
+                skipped_count += 1
+
+    if removed_count or skipped_count:
+        logging.info(
+            "Chrome temp cleanup removed %d folders, %.2f MB, skipped %d locked folders",
+            removed_count,
+            removed_bytes / (1024 * 1024),
+            skipped_count,
+        )
 
 # Making Program to start with other locators instead of javascript locator
 YT_JAVASCRIPT = False
@@ -186,6 +263,7 @@ def set_driver_opt(req_dict: dict,
     Returns:
     - webdriver: returns driver with options already added to it.
     """
+    cleanup_stale_chrome_temp_dirs()
     # In headless mode we prefer Chrome's native default viewport unless explicitly overridden.
     if headless and not force_default_view:
         force_default_view = True
@@ -533,7 +611,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         screenshot_path = screenshot_dir / f"youlikehits_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         try:
-            driver.save_screenshot(str(screenshot_path))
+            # # driver.save_screenshot(str(screenshot_path))
             logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
             log_youlikehits_state(f"{context} failure state")
         except Exception as screenshot_ex:
@@ -586,6 +664,26 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     
     def while_loop_watch(hours_time: int) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
+        video_title_selector = '#listall > center > b:nth-child(1) > font'
+
+        def read_watch_video_name(context: str) -> str | None:
+            for attempt in range(1, 5):
+                try:
+                    video_title = WebDriverWait(driver, 5).until(
+                        ec.presence_of_element_located((By.CSS_SELECTOR, video_title_selector))
+                    )
+                    return video_title.text.strip()
+                except StaleElementReferenceException:
+                    logging.info(
+                        "[YouLikeHits][Watch] Video title refreshed during %s, retry %d/4",
+                        context,
+                        attempt,
+                    )
+                    EVENT.wait(1)
+                except (TimeoutException, NoSuchElementException):
+                    EVENT.wait(0.5)
+            return None
+
         try:
             try:
                 logging.info("Watch Loop Started")
@@ -628,7 +726,9 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         EVENT.wait(0.25)
                     driver.switch_to.window(driver.window_handles[0])
                     try:
-                        video_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
+                        video_name = read_watch_video_name("current video read")
+                        if not video_name:
+                            raise NoSuchElementException("Could not read current YouLikeHits video title")
                         logging.info("[YouLikeHits][Watch] Current video: %s", video_name)
                     except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
                         logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
@@ -698,8 +798,17 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     driver.switch_to.default_content()
                     try:
                         counter = 0
-                        while (video_name ==
-                               driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
+                        while True:
+                            current_video_name = read_watch_video_name("next video wait")
+                            if not current_video_name:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Could not read refreshed video name after %s, refreshing",
+                                    video_name,
+                                )
+                                driver.refresh()
+                                break
+                            if current_video_name != video_name:
+                                break
                             EVENT.wait(5)
                             counter += 1
                             if counter % 6 == 0:
@@ -1405,7 +1514,7 @@ def pandalikes_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     logging.info("[Monitor] span still present proceeding anyway")
         except Exception:
             logging.exception("Error during watch loop") 
-            driver.save_screenshot("screenshots/screenshot.png")
+            # # driver.save_screenshot("screenshots/screenshot.png")
 
 
 
@@ -1446,8 +1555,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.maximize_window()
-    captcha_processor = TrOCRProcessor.from_pretrained('microsoft/trocr-small-printed')
-    captcha_model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-small-printed')
+    captcha_processor = load_transformers_component(TrOCRProcessor, TROCR_MODEL_NAME)
+    captcha_model = load_transformers_component(VisionEncoderDecoderModel, TROCR_MODEL_NAME)
     # # driver.save_screenshot("screenshots/screenshot.png")
     
     while True:
@@ -1476,8 +1585,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     captcha_processor = None                  
     captcha_model = None                      
     torch.cuda.empty_cache()            
-    model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    processor = load_transformers_component(CLIPProcessor, CLIP_MODEL_NAME)
+    model = load_transformers_component(CLIPModel, CLIP_MODEL_NAME, use_safetensors=False)
     model.eval()
     def watch_loop(hours_time: int) -> None:
         now = datetime.now()
