@@ -611,7 +611,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         screenshot_path = screenshot_dir / f"youlikehits_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         try:
-            # # driver.save_screenshot(str(screenshot_path))
+            driver.save_screenshot(str(screenshot_path))
             logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
             log_youlikehits_state(f"{context} failure state")
         except Exception as screenshot_ex:
