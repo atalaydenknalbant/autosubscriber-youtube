@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, JavascriptException, NoSuchFrameException
+    NoSuchWindowException, JavascriptException, NoSuchFrameException, WebDriverException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -40,7 +40,7 @@ TROCR_MODEL_NAME = "microsoft/trocr-small-printed"
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 STALE_CHROME_TEMP_PATTERNS = ("scoped_dir*", "chrome_drag*")
 STALE_CHROME_TEMP_MAX_AGE_SECONDS = 12 * 60 * 60
-STALE_CHROME_TEMP_CLEANED = False
+STALE_CHROME_TEMP_STATE = {"cleaned": False}
 
 
 def load_transformers_component(component, model_name: str, **kwargs):
@@ -71,10 +71,9 @@ def load_transformers_component(component, model_name: str, **kwargs):
 
 
 def cleanup_stale_chrome_temp_dirs() -> None:
-    global STALE_CHROME_TEMP_CLEANED
-    if STALE_CHROME_TEMP_CLEANED:
+    if STALE_CHROME_TEMP_STATE["cleaned"]:
         return
-    STALE_CHROME_TEMP_CLEANED = True
+    STALE_CHROME_TEMP_STATE["cleaned"] = True
 
     temp_dir = Path(os.environ.get("TEMP", ""))
     if not temp_dir.is_dir():
@@ -94,7 +93,7 @@ def cleanup_stale_chrome_temp_dirs() -> None:
                 shutil.rmtree(temp_path)
                 removed_count += 1
                 removed_bytes += dir_size
-            except (OSError, PermissionError):
+            except OSError:
                 skipped_count += 1
 
     if removed_count or skipped_count:
@@ -1087,7 +1086,7 @@ def like4like_functions(req_dict: dict) -> None:
     driver.quit()
 
 
-def ytmonsterru_functions(req_dict: dict) -> None:
+def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     """ytmonsterru login and then earn credits by engaging videos
     Args:
     - req_dict(dict): dictionary object of required parameters
@@ -1097,13 +1096,18 @@ def ytmonsterru_functions(req_dict: dict) -> None:
     def log_ytmonsterru_state(message: str) -> None:
         try:
             current_url = driver.current_url
-        except Exception:
+        except WebDriverException:
             current_url = "<unavailable>"
         try:
             window_count = len(driver.window_handles)
-        except Exception:
+        except WebDriverException:
             window_count = -1
-        logging.info("[YTMonsterRU] %s | url=%s | windows=%d", message, current_url, window_count)
+        logging.info(
+            "[YTMonsterRU] %s | url=%s | windows=%d",
+            message,
+            current_url,
+            window_count,
+        )
 
     def capture_ytmonsterru_failure(context: str, ex: Exception) -> None:
         if getattr(ex, "_ytmonsterru_captured", False):
@@ -1121,24 +1125,48 @@ def ytmonsterru_functions(req_dict: dict) -> None:
                 failing_frame.name,
             )
             if failing_frame.line:
-                logging.error("[YTMonsterRU][Failure] Code: %s", failing_frame.line.strip())
+                logging.error(
+                    "[YTMonsterRU][Failure] Code: %s",
+                    failing_frame.line.strip(),
+                )
         else:
-            logging.error("[YTMonsterRU][Failure] %s failed without traceback entries", context)
+            logging.error(
+                "[YTMonsterRU][Failure] %s failed without traceback entries",
+                context,
+            )
 
         screenshot_dir = Path("screenshots")
         screenshot_dir.mkdir(parents=True, exist_ok=True)
-        screenshot_path = screenshot_dir / f"ytmonsterru_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        screenshot_path = (
+            screenshot_dir
+            / f"ytmonsterru_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        )
 
         try:
             driver.save_screenshot(str(screenshot_path))
-            logging.error("[YTMonsterRU][Failure] Screenshot saved to %s", screenshot_path)
+            logging.error(
+                "[YTMonsterRU][Failure] Screenshot saved to %s",
+                screenshot_path,
+            )
             log_ytmonsterru_state(f"{context} failure state")
-        except Exception as screenshot_ex:
-            logging.error("[YTMonsterRU][Failure] Could not save screenshot: %s", screenshot_ex)
+        except (OSError, WebDriverException) as screenshot_ex:
+            logging.error(
+                "[YTMonsterRU][Failure] Could not save screenshot: %s",
+                screenshot_ex,
+            )
 
-        logging.exception("[YTMonsterRU][Failure] %s raised %s", context, type(ex).__name__)
+        logging.exception(
+            "[YTMonsterRU][Failure] %s raised %s",
+            context,
+            type(ex).__name__,
+        )
 
-    driver: webdriver = set_driver_opt(req_dict, website="ytmonsterru", headless=True, undetected=False)
+    driver: webdriver = set_driver_opt(
+        req_dict,
+        website="ytmonsterru",
+        headless=True,
+        undetected=False,
+    )
     logging.info("[YTMonsterRU] Driver created")
     driver.implicitly_wait(6.5)
     EVENT.wait(secrets.choice(range(1, 4)))
@@ -1152,8 +1180,14 @@ def ytmonsterru_functions(req_dict: dict) -> None:
         driver.find_element(By.CSS_SELECTOR, ".auth-with-password").click()
         logging.info("[YTMonsterRU] Password login selected")
         EVENT.wait(secrets.choice(range(2, 4)))
-        for index, auth_info in enumerate([req_dict["email_ytmonsterru"], req_dict['pw_ytmonsterru']]):
-            driver.find_elements(By.CLASS_NAME, "auth-input")[index].send_keys(auth_info)
+        login_values = [
+            req_dict["email_ytmonsterru"],
+            req_dict['pw_ytmonsterru'],
+        ]
+        for index, auth_info in enumerate(login_values):
+            driver.find_elements(By.CLASS_NAME, "auth-input")[index].send_keys(
+                auth_info
+            )
             logging.info("[YTMonsterRU] Login field %d entered", index + 1)
             EVENT.wait(secrets.choice(range(2, 4)))
         driver.find_elements(By.CLASS_NAME, "auth-button")[0].click()
@@ -1162,37 +1196,14 @@ def ytmonsterru_functions(req_dict: dict) -> None:
         # # driver.find_elements(By.ID, "menu_task")[0].click()
         EVENT.wait(secrets.choice(range(2, 4)))
     except NoSuchElementException:
-        logging.info("[YTMonsterRU] Login nav unavailable, continuing as already logged in")
+        logging.info(
+            "[YTMonsterRU] Login nav unavailable, continuing as already logged in"
+        )
         log_ytmonsterru_state("Already logged in state")
-    except Exception as ex:
+    except WebDriverException as ex:
         capture_ytmonsterru_failure("login", ex)
         raise
 
-
-    def watch_loop(hours_time: int) -> None:
-        j = 1
-        now = datetime.now()
-        hours_added = timedelta(hours=hours_time)
-        future = now + hours_added
-        while True:
-            if datetime.now() > future:
-                break
-            driver.find_element(By.CSS_SELECTOR, "a[href='/task/youtube/']").send_keys(Keys.ENTER)
-            EVENT.wait(secrets.choice(range(2, 4)))
-            driver.switch_to.window(driver.window_handles[1])
-            driver.switch_to.frame('video-start')
-            EVENT.wait(secrets.choice(range(2, 4)))
-            driver.find_element(By.CLASS_NAME, "ytp-large-play-button-red-bg").send_keys(Keys.ENTER)
-            EVENT.wait(secrets.choice(range(2, 4)))
-            driver.switch_to.window(driver.window_handles[1])
-            driver.switch_to.default_content()
-            WebDriverWait(driver, float(driver.find_element(By.CLASS_NAME, 'time').text) + 15)\
-                .until(ec.element_to_be_clickable((By.CSS_SELECTOR, "body > div.top > div.butt > input[type=submit]"))) \
-                .send_keys(Keys.ENTER)
-            logging.info("Total Watched Videos: %d", j)
-            driver.switch_to.window(driver.window_handles[0])
-            j += 1
-    watch_loop(14)
     # # comment_loop(14)
     def watch_loop(hours_time: int) -> None:
         try:
@@ -1206,33 +1217,47 @@ def ytmonsterru_functions(req_dict: dict) -> None:
                     logging.info("[YTMonsterRU][Watch] Time limit reached")
                     break
                 logging.info("[YTMonsterRU][Watch] Iteration %d started", j)
-                driver.find_element(By.CSS_SELECTOR, "a[href='/task/youtube/']").send_keys(Keys.ENTER)
+                driver.find_element(
+                    By.CSS_SELECTOR,
+                    "a[href='/task/youtube/']",
+                ).send_keys(Keys.ENTER)
                 log_ytmonsterru_state("[Watch] YouTube task opened")
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 log_ytmonsterru_state("[Watch] Switched to task window")
                 driver.switch_to.frame('video-start')
                 EVENT.wait(secrets.choice(range(2, 4)))
-                driver.find_element(By.CLASS_NAME, "ytmCueOverlayPlayButton").send_keys(Keys.ENTER)
+                driver.find_element(
+                    By.CLASS_NAME,
+                    "ytmCueOverlayPlayButton",
+                ).send_keys(Keys.ENTER)
                 logging.info("[YTMonsterRU][Watch] Play button submitted")
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 driver.switch_to.default_content()
-                wait_seconds = float(driver.find_element(By.CLASS_NAME, 'time').text) + 15
-                logging.info("[YTMonsterRU][Watch] Waiting %.1fs for claim button", wait_seconds)
+                wait_seconds = float(
+                    driver.find_element(By.CLASS_NAME, 'time').text
+                ) + 15
+                logging.info(
+                    "[YTMonsterRU][Watch] Waiting %.1fs for claim button",
+                    wait_seconds,
+                )
                 WebDriverWait(driver, wait_seconds)\
-                    .until(ec.element_to_be_clickable((By.CSS_SELECTOR, "body > div.top > div.butt > input[type=submit]"))) \
+                    .until(ec.element_to_be_clickable((
+                        By.CSS_SELECTOR,
+                        "body > div.top > div.butt > input[type=submit]",
+                    ))) \
                     .send_keys(Keys.ENTER)
                 logging.info("[YTMonsterRU][Watch] Total watched videos: %d", j)
                 driver.switch_to.window(driver.window_handles[0])
                 log_ytmonsterru_state("[Watch] Returned to main window")
                 j += 1
-        except Exception as ex:
+        except (IndexError, ValueError, WebDriverException) as ex:
             capture_ytmonsterru_failure("watch_loop", ex)
             raise
     try:
         watch_loop(14)
-    except Exception as ex:
+    except (IndexError, ValueError, WebDriverException) as ex:
         capture_ytmonsterru_failure("ytmonsterru_functions", ex)
         raise
     # # comment_loop(14)
