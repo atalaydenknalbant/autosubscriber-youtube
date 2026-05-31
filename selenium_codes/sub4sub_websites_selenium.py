@@ -1196,7 +1196,71 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         raise
 
     # # comment_loop(14)
-    def watch_loop(hours_time: int) -> None:
+    def watch_loop(hours_time: int) -> None:  # noqa: PLR0915
+        def submit_youtube_play() -> bool:
+            play_selectors = [
+                (By.CLASS_NAME, "ytmCueOverlayPlayButton"),
+                (By.CLASS_NAME, "ytp-large-play-button-red-bg"),
+                (By.CLASS_NAME, "ytp-large-play-button"),
+                (By.CSS_SELECTOR, ".ytp-large-play-button"),
+                (By.CSS_SELECTOR, ".ytp-play-button"),
+                (By.CSS_SELECTOR, "button[aria-label*='Play']"),
+                (By.CSS_SELECTOR, "button[title*='Play']"),
+            ]
+
+            for locator in play_selectors:
+                try:
+                    WebDriverWait(driver, 3).until(
+                        ec.element_to_be_clickable(locator)
+                    ).send_keys(Keys.ENTER)
+                    return True
+                except (TimeoutException, WebDriverException):
+                    pass
+
+            js_attempts = [
+                "document.querySelector('video')?.play()",
+                "document.querySelector('.html5-video-player video')?.play()",
+                "document.getElementById('movie_player')?.click()",
+            ]
+            for script in js_attempts:
+                try:
+                    driver.execute_script(script)
+                    return True
+                except JavascriptException:
+                    pass
+
+            click_targets = [
+                (By.ID, "movie_player"),
+                (By.CSS_SELECTOR, ".html5-video-player"),
+                (By.CSS_SELECTOR, "video"),
+                (By.TAG_NAME, "body"),
+            ]
+            for locator in click_targets:
+                try:
+                    target = WebDriverWait(driver, 3).until(
+                        ec.presence_of_element_located(locator)
+                    )
+                    ActionChains(driver).move_to_element(target).click().perform()
+                    return True
+                except (TimeoutException, WebDriverException):
+                    pass
+
+            key_targets = [
+                (By.ID, "movie_player"),
+                (By.TAG_NAME, "body"),
+            ]
+            for locator in key_targets:
+                try:
+                    target = WebDriverWait(driver, 3).until(
+                        ec.presence_of_element_located(locator)
+                    )
+                    target.send_keys(Keys.SPACE)
+                    return True
+                except (TimeoutException, WebDriverException):
+                    pass
+
+            return False
+
         try:
             j = 1
             now = datetime.now()
@@ -1218,11 +1282,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 log_ytmonsterru_state("[Watch] Switched to task window")
                 driver.switch_to.frame('video-start')
                 EVENT.wait(secrets.choice(range(2, 4)))
-                driver.find_element(
-                    By.CLASS_NAME,
-                    "ytmCueOverlayPlayButton",
-                ).send_keys(Keys.ENTER)
-                logging.info("[YTMonsterRU][Watch] Play button submitted")
+                if not submit_youtube_play():
+                    raise NoSuchElementException(
+                        "Could not activate YouTube play button"
+                    )
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 driver.switch_to.default_content()
