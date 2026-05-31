@@ -1214,7 +1214,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         ec.element_to_be_clickable(locator)
                     ).send_keys(Keys.ENTER)
                     return True
-                except (TimeoutException, WebDriverException):
+                except WebDriverException:
                     pass
 
             js_attempts = [
@@ -1242,7 +1242,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     )
                     ActionChains(driver).move_to_element(target).click().perform()
                     return True
-                except (TimeoutException, WebDriverException):
+                except WebDriverException:
                     pass
 
             key_targets = [
@@ -1256,7 +1256,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     )
                     target.send_keys(Keys.SPACE)
                     return True
-                except (TimeoutException, WebDriverException):
+                except WebDriverException:
                     pass
 
             return False
