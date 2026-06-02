@@ -1232,6 +1232,49 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             )
             EVENT.wait(wait_seconds)
 
+        def request_new_ytmonsterru_puzzle(reason: str, allow_refresh: bool = True) -> bool:
+            try:
+                driver.switch_to.default_content()
+            except WebDriverException:
+                pass
+
+            try:
+                body_text = driver.find_element(By.TAG_NAME, "body").text.lower()
+            except WebDriverException:
+                body_text = ""
+
+            reset_markers = ("reset page", "перезагрузить")
+            if any(marker in body_text for marker in reset_markers):
+                reload_locators = (
+                    (By.XPATH, "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reload')]"),
+                    (By.XPATH, "//a[contains(., 'перезагрузить')]"),
+                    (By.XPATH, "//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]"),
+                )
+                for locator in reload_locators:
+                    try:
+                        WebDriverWait(driver, 3).until(
+                            ec.element_to_be_clickable(locator)
+                        ).click()
+                        logging.info(
+                            "[YTMonsterRU][ImagePuzzle] Reset page handled by clicking reload link after %s.",
+                            reason,
+                        )
+                        EVENT.wait(5)
+                        return True
+                    except WebDriverException:
+                        pass
+
+            if not allow_refresh:
+                return False
+
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] Refreshing page to request a new puzzle image after %s.",
+                reason,
+            )
+            driver.refresh()
+            EVENT.wait(5)
+            return True
+
         try:
             while datetime.now() < deadline:
                 try:
@@ -1242,6 +1285,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     wait_out_ytmonsterru_alert(getattr(alert_ex, "alert_text", None))
                     return handle_yt_monster_image_puzzle(context, timeout)
                 except WebDriverException:
+                    if request_new_ytmonsterru_puzzle(
+                        "missing puzzle popup",
+                        allow_refresh=False,
+                    ):
+                        continue
                     return True
 
                 # Attempt Automated Solve using CLIP
@@ -1829,29 +1877,26 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         else:
                             logging.warning(
                                 "[YTMonsterRU][ImagePuzzle] Skipping submit due to low-confidence match scores. "
-                                "Refreshing page to request a new puzzle image."
+                                "Requesting a new puzzle image."
                             )
-                            driver.refresh()
-                            EVENT.wait(5)
+                            request_new_ytmonsterru_puzzle("low-confidence match scores")
                             continue
                     else:
                         logging.warning(
                             "[YTMonsterRU][ImagePuzzle] Only %d scene shapes detected. "
-                            "Need 3. Refreshing page to request a new puzzle image.",
+                            "Need 3. Requesting a new puzzle image.",
                             len(shapes),
                         )
-                        driver.refresh()
-                        EVENT.wait(5)
+                        request_new_ytmonsterru_puzzle("fewer than 3 scene shapes")
                         continue
 
                 else:
                     logging.warning(
                         "[YTMonsterRU][ImagePuzzle] Found less than 2 distinct image/canvas "
-                        "elements inside the popup. Got %d. Refreshing page to request a new puzzle image.",
+                        "elements inside the popup. Got %d. Requesting a new puzzle image.",
                         len(images),
                     )
-                    driver.refresh()
-                    EVENT.wait(5)
+                    request_new_ytmonsterru_puzzle("fewer than 2 canvas elements")
                     continue
 
                 logging.info("[YTMonsterRU][ImagePuzzle] Automated puzzle pass complete. Re-evaluating next tick.")
