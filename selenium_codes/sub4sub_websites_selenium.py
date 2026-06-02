@@ -1582,7 +1582,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         min_area=36,
                     )
 
-                    if background_diff is not None:
+                    # #if background_diff is not None:
                         # # cv2.imwrite(
                         # #     str(debug_dir / "bottom_background_diff.png"),
                         # #     background_diff,
@@ -1600,7 +1600,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     str(debug_dir / "bottom_objects_only.png"),
                         # #     objects_only_scene,
                         # # )
-                        pass
+                        # #pass
                     # # cv2.imwrite(
                     # #     str(debug_dir / "bottom_background_removed_mask.png"),
                     # #     filtered_shape_mask,
@@ -1626,7 +1626,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         bottom_crops = []
                         bottom_mask_img = Image.fromarray(filtered_shape_mask).convert("RGB")
                         crop_pad = 8
-                        for idx, (x, y, w, h) in enumerate(shapes):
+                        for x, y, w, h in shapes:
                             crop_box = (
                                 max(0, x - crop_pad),
                                 max(0, y - crop_pad),
@@ -1635,6 +1635,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             )
                             crop = bottom_mask_img.crop(crop_box)
                             bottom_crops.append(crop)
+                            # # idx = len(bottom_crops) - 1
                             # # crop.save(debug_dir / f"bottom_crop_{idx}_mask.png")
                             # # bottom_img.crop(crop_box).save(
                             # #     debug_dir / f"bottom_crop_{idx}_scene.png"
@@ -1857,11 +1858,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
         screenshot_dir = Path("screenshots")
         screenshot_dir.mkdir(parents=True, exist_ok=True)
-        screenshot_path = (
-            screenshot_dir
-            / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-        )
         try:
+            # # screenshot_path = (
+            # #     screenshot_dir
+            # #     / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            # # )
             # # driver.save_screenshot(str(screenshot_path))
             # # logging.info(
             # #     "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
