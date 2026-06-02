@@ -121,9 +121,14 @@ def close_existing_chrome_processes() -> None:
         return
 
     closed_processes = []
+    taskkill_path = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "taskkill.exe"
+    if not taskkill_path.is_file():
+        logging.info("Chrome process cleanup skipped: taskkill.exe was not found")
+        return
+
     for image_name in ("chromedriver.exe", "chrome.exe"):
         result = subprocess.run(
-            ["taskkill", "/F", "/T", "/IM", image_name],
+            [str(taskkill_path), "/F", "/T", "/IM", image_name],
             capture_output=True,
             text=True,
             check=False,
@@ -1269,13 +1274,12 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     # Fallback in case they change the structure again
                     images = driver.find_elements(By.CSS_SELECTOR, f"{puzzle_selector} img, {puzzle_selector} canvas")
 
-                for i, img_el in enumerate(images):
-                    try:
-                        # # with open(debug_dir / f"raw_element_{i}.png", "wb") as f:
-                        # #     f.write(img_el.screenshot_as_png)
-                        pass
-                    except Exception as e:
-                        logging.info(f"Failed to save raw_element_{i}: {e}")
+                # # for i, img_el in enumerate(images):
+                # #     try:
+                # #         with open(debug_dir / f"raw_element_{i}.png", "wb") as f:
+                # #             f.write(img_el.screenshot_as_png)
+                # #     except Exception as e:
+                # #         logging.info("Failed to save raw_element_%d: %s", i, e)
 
                 if len(images) >= 2:
                     top_img_element = images[0]
@@ -1292,8 +1296,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         bottom_img.size,
                     )
 
-                    top_w, top_h = top_img.size
-                    part_w = top_w // 3
+                    _top_w, top_h = top_img.size
 
                     # Keep original crops for debugging
                     top_crops_original = [
@@ -1353,9 +1356,9 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             ) ** 0.5
                             return center_distance <= 35
 
-                        for left_idx in range(len(boxes)):
-                            for right_idx in range(left_idx + 1, len(boxes)):
-                                if close_enough(boxes[left_idx], boxes[right_idx]):
+                        for left_idx, left_box in enumerate(boxes):
+                            for right_idx, right_box in enumerate(boxes[left_idx + 1:], start=left_idx + 1):
+                                if close_enough(left_box, right_box):
                                     union(left_idx, right_idx)
 
                         groups = {}
@@ -1584,11 +1587,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     str(debug_dir / "bottom_background_diff.png"),
                         # #     background_diff,
                         # # )
-                        objects_only_scene = cv2.bitwise_and(
-                            bottom_arr,
-                            bottom_arr,
-                            mask=filtered_shape_mask,
-                        )
+                        # # objects_only_scene = cv2.bitwise_and(
+                        # #     bottom_arr,
+                        # #     bottom_arr,
+                        # #     mask=filtered_shape_mask,
+                        # # )
                         # # cv2.imwrite(
                         # #     str(debug_dir / "bottom_background_removed_scene.png"),
                         # #     objects_only_scene,
@@ -1597,12 +1600,13 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     str(debug_dir / "bottom_objects_only.png"),
                         # #     objects_only_scene,
                         # # )
+                        pass
                     # # cv2.imwrite(
                     # #     str(debug_dir / "bottom_background_removed_mask.png"),
                     # #     filtered_shape_mask,
                     # # )
                     bottom_boxes_debug = bottom_arr.copy()
-                    for _idx, (x, y, w, h) in enumerate(shapes):
+                    for x, y, w, h in shapes:
                         cv2.rectangle(
                             bottom_boxes_debug,
                             (x, y),
@@ -1612,12 +1616,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         )
                     # # cv2.imwrite(str(debug_dir / "bottom_boxes.png"), bottom_boxes_debug)
 
-                    for idx, tc in enumerate(top_crops_original):
-                        # # tc.save(debug_dir / f"top_crop_{idx}_original.png")
-                        pass
-                    for idx, tc in enumerate(top_crops):
-                        # # tc.save(debug_dir / f"top_crop_{idx}_inverted.png")
-                        pass
+                    # # for idx, tc in enumerate(top_crops_original):
+                    # #     tc.save(debug_dir / f"top_crop_{idx}_original.png")
+                    # # for idx, tc in enumerate(top_crops):
+                    # #     tc.save(debug_dir / f"top_crop_{idx}_inverted.png")
 
                     # We need at least 3 shapes detected to solve this puzzle.
                     if len(shapes) >= 3:
@@ -1777,7 +1779,16 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             for i, j in matched_pairs:
                                 x, y, w, h = shapes[j]
                                 sim_score = similarity[i, j]
-                                logging.info(f"[YTMonsterRU][ImagePuzzle] Clicking target {i+1}/3. Matched bottom shape index: {j}, Similarity score: {sim_score:.4f}, Coordinates: (x={x}, y={y})")
+                                logging.info(
+                                    "[YTMonsterRU][ImagePuzzle] Clicking target %d/3. "
+                                    "Matched bottom shape index: %d, Similarity score: %.4f, "
+                                    "Coordinates: (x=%d, y=%d)",
+                                    i + 1,
+                                    j,
+                                    sim_score,
+                                    x,
+                                    y,
+                                )
 
                                 center_x_css = (x + w/2) / scale_x
                                 center_y_css = (y + h/2) / scale_y
@@ -1793,10 +1804,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             submit_button = driver.find_element(By.CSS_SELECTOR, "body > div.popupRecaptcha > div > button")
                             submit_button.click()
                             EVENT.wait(5)
-                            post_submit_path = (
-                                debug_dir
-                                / f"post_submit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-                            )
+                            # # post_submit_path = (
+                            # #     debug_dir
+                            # #     / f"post_submit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                            # # )
                             # # driver.save_screenshot(str(post_submit_path))
                             # # logging.info(
                             # #     "[YTMonsterRU][ImagePuzzle] Post-submit screenshot saved to %s",
