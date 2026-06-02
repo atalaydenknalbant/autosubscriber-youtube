@@ -1243,18 +1243,21 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except WebDriverException:
                 body_text = ""
 
-            reset_markers = ("reset page", "перезагрузить")
-            if any(marker in body_text for marker in reset_markers):
+            if "reset page" in body_text or "reload" in body_text:
                 reload_locators = (
+                    (By.XPATH, "//a[contains(@href, 'reload')]"),
+                    (By.XPATH, "//a[contains(@onclick, 'reload')]"),
+                    (By.CSS_SELECTOR, "a[href*='reload']"),
                     (By.XPATH, "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reload')]"),
-                    (By.XPATH, "//a[contains(., 'перезагрузить')]"),
-                    (By.XPATH, "//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]"),
+                    (By.XPATH, "//h1[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]/following::a[2]"),
+                    (By.XPATH, "//h1[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]/following::a[1]"),
                 )
                 for locator in reload_locators:
                     try:
-                        WebDriverWait(driver, 3).until(
+                        reset_element = WebDriverWait(driver, 3).until(
                             ec.element_to_be_clickable(locator)
-                        ).click()
+                        )
+                        driver.execute_script("arguments[0].click();", reset_element)
                         logging.info(
                             "[YTMonsterRU][ImagePuzzle] Reset page handled by clicking reload link after %s.",
                             reason,
@@ -1277,6 +1280,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
         try:
             while datetime.now() < deadline:
+                if request_new_ytmonsterru_puzzle(
+                    "reset page pre-check",
+                    allow_refresh=False,
+                ):
+                    continue
                 try:
                     puzzle_popup = driver.find_element(By.CSS_SELECTOR, puzzle_selector)
                     if not puzzle_popup.is_displayed():
@@ -1306,10 +1314,6 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             pass
 
                 try:
-                    # # with open(debug_dir / "popup.html", "w", encoding="utf-8") as f:
-                    # #     f.write(puzzle_popup.get_attribute("innerHTML"))
-                    # # with open(debug_dir / "popup_element.png", "wb") as f:
-                    # #     f.write(puzzle_popup.screenshot_as_png)
                     pass
                 except Exception as e:
                     logging.warning("[YTMonsterRU][ImagePuzzle] Could not save popup debug dumps: %s", e)
@@ -1630,7 +1634,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         min_area=36,
                     )
 
-                    # #if _background_diff is not None:
+                    if _background_diff is not None:
                         # # cv2.imwrite(
                         # #     str(debug_dir / "bottom_background_diff.png"),
                         # #     _background_diff,
@@ -1648,20 +1652,20 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     str(debug_dir / "bottom_objects_only.png"),
                         # #     objects_only_scene,
                         # # )
-                        # #pass
+                        pass
                     # # cv2.imwrite(
                     # #     str(debug_dir / "bottom_background_removed_mask.png"),
                     # #     filtered_shape_mask,
                     # # )
-                    bottom_boxes_debug = bottom_arr.copy()
-                    for x, y, w, h in shapes:
-                        cv2.rectangle(
-                            bottom_boxes_debug,
-                            (x, y),
-                            (x + w, y + h),
-                            (0, 255, 0),
-                            1,
-                        )
+                    # # bottom_boxes_debug = bottom_arr.copy()
+                    # # for x, y, w, h in shapes:
+                    # #     cv2.rectangle(
+                    # #         bottom_boxes_debug,
+                    # #         (x, y),
+                    # #         (x + w, y + h),
+                    # #         (0, 255, 0),
+                    # #         1,
+                    # #     )
                     # # cv2.imwrite(str(debug_dir / "bottom_boxes.png"), bottom_boxes_debug)
 
                     # # for idx, tc in enumerate(top_crops_original):
@@ -1899,8 +1903,8 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     request_new_ytmonsterru_puzzle("fewer than 2 canvas elements")
                     continue
 
-                logging.info("[YTMonsterRU][ImagePuzzle] Automated puzzle pass complete. Re-evaluating next tick.")
-                EVENT.wait(5) # Wait before next while iteration retry
+                # # logging.info("[YTMonsterRU][ImagePuzzle] Automated puzzle pass complete. Re-evaluating next tick.")
+                # # EVENT.wait(5) # Wait before next while iteration retry
         except UnexpectedAlertPresentException as alert_ex:
             wait_out_ytmonsterru_alert(getattr(alert_ex, "alert_text", None))
             return handle_yt_monster_image_puzzle(context, timeout)
@@ -1911,17 +1915,17 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         screenshot_dir = Path("screenshots")
         screenshot_dir.mkdir(parents=True, exist_ok=True)
         try:
-            # # screenshot_path = (
-            # #     screenshot_dir
-            # #     / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-            # # )
-            # # driver.save_screenshot(str(screenshot_path))
-            # # logging.info(
-            # #     "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
-            # #     "Screenshot saved to %s",
-            # #     context,
-            # #     screenshot_path,
-            # # )
+            screenshot_path = (
+                screenshot_dir
+                / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            )
+            driver.save_screenshot(str(screenshot_path))
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
+                "Screenshot saved to %s",
+                context,
+                screenshot_path,
+            )
             pass
         except (OSError, WebDriverException) as screenshot_ex:
             logging.info(
