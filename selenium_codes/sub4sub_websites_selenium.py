@@ -3,7 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
-    NoSuchWindowException, JavascriptException, NoSuchFrameException, WebDriverException
+    NoSuchWindowException, JavascriptException, NoSuchFrameException, \
+    WebDriverException, UnexpectedAlertPresentException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,18 +13,22 @@ import logging
 from threading import Event
 from datetime import datetime, timedelta
 from pathlib import Path
+from itertools import permutations
 import os
 import secrets
 import shutil
+import subprocess
 import time
 import traceback
 import undetected_chromedriver as uc
+import cv2
+import numpy as np
 
 # Prevent Transformers from spawning the online safetensors conversion thread.
 os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "1")
 
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel, CLIPProcessor, CLIPModel
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 import re
 import torch
@@ -38,9 +43,11 @@ HF_MODEL_LOAD_RETRIES = 3
 HF_MODEL_LOAD_RETRY_SECONDS = 5
 TROCR_MODEL_NAME = "microsoft/trocr-small-printed"
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
+YTMONSTERRU_CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
 STALE_CHROME_TEMP_PATTERNS = ("scoped_dir*", "chrome_drag*")
 STALE_CHROME_TEMP_MAX_AGE_SECONDS = 12 * 60 * 60
 STALE_CHROME_TEMP_STATE = {"cleaned": False}
+CHROME_PROCESS_CLEANUP_STATE = {"cleaned": False}
 
 
 def load_transformers_component(component, model_name: str, **kwargs):
@@ -104,6 +111,39 @@ def cleanup_stale_chrome_temp_dirs() -> None:
             skipped_count,
         )
 
+
+def close_existing_chrome_processes() -> None:
+    if CHROME_PROCESS_CLEANUP_STATE["cleaned"]:
+        return
+    CHROME_PROCESS_CLEANUP_STATE["cleaned"] = True
+
+    if os.name != "nt":
+        return
+
+    closed_processes = []
+    for image_name in ("chromedriver.exe", "chrome.exe"):
+        result = subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", image_name],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        output = f"{result.stdout} {result.stderr}".lower()
+        if result.returncode == 0:
+            closed_processes.append(image_name)
+        elif "not found" not in output:
+            logging.info(
+                "Chrome process cleanup skipped %s: %s",
+                image_name,
+                (result.stderr or result.stdout).strip(),
+            )
+
+    if closed_processes:
+        logging.info(
+            "Closed existing browser processes before Selenium start: %s",
+            ", ".join(closed_processes),
+        )
+
 # Making Program to start with other locators instead of javascript locator
 YT_JAVASCRIPT = False
 
@@ -152,7 +192,7 @@ def test_ytbuttons(youtube_url: str, button_to_test: str, req_dict: dict) -> Non
         confirm_button = driver.find_element(By.CSS_SELECTOR, ytbutton_elements_location_dict['yt_css_confirm_button'])
         ActionChains(driver).move_to_element(confirm_button).click().perform()
     else:
-        logging.info("Not Subscribed")  
+        logging.info("Not Subscribed")
     EVENT.wait(secrets.choice(range(3, 4)))
     driver.quit()
 
@@ -262,6 +302,7 @@ def set_driver_opt(req_dict: dict,
     Returns:
     - webdriver: returns driver with options already added to it.
     """
+    close_existing_chrome_processes()
     cleanup_stale_chrome_temp_dirs()
     # In headless mode we prefer Chrome's native default viewport unless explicitly overridden.
     if headless and not force_default_view:
@@ -283,12 +324,17 @@ def set_driver_opt(req_dict: dict,
         pass
     else:
         chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--disable-component-extensions-with-background-pages")  
-        chrome_options.add_argument("--disable-default-apps")             
+        chrome_options.add_argument("--disable-component-extensions-with-background-pages")
+        chrome_options.add_argument("--disable-default-apps")
         prefs = {
                  "disk-cache-size": 4096,
                  "profile.password_manager_enabled": False,
                  "credentials_enable_service": False}
+        if website == "ytmonsterru":
+            prefs.update({
+                "profile.default_content_setting_values.images": 1,
+                "profile.managed_default_content_settings.images": 1,
+            })
         if not undetected:
             chrome_options.add_experimental_option('prefs', prefs)
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -308,7 +354,11 @@ def set_driver_opt(req_dict: dict,
             chrome_options.add_argument("--force-device-scale-factor=1")
         chrome_options.add_argument("--disable-search-engine-choice-screen")
         chrome_options.add_argument("--ash-no-nudges")
-        chrome_options.add_argument("--disable-gpu")  
+        if website == "ytmonsterru":
+            chrome_options.add_argument("--enable-gpu")
+            chrome_options.add_argument("--ignore-gpu-blocklist")
+        else:
+            chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--propagate-iph-for-testing")
 
     chrome_options.add_argument("--mute-audio")
@@ -425,7 +475,7 @@ def ytbpals_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             driver.find_element(By.ID, "password").send_keys(req_dict['pw_ytbpals'])
             driver.find_element(By.CSS_SELECTOR, "#form_login > div:nth-child(3) > button").send_keys(Keys.ENTER)
     except NoSuchElementException:
-        pass        
+        pass
     driver.find_element(By.CSS_SELECTOR, "body > div.page-container.horizontal-menu > header > div > ul.navbar-nav >"
                                          " li:nth-child(5) > a").send_keys(Keys.ENTER)
 
@@ -456,7 +506,7 @@ def ytbpals_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 current_channel = driver.find_element(By.CSS_SELECTOR, channel).text
                 logging.info(current_channel)
             except NoSuchElementException:
-                pass   
+                pass
             try:
                 driver.find_element(By.CSS_SELECTOR, sub_btn).send_keys(Keys.ENTER)
                 logging.info("Remaining Videos:" + driver.find_element(By.ID, "ytbbal").text)
@@ -525,7 +575,7 @@ def ytbpals_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         else:
                             pass
                     except NoSuchElementException:
-                        pass      
+                        pass
                     for _ in range(3):
                         try:
                             sub_button = driver.find_elements(By.ID,
@@ -649,9 +699,9 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         except Exception as ex:
             capture_youlikehits_failure("collect_bonus_points", ex)
             raise
-    
+
     collect_bonus_points()
-    
+
     def while_loop_watch(hours_time: int) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
         video_title_selector = '#listall > center > b:nth-child(1) > font'
@@ -972,7 +1022,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         except Exception as ex:
             capture_youlikehits_failure("while_loop_visit", ex)
             raise
-    
+
     try:
         while_loop_watch(14)
         while_loop_listen(14)
@@ -1152,6 +1202,685 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             type(ex).__name__,
         )
 
+    def handle_yt_monster_image_puzzle(
+        context: str,
+        timeout: int = 600,
+    ) -> bool:
+        puzzle_selector = "div.popupRecaptcha"
+        deadline = datetime.now() + timedelta(seconds=timeout)
+
+        def wait_out_ytmonsterru_alert(alert_text: str | None = None) -> None:
+            text = alert_text or ""
+            try:
+                alert = driver.switch_to.alert
+                text = alert.text or text
+                alert.accept()
+            except WebDriverException:
+                pass
+
+            wait_match = re.search(r"Wait\s+(\d+)\s*sec", text, re.IGNORECASE)
+            wait_seconds = int(wait_match.group(1)) + 5 if wait_match else 60
+            logging.warning(
+                "[YTMonsterRU][ImagePuzzle] Wait alert detected: %s. Waiting %d sec before retry.",
+                text or "<no alert text>",
+                wait_seconds,
+            )
+            EVENT.wait(wait_seconds)
+
+        try:
+            while datetime.now() < deadline:
+                try:
+                    puzzle_popup = driver.find_element(By.CSS_SELECTOR, puzzle_selector)
+                    if not puzzle_popup.is_displayed():
+                        return True
+                except UnexpectedAlertPresentException as alert_ex:
+                    wait_out_ytmonsterru_alert(getattr(alert_ex, "alert_text", None))
+                    return handle_yt_monster_image_puzzle(context, timeout)
+                except WebDriverException:
+                    return True
+
+                # Attempt Automated Solve using CLIP
+                logging.info("[YTMonsterRU][ImagePuzzle] Attempting automated solve iteration...")
+                EVENT.wait(2)
+
+                debug_dir = Path("screenshots/debug")
+                debug_dir.mkdir(parents=True, exist_ok=True)
+                for stale_pattern in ("bottom_crop_*_thresh.png", "bottom_crop_*_scene.png"):
+                    for stale_debug in debug_dir.glob(stale_pattern):
+                        try:
+                            stale_debug.unlink()
+                        except OSError:
+                            pass
+
+                try:
+                    with open(debug_dir / "popup.html", "w", encoding="utf-8") as f:
+                        f.write(puzzle_popup.get_attribute("innerHTML"))
+                    # # with open(debug_dir / "popup_element.png", "wb") as f:
+                    # #     f.write(puzzle_popup.screenshot_as_png)
+                    logging.info("[YTMonsterRU][ImagePuzzle] Saved popup DOM for debugging.")
+                except Exception as e:
+                    logging.warning("[YTMonsterRU][ImagePuzzle] Could not save popup debug dumps: %s", e)
+
+                try:
+                    top_img_element = driver.find_element(By.ID, "targets")
+                    bottom_img_element = driver.find_element(By.ID, "scene")
+                    images = [top_img_element, bottom_img_element]
+                except NoSuchElementException:
+                    # Fallback in case they change the structure again
+                    images = driver.find_elements(By.CSS_SELECTOR, f"{puzzle_selector} img, {puzzle_selector} canvas")
+
+                for i, img_el in enumerate(images):
+                    try:
+                        # # with open(debug_dir / f"raw_element_{i}.png", "wb") as f:
+                        # #     f.write(img_el.screenshot_as_png)
+                        pass
+                    except Exception as e:
+                        logging.info(f"Failed to save raw_element_{i}: {e}")
+
+                if len(images) >= 2:
+                    top_img_element = images[0]
+                    bottom_img_element = images[1]
+
+                    top_img_png = top_img_element.screenshot_as_png
+                    bottom_img_png = bottom_img_element.screenshot_as_png
+
+                    top_img = Image.open(BytesIO(top_img_png)).convert("RGB")
+                    bottom_img = Image.open(BytesIO(bottom_img_png)).convert("RGB")
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Canvas sizes: targets=%s scene=%s",
+                        top_img.size,
+                        bottom_img.size,
+                    )
+
+                    top_w, top_h = top_img.size
+                    part_w = top_w // 3
+
+                    # Keep original crops for debugging
+                    top_crops_original = [
+                        top_img.crop((10, 0, 40, top_h)),
+                        top_img.crop((50, 0, 80, top_h)),
+                        top_img.crop((90, 0, 120, top_h))
+                    ]
+
+                    # Invert the top crops so the black lines become white lines on a black background.
+                    # This helps CLIP match them with the white lines found in the bottom scene.
+                    top_crops = [
+                        ImageOps.invert(tc) for tc in top_crops_original
+                    ]
+
+                    # Bottom image processing
+                    bottom_arr = cv2.cvtColor(np.array(bottom_img), cv2.COLOR_RGB2BGR)
+                    hsv = cv2.cvtColor(bottom_arr, cv2.COLOR_BGR2HSV)
+
+                    def merge_nearby_boxes(boxes, pad: int = 10):
+                        parents = list(range(len(boxes)))
+
+                        def find_parent(item: int) -> int:
+                            while parents[item] != item:
+                                parents[item] = parents[parents[item]]
+                                item = parents[item]
+                            return item
+
+                        def union(left: int, right: int) -> None:
+                            left_parent = find_parent(left)
+                            right_parent = find_parent(right)
+                            if left_parent != right_parent:
+                                parents[right_parent] = left_parent
+
+                        def expanded(box):
+                            x, y, w, h, _area = box
+                            return x - pad, y - pad, x + w + pad, y + h + pad
+
+                        def close_enough(left, right) -> bool:
+                            left_x1, left_y1, left_x2, left_y2 = expanded(left)
+                            right_x1, right_y1, right_x2, right_y2 = expanded(right)
+                            boxes_intersect = (
+                                left_x1 <= right_x2
+                                and right_x1 <= left_x2
+                                and left_y1 <= right_y2
+                                and right_y1 <= left_y2
+                            )
+                            if not boxes_intersect:
+                                return False
+
+                            left_center_x = left[0] + left[2] / 2
+                            left_center_y = left[1] + left[3] / 2
+                            right_center_x = right[0] + right[2] / 2
+                            right_center_y = right[1] + right[3] / 2
+                            center_distance = (
+                                (left_center_x - right_center_x) ** 2
+                                + (left_center_y - right_center_y) ** 2
+                            ) ** 0.5
+                            return center_distance <= 35
+
+                        for left_idx in range(len(boxes)):
+                            for right_idx in range(left_idx + 1, len(boxes)):
+                                if close_enough(boxes[left_idx], boxes[right_idx]):
+                                    union(left_idx, right_idx)
+
+                        groups = {}
+                        for idx, box in enumerate(boxes):
+                            groups.setdefault(find_parent(idx), []).append(box)
+
+                        merged = []
+                        for group in groups.values():
+                            x_min = min(item[0] for item in group)
+                            y_min = min(item[1] for item in group)
+                            x_max = max(item[0] + item[2] for item in group)
+                            y_max = max(item[1] + item[3] for item in group)
+                            area = sum(item[4] for item in group)
+                            merged.append((x_min, y_min, x_max - x_min, y_max - y_min, area))
+                        return merged
+
+                    def collect_white_component_boxes(mask):
+                        scene_h, scene_w = mask.shape
+                        boxes = []
+                        label_count, _labels, stats, _centroids = cv2.connectedComponentsWithStats(
+                            mask,
+                            8,
+                        )
+                        for label_idx in range(1, label_count):
+                            x, y, w, h, area = stats[label_idx]
+                            aspect_ratio = float(w) / h if h else 0
+                            density = float(area) / (w * h) if w and h else 0
+                            if not (35 <= area <= 2600):
+                                continue
+                            if not (6 <= w <= 105 and 6 <= h <= 105):
+                                continue
+                            if not (0.20 <= aspect_ratio <= 5.0):
+                                continue
+                            if density < 0.05:
+                                continue
+                            if x <= 1 or y <= 1 or x + w >= scene_w - 1 or y + h >= scene_h - 1:
+                                continue
+                            boxes.append((int(x), int(y), int(w), int(h), int(area)))
+                        return boxes
+
+                    def remove_small_mask_components(mask, min_area: int = 18):
+                        label_count, labels, stats, _centroids = cv2.connectedComponentsWithStats(
+                            mask,
+                            8,
+                        )
+                        cleaned = np.zeros_like(mask)
+                        for label_idx in range(1, label_count):
+                            area = stats[label_idx, cv2.CC_STAT_AREA]
+                            if area >= min_area:
+                                cleaned[labels == label_idx] = 255
+                        return cleaned
+
+                    def collect_contour_object_boxes(mask):
+                        scene_h, scene_w = mask.shape
+                        close_kernel = cv2.getStructuringElement(
+                            cv2.MORPH_ELLIPSE,
+                            (5, 5),
+                        )
+                        merged_mask = cv2.morphologyEx(
+                            mask,
+                            cv2.MORPH_CLOSE,
+                            close_kernel,
+                            iterations=2,
+                        )
+                        contours, _hierarchy = cv2.findContours(
+                            merged_mask,
+                            cv2.RETR_EXTERNAL,
+                            cv2.CHAIN_APPROX_SIMPLE,
+                        )
+                        boxes = []
+                        for contour in contours:
+                            x, y, w, h = cv2.boundingRect(contour)
+                            white_area = int(cv2.countNonZero(mask[y:y + h, x:x + w]))
+                            aspect_ratio = float(w) / h if h else 0
+                            density = float(white_area) / (w * h) if w and h else 0
+                            if not (45 <= white_area <= 3000):
+                                continue
+                            if not (10 <= w <= 120 and 10 <= h <= 120):
+                                continue
+                            if not (0.20 <= aspect_ratio <= 5.0):
+                                continue
+                            if density < 0.04:
+                                continue
+                            if x <= 1 or y <= 1 or x + w >= scene_w - 1 or y + h >= scene_h - 1:
+                                continue
+                            boxes.append((int(x), int(y), int(w), int(h), white_area))
+                        return boxes
+
+                    def find_white_scene_shapes(mask):
+                        boxes = collect_white_component_boxes(mask)
+                        contour_boxes = collect_contour_object_boxes(mask)
+                        merged = merge_nearby_boxes(boxes + contour_boxes)
+
+                        def has_clean_icon_shape(x, y, w, h):
+                            crop = mask[y:y + h, x:x + w]
+                            white_area = cv2.countNonZero(crop)
+                            density = float(white_area) / (w * h) if w and h else 0
+                            contours, _hierarchy = cv2.findContours(
+                                crop,
+                                cv2.RETR_EXTERNAL,
+                                cv2.CHAIN_APPROX_SIMPLE,
+                            )
+                            contours = [
+                                contour
+                                for contour in contours
+                                if cv2.contourArea(contour) >= 4
+                            ]
+                            if white_area < 120:
+                                return False
+                            if density < 0.08:
+                                return False
+                            return len(contours) <= 20
+
+                        seen = set()
+                        deduped = []
+                        for x, y, w, h, area in sorted(
+                            merged,
+                            key=lambda item: item[4],
+                            reverse=True,
+                        ):
+                            key = (x // 4, y // 4, w // 4, h // 4)
+                            if key in seen:
+                                continue
+                            seen.add(key)
+                            deduped.append((x, y, w, h, area))
+                        detected_shapes = [
+                            (x, y, w, h)
+                            for x, y, w, h, _area in deduped
+                            if 10 <= w <= 115 and 10 <= h <= 115
+                            and has_clean_icon_shape(x, y, w, h)
+                        ][:10]
+                        return boxes + contour_boxes, detected_shapes
+
+                    def build_background_removed_mask():
+                        assets_dir = Path("ytmonsterru_assets")
+                        best_background_name = None
+                        best_background_diff = None
+                        best_background_score = float("inf")
+                        for background_path in sorted(assets_dir.glob("canvas*.png")):
+                            background_img = Image.open(background_path).convert("RGB")
+                            if background_img.size != bottom_img.size:
+                                background_img = background_img.resize(bottom_img.size)
+                            background_arr = cv2.cvtColor(
+                                np.array(background_img),
+                                cv2.COLOR_RGB2BGR,
+                            )
+                            diff = cv2.absdiff(bottom_arr, background_arr)
+                            score = float(np.mean(diff))
+                            if score < best_background_score:
+                                best_background_name = background_path.name
+                                best_background_diff = diff.max(axis=2)
+                                best_background_score = score
+
+                        if best_background_diff is None:
+                            return None, None, None, None
+
+                        return best_background_name, best_background_score, best_background_diff, cv2.inRange(
+                            best_background_diff,
+                            20,
+                            255,
+                        )
+
+                    selected_background, background_score, background_diff, background_removed_mask = (
+                        build_background_removed_mask()
+                    )
+                    thresh = None
+                    component_boxes = []
+                    shapes = []
+                    if background_removed_mask is not None:
+                        logging.info(
+                            "[YTMonsterRU][ImagePuzzle] Selected background asset: %s with score %.2f",
+                            selected_background,
+                            background_score,
+                        )
+                        threshold_attempts = (
+                            (200, 115),
+                            (220, 100),
+                            (180, 130),
+                        )
+                        for min_value, max_saturation in threshold_attempts:
+                            white_mask = cv2.inRange(
+                                hsv,
+                                (0, 0, min_value),
+                                (179, max_saturation, 255),
+                            )
+                            candidate_mask = cv2.bitwise_and(
+                                white_mask,
+                                background_removed_mask,
+                            )
+                            candidate_mask = remove_small_mask_components(
+                                candidate_mask,
+                                min_area=24,
+                            )
+                            candidate_boxes, candidate_shapes = find_white_scene_shapes(
+                                candidate_mask,
+                            )
+                            if len(candidate_shapes) > len(shapes):
+                                thresh = candidate_mask
+                                component_boxes = candidate_boxes
+                                shapes = candidate_shapes
+                            if len(shapes) >= 3:
+                                break
+
+                    if thresh is None:
+                        thresh = cv2.inRange(hsv, (0, 0, 235), (179, 70, 255))
+                        thresh = remove_small_mask_components(thresh, min_area=24)
+                        component_boxes, shapes = find_white_scene_shapes(thresh)
+
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Component boxes=%d, merged shapes=%d",
+                        len(component_boxes),
+                        len(shapes),
+                    )
+
+                    # Save debugging images
+                    filtered_shape_mask = np.zeros_like(thresh)
+                    for x, y, w, h in shapes:
+                        filtered_shape_mask[y:y + h, x:x + w] = thresh[y:y + h, x:x + w]
+                    filtered_shape_mask = remove_small_mask_components(
+                        filtered_shape_mask,
+                        min_area=36,
+                    )
+
+                    if background_diff is not None:
+                        # # cv2.imwrite(
+                        # #     str(debug_dir / "bottom_background_diff.png"),
+                        # #     background_diff,
+                        # # )
+                        objects_only_scene = cv2.bitwise_and(
+                            bottom_arr,
+                            bottom_arr,
+                            mask=filtered_shape_mask,
+                        )
+                        # # cv2.imwrite(
+                        # #     str(debug_dir / "bottom_background_removed_scene.png"),
+                        # #     objects_only_scene,
+                        # # )
+                        # # cv2.imwrite(
+                        # #     str(debug_dir / "bottom_objects_only.png"),
+                        # #     objects_only_scene,
+                        # # )
+                    # # cv2.imwrite(
+                    # #     str(debug_dir / "bottom_background_removed_mask.png"),
+                    # #     filtered_shape_mask,
+                    # # )
+                    bottom_boxes_debug = bottom_arr.copy()
+                    for _idx, (x, y, w, h) in enumerate(shapes):
+                        cv2.rectangle(
+                            bottom_boxes_debug,
+                            (x, y),
+                            (x + w, y + h),
+                            (0, 255, 0),
+                            1,
+                        )
+                    # # cv2.imwrite(str(debug_dir / "bottom_boxes.png"), bottom_boxes_debug)
+
+                    for idx, tc in enumerate(top_crops_original):
+                        # # tc.save(debug_dir / f"top_crop_{idx}_original.png")
+                        pass
+                    for idx, tc in enumerate(top_crops):
+                        # # tc.save(debug_dir / f"top_crop_{idx}_inverted.png")
+                        pass
+
+                    # We need at least 3 shapes detected to solve this puzzle.
+                    if len(shapes) >= 3:
+                        bottom_crops = []
+                        bottom_mask_img = Image.fromarray(filtered_shape_mask).convert("RGB")
+                        crop_pad = 8
+                        for idx, (x, y, w, h) in enumerate(shapes):
+                            crop_box = (
+                                max(0, x - crop_pad),
+                                max(0, y - crop_pad),
+                                min(bottom_img.width, x + w + crop_pad),
+                                min(bottom_img.height, y + h + crop_pad),
+                            )
+                            crop = bottom_mask_img.crop(crop_box)
+                            bottom_crops.append(crop)
+                            # # crop.save(debug_dir / f"bottom_crop_{idx}_mask.png")
+                            # # bottom_img.crop(crop_box).save(
+                            # #     debug_dir / f"bottom_crop_{idx}_scene.png"
+                            # # )
+
+                        def find_best_assignment(score_matrix):
+                            best_match = None
+                            best_score = -float("inf")
+                            best_min_score = -float("inf")
+                            for candidate in permutations(range(score_matrix.shape[1]), 3):
+                                scores = [
+                                    float(score_matrix[target_idx, shape_idx])
+                                    for target_idx, shape_idx in enumerate(candidate)
+                                ]
+                                total_score = sum(scores)
+                                min_score = min(scores)
+                                if (
+                                    total_score > best_score
+                                    or (
+                                        total_score == best_score
+                                        and min_score > best_min_score
+                                    )
+                                ):
+                                    best_match = candidate
+                                    best_score = total_score
+                                    best_min_score = min_score
+                            return best_match, best_score, best_min_score
+
+                        processor = load_transformers_component(
+                            CLIPProcessor,
+                            YTMONSTERRU_CLIP_MODEL_NAME,
+                        )
+                        model = load_transformers_component(
+                            CLIPModel,
+                            YTMONSTERRU_CLIP_MODEL_NAME,
+                            use_safetensors=False,
+                        )
+                        model.eval()
+
+                        top_inputs = processor(images=top_crops, return_tensors="pt")
+                        bottom_inputs = processor(images=bottom_crops, return_tensors="pt")
+
+                        with torch.no_grad():
+                            top_out = model.get_image_features(**top_inputs)
+                            bottom_out = model.get_image_features(**bottom_inputs)
+
+                            top_features = top_out if isinstance(top_out, torch.Tensor) else (top_out.image_embeds if hasattr(top_out, 'image_embeds') else top_out.pooler_output)
+                            bottom_features = bottom_out if isinstance(bottom_out, torch.Tensor) else (bottom_out.image_embeds if hasattr(bottom_out, 'image_embeds') else bottom_out.pooler_output)
+
+                        top_features /= top_features.norm(dim=-1, keepdim=True)
+                        bottom_features /= bottom_features.norm(dim=-1, keepdim=True)
+
+                        similarity = (top_features @ bottom_features.T).cpu().numpy()
+                        best_assignment, _best_total, best_assignment_min_score = (
+                            find_best_assignment(similarity)
+                        )
+                        matched_indices = list(best_assignment) if best_assignment else []
+
+                        def image_to_shape_contour(image):
+                            gray = np.array(image.convert("L"))
+                            _threshold, mask = cv2.threshold(
+                                gray,
+                                25,
+                                255,
+                                cv2.THRESH_BINARY,
+                            )
+                            kernel = cv2.getStructuringElement(
+                                cv2.MORPH_ELLIPSE,
+                                (3, 3),
+                            )
+                            mask = cv2.morphologyEx(
+                                mask,
+                                cv2.MORPH_CLOSE,
+                                kernel,
+                                iterations=1,
+                            )
+                            contours, _hierarchy = cv2.findContours(
+                                mask,
+                                cv2.RETR_EXTERNAL,
+                                cv2.CHAIN_APPROX_SIMPLE,
+                            )
+                            contours = [
+                                contour
+                                for contour in contours
+                                if cv2.contourArea(contour) >= 8
+                            ]
+                            if not contours:
+                                return None
+                            return max(contours, key=cv2.contourArea)
+
+                        if best_assignment_min_score < 0.70:
+                            top_contours = [
+                                image_to_shape_contour(crop)
+                                for crop in top_crops
+                            ]
+                            bottom_contours = [
+                                image_to_shape_contour(crop)
+                                for crop in bottom_crops
+                            ]
+
+                            contour_similarity = np.zeros((3, len(bottom_crops)), dtype=float)
+                            for target_idx, top_contour in enumerate(top_contours):
+                                for shape_idx, bottom_contour in enumerate(bottom_contours):
+                                    if top_contour is None or bottom_contour is None:
+                                        continue
+                                    distance = cv2.matchShapes(
+                                        top_contour,
+                                        bottom_contour,
+                                        cv2.CONTOURS_MATCH_I3,
+                                        0,
+                                    )
+                                    contour_similarity[target_idx, shape_idx] = 1.0 / (1.0 + distance)
+
+                            fallback_assignment, _fallback_total, fallback_min_score = (
+                                find_best_assignment(contour_similarity)
+                            )
+                            if fallback_assignment and fallback_min_score > best_assignment_min_score:
+                                similarity = contour_similarity
+                                matched_indices = list(fallback_assignment)
+                                best_assignment_min_score = fallback_min_score
+                                logging.info(
+                                    "[YTMonsterRU][ImagePuzzle] Used contour fallback for matching."
+                                )
+
+                        if best_assignment_min_score < 0.70:
+                            logging.warning(
+                                "[YTMonsterRU][ImagePuzzle] Best assignment minimum similarity "
+                                "was only %.4f. Skipping to avoid misclick.",
+                                best_assignment_min_score,
+                            )
+                            matched_indices = []
+
+                        if len(matched_indices) == 3:
+                            b_w = bottom_img_element.size['width']
+                            b_h = bottom_img_element.size['height']
+                            scale_x = bottom_img.width / b_w if b_w else 1
+                            scale_y = bottom_img.height / b_h if b_h else 1
+
+                            matched_pairs = list(enumerate(matched_indices))
+
+                            # Click shapes in the same left-to-right order as the target canvas.
+                            for i, j in matched_pairs:
+                                x, y, w, h = shapes[j]
+                                sim_score = similarity[i, j]
+                                logging.info(f"[YTMonsterRU][ImagePuzzle] Clicking target {i+1}/3. Matched bottom shape index: {j}, Similarity score: {sim_score:.4f}, Coordinates: (x={x}, y={y})")
+
+                                center_x_css = (x + w/2) / scale_x
+                                center_y_css = (y + h/2) / scale_y
+
+                                ActionChains(driver).move_to_element_with_offset(
+                                    bottom_img_element,
+                                    int(center_x_css - b_w/2),
+                                    int(center_y_css - b_h/2)
+                                ).click().perform()
+                                # Wait 3 seconds so you can visually verify what it clicked
+                                time.sleep(3)
+
+                            submit_button = driver.find_element(By.CSS_SELECTOR, "body > div.popupRecaptcha > div > button")
+                            submit_button.click()
+                            EVENT.wait(5)
+                            post_submit_path = (
+                                debug_dir
+                                / f"post_submit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                            )
+                            # # driver.save_screenshot(str(post_submit_path))
+                            # # logging.info(
+                            # #     "[YTMonsterRU][ImagePuzzle] Post-submit screenshot saved to %s",
+                            # #     post_submit_path,
+                            # # )
+
+                            # Check if puzzle is solved or respawned
+                            try:
+                                if not puzzle_popup.is_displayed():
+                                    logging.info("[YTMonsterRU][ImagePuzzle] Automated solve successful.")
+                                    return True
+                                else:
+                                    logging.info("[YTMonsterRU][ImagePuzzle] Puzzle still visible after submit. Loop will retry...")
+                                    continue # Restart the while loop
+                            except StaleElementReferenceException: # Popup was destroyed
+                                logging.info("[YTMonsterRU][ImagePuzzle] Automated solve successful (popup closed).")
+                                return True
+                        else:
+                            logging.warning(
+                                "[YTMonsterRU][ImagePuzzle] Skipping submit due to low-confidence match scores. "
+                                "Refreshing page to request a new puzzle image."
+                            )
+                            driver.refresh()
+                            EVENT.wait(5)
+                            continue
+                    else:
+                        logging.warning(
+                            "[YTMonsterRU][ImagePuzzle] Only %d scene shapes detected. "
+                            "Need 3. Refreshing page to request a new puzzle image.",
+                            len(shapes),
+                        )
+                        driver.refresh()
+                        EVENT.wait(5)
+                        continue
+
+                else:
+                    logging.warning("[YTMonsterRU][ImagePuzzle] Found less than 2 distinct image/canvas elements inside the popup! Got %d.", len(images))
+
+                logging.info("[YTMonsterRU][ImagePuzzle] Automated puzzle pass complete. Re-evaluating next tick.")
+                EVENT.wait(5) # Wait before next while iteration retry
+        except UnexpectedAlertPresentException as alert_ex:
+            wait_out_ytmonsterru_alert(getattr(alert_ex, "alert_text", None))
+            return handle_yt_monster_image_puzzle(context, timeout)
+        except Exception as auto_ex:
+            logging.error("[YTMonsterRU][ImagePuzzle] Exception in automated solve: %s\n%s", auto_ex, traceback.format_exc())
+            EVENT.wait(5)
+
+        screenshot_dir = Path("screenshots")
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+        screenshot_path = (
+            screenshot_dir
+            / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        )
+        try:
+            # # driver.save_screenshot(str(screenshot_path))
+            # # logging.info(
+            # #     "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
+            # #     "Screenshot saved to %s",
+            # #     context,
+            # #     screenshot_path,
+            # # )
+            pass
+        except (OSError, WebDriverException) as screenshot_ex:
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] Could not save puzzle screenshot: %s",
+                screenshot_ex,
+            )
+
+        deadline = datetime.now() + timedelta(seconds=timeout)
+        while datetime.now() < deadline:
+            try:
+                puzzle_popup = driver.find_element(By.CSS_SELECTOR, puzzle_selector)
+                if not puzzle_popup.is_displayed():
+                    logging.info("[YTMonsterRU][ImagePuzzle] Manual puzzle cleared")
+                    return True
+            except WebDriverException:
+                logging.info("[YTMonsterRU][ImagePuzzle] Manual puzzle cleared")
+                return True
+            EVENT.wait(5)
+
+        raise TimeoutException(
+            "Manual YTMonsterRU image puzzle was not cleared in time"
+        )
+
     driver: webdriver = set_driver_opt(
         req_dict,
         website="ytmonsterru",
@@ -1261,6 +1990,32 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
             return False
 
+        def handle_unavailable_youtube_embed() -> bool:
+            try:
+                frame_text = driver.find_element(By.TAG_NAME, "body").text.lower()
+            except WebDriverException:
+                frame_text = ""
+
+            unavailable_markers = (
+                "video unavailable",
+                "playback on other websites has been disabled",
+                "watch on youtube",
+            )
+            if not any(marker in frame_text for marker in unavailable_markers):
+                return False
+
+            logging.info("[YTMonsterRU][Watch] YouTube embed unavailable, submitting unavailable task")
+            driver.switch_to.default_content()
+            unavailable_button = WebDriverWait(driver, 10).until(
+                ec.element_to_be_clickable((
+                    By.CSS_SELECTOR,
+                    "body > div.top > div.butt > input[type=submit]",
+                ))
+            )
+            unavailable_button.send_keys(Keys.ENTER)
+            EVENT.wait(3)
+            return True
+
         try:
             j = 1
             now = datetime.now()
@@ -1280,15 +2035,27 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 log_ytmonsterru_state("[Watch] Switched to task window")
+                handle_yt_monster_image_puzzle("task window open")
                 driver.switch_to.frame('video-start')
                 EVENT.wait(secrets.choice(range(2, 4)))
+                if handle_unavailable_youtube_embed():
+                    driver.switch_to.window(driver.window_handles[0])
+                    log_ytmonsterru_state("[Watch] Returned to main window after unavailable video")
+                    j += 1
+                    continue
                 if not submit_youtube_play():
+                    if handle_unavailable_youtube_embed():
+                        driver.switch_to.window(driver.window_handles[0])
+                        log_ytmonsterru_state("[Watch] Returned to main window after unavailable video")
+                        j += 1
+                        continue
                     raise NoSuchElementException(
                         "Could not activate YouTube play button"
                     )
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 driver.switch_to.default_content()
+                handle_yt_monster_image_puzzle("after video play")
                 wait_seconds = float(
                     driver.find_element(By.CLASS_NAME, 'time').text
                 ) + 15
@@ -1332,7 +2099,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     captcha_processor = load_transformers_component(TrOCRProcessor, TROCR_MODEL_NAME)
     captcha_model = load_transformers_component(VisionEncoderDecoderModel, TROCR_MODEL_NAME)
     # # driver.save_screenshot("screenshots/screenshot.png")
-    
+
     while True:
         driver.find_element(By.ID, "email").send_keys(req_dict['email_traffup'])
         EVENT.wait(secrets.choice(range(1, 4)))
@@ -1352,13 +2119,13 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         if driver.current_url == "https://traffup.net/websites/":
             break
     # # driver.save_screenshot("screenshots/screenshot.png")
-    driver.get("https://traffup.net/youtube/?type=posts&mode=watchtime")    
+    driver.get("https://traffup.net/youtube/?type=posts&mode=watchtime")
     EVENT.wait(secrets.choice(range(3, 5)))
     # # driver.save_screenshot("screenshots/traffup_watch_home.png")
-    captcha_model.to("cpu")                  
-    captcha_processor = None                  
-    captcha_model = None                      
-    torch.cuda.empty_cache()            
+    captcha_model.to("cpu")
+    captcha_processor = None
+    captcha_model = None
+    torch.cuda.empty_cache()
     processor = load_transformers_component(CLIPProcessor, CLIP_MODEL_NAME)
     model = load_transformers_component(CLIPModel, CLIP_MODEL_NAME, use_safetensors=False)
     model.eval()
@@ -1383,8 +2150,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
              """
             css_dict = {"Youtube Watch": "#msg_area", "Website Visit":"#iframe1_msg"}
             try:
-                WebDriverWait(driver, 5).until(ec.alert_is_present())  
-                alert = driver.switch_to.alert  
+                WebDriverWait(driver, 5).until(ec.alert_is_present())
+                alert = driver.switch_to.alert
                 alert.accept()
             except TimeoutException:
                 pass
@@ -1396,8 +2163,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 # # driver.save_screenshot("screenshots/screenshot.png")
                 return
             try:
-                WebDriverWait(driver, 5).until(ec.alert_is_present())  
-                alert = driver.switch_to.alert  
+                WebDriverWait(driver, 5).until(ec.alert_is_present())
+                alert = driver.switch_to.alert
                 alert.accept()
             except TimeoutException:
                 pass
@@ -1408,9 +2175,9 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             opt1 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(1)").text
             opt2 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(2)").text
             opt3 = driver.find_element(By.CSS_SELECTOR, f"{css_dict[current_way]} > div > div.res_cb3 > a:nth-child(3)").text
-        
+
             image = Image.open(BytesIO(image_screenshot)).convert("RGB")
-  
+
             options = [opt1, opt2, opt3]
             inputs = processor(text=options, images=image, return_tensors="pt", padding=True)
             with torch.no_grad():
@@ -1426,7 +2193,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#box_close > a")).click().perform()
             elif current_way == "Website Visit":
                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
-            
+
         while True:
             try:
                 EVENT.wait(secrets.choice(range(2, 4)))
@@ -1434,7 +2201,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 driver.switch_to.default_content()
                 if datetime.now() > future:
                     logging.info("Time limit reached, ending watch loop.")
-                    return                    
+                    return
                 if len(driver.find_elements(By.XPATH, "//p[contains(text(),'Please try again')]")) > 0:
                     logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                     # # driver.save_screenshot("screenshots/traffup_hourly_limit.png")
@@ -1456,14 +2223,14 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                     return
                             except NoSuchElementException:
                                 pass
-                            i = 0 
+                            i = 0
                             try:
                                 ActionChains(driver).move_to_element(driver.find_element(By.CSS_SELECTOR, "#iframe1_points > table > tbody > tr > td:nth-child(2) > a > img")).click().perform()
                             except (NoSuchElementException, ElementNotInteractableException):
                                 pass
                             try:
-                                WebDriverWait(driver, 10).until(ec.alert_is_present())  
-                                alert = driver.switch_to.alert  
+                                WebDriverWait(driver, 10).until(ec.alert_is_present())
+                                alert = driver.switch_to.alert
                                 alert.accept()
                             except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
                                 pass
@@ -1482,15 +2249,15 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 i = 0
                                 continue
                             continue
-                        
+
                         try:
                             ActionChains(driver).move_to_element(driver.find_elements(By.CLASS_NAME, "open_iframe1")[i]).click().perform()
                         except Exception:
                             logging.info('skipped website')
                         EVENT.wait(secrets.choice(range(5, 7)))
                         try:
-                            WebDriverWait(driver, 3).until(ec.alert_is_present())  
-                            alert = driver.switch_to.alert  
+                            WebDriverWait(driver, 3).until(ec.alert_is_present())
+                            alert = driver.switch_to.alert
                             alert.accept()
                         except TimeoutException:
                             pass
@@ -1512,7 +2279,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         i += 1
                         if "traffup" not in driver.current_url:
                             driver.get("https://traffup.net/websites/")
-                            continue                   
+                            continue
                         predict_image(ways_of_earning[way])
 
                 if ways_of_earning[way] == "Youtube Watch":
@@ -1535,7 +2302,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                             way+=1
                             i = 0
-                            if way > len(ways_of_earning) - 1: 
+                            if way > len(ways_of_earning) - 1:
                                 return
                             if ways_of_earning[way] == "Website Visit":
                                 driver.get("https://traffup.net/websites/")
@@ -1548,7 +2315,7 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         logging.info("You have hit hourly limit for %s", ways_of_earning[way])
                         way+=1
                         i = 0
-                        if way > len(ways_of_earning) - 1: 
+                        if way > len(ways_of_earning) - 1:
                             return
                         if ways_of_earning[way] == "Website Visit":
                             driver.get("https://traffup.net/websites/")
@@ -1589,9 +2356,9 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     lineno = tb.tb_lineno
                     func_name = tb.tb_frame.f_code.co_name
                     logging.info("Exception occurred in file: %s, function: %s, line: %d", filename, func_name, lineno)
-                    tb = tb.tb_next  
+                    tb = tb.tb_next
                     # # driver.save_screenshot("screenshots/screenshot.png")
                 break
     watch_loop(14)
     driver.quit()
-    
+
