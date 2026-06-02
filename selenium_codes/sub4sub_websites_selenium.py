@@ -1521,7 +1521,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             255,
                         )
 
-                    selected_background, background_score, background_diff, background_removed_mask = (
+                    selected_background, background_score, _background_diff, background_removed_mask = (
                         build_background_removed_mask()
                     )
                     thresh = None
@@ -1582,10 +1582,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         min_area=36,
                     )
 
-                    # #if background_diff is not None:
+                    # #if _background_diff is not None:
                         # # cv2.imwrite(
                         # #     str(debug_dir / "bottom_background_diff.png"),
-                        # #     background_diff,
+                        # #     _background_diff,
                         # # )
                         # # objects_only_scene = cv2.bitwise_and(
                         # #     bottom_arr,
