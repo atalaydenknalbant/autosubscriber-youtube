@@ -1258,11 +1258,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             pass
 
                 try:
-                    with open(debug_dir / "popup.html", "w", encoding="utf-8") as f:
-                        f.write(puzzle_popup.get_attribute("innerHTML"))
+                    # # with open(debug_dir / "popup.html", "w", encoding="utf-8") as f:
+                    # #     f.write(puzzle_popup.get_attribute("innerHTML"))
                     # # with open(debug_dir / "popup_element.png", "wb") as f:
                     # #     f.write(puzzle_popup.screenshot_as_png)
-                    logging.info("[YTMonsterRU][ImagePuzzle] Saved popup DOM for debugging.")
+                    pass
                 except Exception as e:
                     logging.warning("[YTMonsterRU][ImagePuzzle] Could not save popup debug dumps: %s", e)
 
@@ -1845,7 +1845,14 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         continue
 
                 else:
-                    logging.warning("[YTMonsterRU][ImagePuzzle] Found less than 2 distinct image/canvas elements inside the popup! Got %d.", len(images))
+                    logging.warning(
+                        "[YTMonsterRU][ImagePuzzle] Found less than 2 distinct image/canvas "
+                        "elements inside the popup. Got %d. Refreshing page to request a new puzzle image.",
+                        len(images),
+                    )
+                    driver.refresh()
+                    EVENT.wait(5)
+                    continue
 
                 logging.info("[YTMonsterRU][ImagePuzzle] Automated puzzle pass complete. Re-evaluating next tick.")
                 EVENT.wait(5) # Wait before next while iteration retry
