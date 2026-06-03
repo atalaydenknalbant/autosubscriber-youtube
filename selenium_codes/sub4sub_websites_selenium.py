@@ -1207,6 +1207,26 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             type(ex).__name__,
         )
 
+    class NoYTMonsterVideosLeft(Exception):
+        """Raised when YTMonsterRU reports no more YouTube videos."""
+
+    def no_ytmonsterru_videos_left() -> bool:
+        try:
+            driver.switch_to.default_content()
+        except WebDriverException:
+            pass
+
+        try:
+            body_text = driver.find_element(By.TAG_NAME, "body").text.lower()
+        except WebDriverException:
+            return False
+
+        no_video_markers = (
+            "\u0432\u0438\u0434\u0435\u043e \u0437\u0430\u043a\u043e\u043d\u0447\u0438\u043b\u0438\u0441\u044c",
+            "\u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u043f\u043e\u0437\u0436\u0435",
+        )
+        return any(marker in body_text for marker in no_video_markers)
+
     def handle_yt_monster_image_puzzle(
         context: str,
         timeout: int = 600,
@@ -1243,12 +1263,21 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except WebDriverException:
                 body_text = ""
 
-            if "reset page" in body_text or "reload" in body_text:
+            if no_ytmonsterru_videos_left():
+                raise NoYTMonsterVideosLeft
+
+            reload_page_markers = (
+                "reset page",
+                "reload",
+                "перезагрузить",
+            )
+            if any(marker in body_text for marker in reload_page_markers):
                 reload_locators = (
                     (By.XPATH, "//a[contains(@href, 'reload')]"),
                     (By.XPATH, "//a[contains(@onclick, 'reload')]"),
                     (By.CSS_SELECTOR, "a[href*='reload']"),
                     (By.XPATH, "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reload')]"),
+                    (By.XPATH, "//a[contains(., 'перезагрузить')]"),
                     (By.XPATH, "//h1[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]/following::a[2]"),
                     (By.XPATH, "//h1[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reset page')]/following::a[1]"),
                 )
@@ -1634,7 +1663,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         min_area=36,
                     )
 
-                    if _background_diff is not None:
+                    # # if _background_diff is not None:
                         # # cv2.imwrite(
                         # #     str(debug_dir / "bottom_background_diff.png"),
                         # #     _background_diff,
@@ -1652,7 +1681,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     str(debug_dir / "bottom_objects_only.png"),
                         # #     objects_only_scene,
                         # # )
-                        pass
+                        # # pass
                     # # cv2.imwrite(
                     # #     str(debug_dir / "bottom_background_removed_mask.png"),
                     # #     filtered_shape_mask,
@@ -1908,6 +1937,12 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         except UnexpectedAlertPresentException as alert_ex:
             wait_out_ytmonsterru_alert(getattr(alert_ex, "alert_text", None))
             return handle_yt_monster_image_puzzle(context, timeout)
+        except NoYTMonsterVideosLeft:
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] No YouTube videos left during %s.",
+                context,
+            )
+            raise
         except Exception as auto_ex:
             logging.error("[YTMonsterRU][ImagePuzzle] Exception in automated solve: %s\n%s", auto_ex, traceback.format_exc())
             EVENT.wait(5)
@@ -2084,6 +2119,30 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             EVENT.wait(3)
             return True
 
+        def submit_unplayable_video_error(reason: str) -> bool:
+            try:
+                driver.switch_to.default_content()
+                error_button = WebDriverWait(driver, 10).until(
+                    ec.element_to_be_clickable((
+                        By.CSS_SELECTOR,
+                        "body > div.top > div.buttError > input[type=submit]",
+                    ))
+                )
+                error_button.send_keys(Keys.ENTER)
+                logging.info(
+                    "[YTMonsterRU][Watch] Submitted unplayable video error button after %s",
+                    reason,
+                )
+                EVENT.wait(3)
+                return True
+            except WebDriverException as error_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not submit unplayable video error button after %s: %s",
+                    reason,
+                    type(error_ex).__name__,
+                )
+                return False
+
         try:
             j = 1
             now = datetime.now()
@@ -2104,6 +2163,9 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 driver.switch_to.window(driver.window_handles[1])
                 log_ytmonsterru_state("[Watch] Switched to task window")
                 handle_yt_monster_image_puzzle("task window open")
+                if no_ytmonsterru_videos_left():
+                    logging.info("[YTMonsterRU][Watch] No YouTube videos left. Ending watch loop.")
+                    break
                 driver.switch_to.frame('video-start')
                 EVENT.wait(secrets.choice(range(2, 4)))
                 if handle_unavailable_youtube_embed():
@@ -2124,23 +2186,43 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 driver.switch_to.window(driver.window_handles[1])
                 driver.switch_to.default_content()
                 handle_yt_monster_image_puzzle("after video play")
-                wait_seconds = float(
-                    driver.find_element(By.CLASS_NAME, 'time').text
-                ) + 15
+                time_text = driver.find_element(By.CLASS_NAME, 'time').text.strip()
+                try:
+                    wait_seconds = float(time_text) + 15
+                except ValueError:
+                    if submit_unplayable_video_error(
+                        f"invalid timer text {time_text!r}"
+                    ):
+                        driver.switch_to.window(driver.window_handles[0])
+                        log_ytmonsterru_state("[Watch] Returned to main window after unplayable video")
+                        j += 1
+                        continue
+                    raise
                 logging.info(
                     "[YTMonsterRU][Watch] Waiting %.1fs for claim button",
                     wait_seconds,
                 )
-                WebDriverWait(driver, wait_seconds)\
-                    .until(ec.element_to_be_clickable((
-                        By.CSS_SELECTOR,
-                        "body > div.top > div.butt > input[type=submit]",
-                    ))) \
-                    .send_keys(Keys.ENTER)
+                try:
+                    WebDriverWait(driver, wait_seconds).until(
+                        ec.element_to_be_clickable((
+                            By.CSS_SELECTOR,
+                            "body > div.top > div.butt > input[type=submit]",
+                        ))
+                    ).send_keys(Keys.ENTER)
+                except TimeoutException:
+                    if no_ytmonsterru_videos_left():
+                        logging.info(
+                            "[YTMonsterRU][Watch] No YouTube videos left while waiting for claim button. "
+                            "Ending watch loop."
+                        )
+                        break
+                    raise
                 logging.info("[YTMonsterRU][Watch] Total watched videos: %d", j)
                 driver.switch_to.window(driver.window_handles[0])
                 log_ytmonsterru_state("[Watch] Returned to main window")
                 j += 1
+        except NoYTMonsterVideosLeft:
+            logging.info("[YTMonsterRU][Watch] No YouTube videos left. Ending watch loop.")
         except (IndexError, ValueError, WebDriverException) as ex:
             capture_ytmonsterru_failure("watch_loop", ex)
             raise
