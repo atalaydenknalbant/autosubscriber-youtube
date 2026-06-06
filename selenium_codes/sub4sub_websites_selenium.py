@@ -2132,7 +2132,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     driver: webdriver = set_driver_opt(
         req_dict,
         website="ytmonsterru",
-        headless=False,
+        headless=True,
         undetected=False,
     )
     logging.info("[YTMonsterRU] Driver created")
