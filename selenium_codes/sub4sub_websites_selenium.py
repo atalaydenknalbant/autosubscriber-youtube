@@ -2288,6 +2288,54 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 )
                 return False
 
+        def close_current_ytmonsterru_task(reason: str) -> None:
+            try:
+                driver.switch_to.default_content()
+                page_text = driver.find_element(By.TAG_NAME, "body").text.strip()
+                logging.info(
+                    "[YTMonsterRU][Watch] Closing current task after %s. Page text: %s",
+                    reason,
+                    page_text[:500],
+                )
+            except WebDriverException as text_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not read page text before closing task after %s: %s",
+                    reason,
+                    type(text_ex).__name__,
+                )
+
+            try:
+                handles = driver.window_handles
+                if len(handles) > 1:
+                    driver.switch_to.window(handles[-1])
+                    driver.close()
+                    logging.info(
+                        "[YTMonsterRU][Watch] Closed current task window after %s",
+                        reason,
+                    )
+                else:
+                    logging.info(
+                        "[YTMonsterRU][Watch] No child task window to close after %s",
+                        reason,
+                    )
+            except WebDriverException as close_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not close current task window after %s: %s",
+                    reason,
+                    type(close_ex).__name__,
+                )
+
+            try:
+                driver.switch_to.window(driver.window_handles[0])
+                driver.switch_to.default_content()
+                log_ytmonsterru_state("[Watch] Returned to main window after closing failed task")
+            except WebDriverException as switch_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not return to main window after %s: %s",
+                    reason,
+                    type(switch_ex).__name__,
+                )
+
         try:
             j = 1
             now = datetime.now()
@@ -2342,7 +2390,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         log_ytmonsterru_state("[Watch] Returned to main window after unplayable video")
                         j += 1
                         continue
-                    raise
+                    close_current_ytmonsterru_task(
+                        f"invalid timer text {time_text!r} and missing error button"
+                    )
+                    j += 1
+                    continue
                 logging.info(
                     "[YTMonsterRU][Watch] Waiting %.1fs for claim button",
                     wait_seconds,
