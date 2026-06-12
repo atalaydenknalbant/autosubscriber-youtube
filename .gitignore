@@ -23,3 +23,10 @@
 autosubscriber-youtube.code-workspace
 config.ini
 
+
+/FastSAM-s.pt
+/FastSAM-s.pt.part
+/models--facebook--sam2.1-hiera-tiny/
+/models--timm--vit_small_patch16_dinov3.lvd1689m/
+/.cache/huggingface/
+/screenshots/debug/*.png

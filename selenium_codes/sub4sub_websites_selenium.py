@@ -27,7 +27,16 @@ import numpy as np
 # Prevent Transformers from spawning the online safetensors conversion thread.
 os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "1")
 
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel, CLIPProcessor, CLIPModel
+from transformers import (
+    TrOCRProcessor,
+    VisionEncoderDecoderModel,
+    CLIPProcessor,
+    CLIPModel,
+    Sam2Model,
+    Sam2Processor,
+    AutoImageProcessor,
+    AutoModel,
+)
 from PIL import Image, ImageOps
 from io import BytesIO
 import re
@@ -44,6 +53,11 @@ HF_MODEL_LOAD_RETRY_SECONDS = 5
 TROCR_MODEL_NAME = "microsoft/trocr-small-printed"
 CLIP_MODEL_NAME = "openai/clip-vit-base-patch32"
 YTMONSTERRU_CLIP_MODEL_NAME = "openai/clip-vit-large-patch14"
+YTMONSTERRU_DINOV3_MODEL_NAME = "timm/vit_small_patch16_dinov3.lvd1689m"
+YTMONSTERRU_SAM_MODEL_NAME = os.environ.get(
+    "YTMONSTERRU_SAM_MODEL_NAME",
+    "facebook/sam2.1-hiera-tiny",
+)
 STALE_CHROME_TEMP_PATTERNS = ("scoped_dir*", "chrome_drag*")
 STALE_CHROME_TEMP_MAX_AGE_SECONDS = 12 * 60 * 60
 STALE_CHROME_TEMP_STATE = {"cleaned": False}
@@ -654,6 +668,81 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             )
             return False
 
+    def close_youlikehits_child_window(handle: str, context: str) -> bool:
+        """Close a YouLikeHits child tab without letting renderer timeouts stop the loop."""
+        try:
+            main_handle = driver.window_handles[0]
+        except (IndexError, WebDriverException):
+            main_handle = None
+
+        if handle == main_handle:
+            return False
+
+        try:
+            close_result = driver.execute_cdp_cmd(
+                "Target.closeTarget",
+                {"targetId": handle},
+            )
+            if close_result.get("success", False):
+                logging.info(
+                    "[YouLikeHits] %s | child window closed via CDP",
+                    context,
+                )
+                return True
+        except WebDriverException as cdp_ex:
+            logging.info(
+                "[YouLikeHits] %s | CDP child close failed: %s",
+                context,
+                type(cdp_ex).__name__,
+            )
+
+        try:
+            driver.switch_to.window(handle)
+            driver.close()
+            logging.info("[YouLikeHits] %s | child window closed", context)
+            return True
+        except (NoSuchWindowException, TimeoutException, WebDriverException) as close_ex:
+            logging.info(
+                "[YouLikeHits] %s | child window close skipped after %s",
+                context,
+                type(close_ex).__name__,
+            )
+            return False
+
+    def cleanup_youlikehits_child_windows(
+        context: str,
+        keep_handle: str | None = None,
+        max_to_close: int | None = None,
+    ) -> None:
+        """Close leftover child tabs so YouLikeHits does not accumulate hundreds of windows."""
+        try:
+            handles = driver.window_handles
+        except WebDriverException as handles_ex:
+            logging.info(
+                "[YouLikeHits] %s | could not inspect child windows: %s",
+                context,
+                type(handles_ex).__name__,
+            )
+            return
+
+        if len(handles) <= 1:
+            return
+
+        close_count = 0
+        child_handles = [handle for handle in handles[1:] if handle != keep_handle]
+        logging.info(
+            "[YouLikeHits] %s | closing %d leftover child window(s)",
+            context,
+            len(child_handles),
+        )
+        for handle in child_handles:
+            if max_to_close is not None and close_count >= max_to_close:
+                break
+            if close_youlikehits_child_window(handle, context):
+                close_count += 1
+
+        switch_youlikehits_main_window(f"{context} | after child cleanup")
+
     def capture_youlikehits_failure(context: str, ex: Exception) -> None:
         """Capture the failing line and a screenshot for YouLikeHits-only failures."""
         if getattr(ex, "_youlikehits_captured", False):
@@ -680,8 +769,9 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         screenshot_path = screenshot_dir / f"youlikehits_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         try:
-            driver.save_screenshot(str(screenshot_path))
-            logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
+            # # driver.save_screenshot(str(screenshot_path))
+            # # logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
+            pass
             log_youlikehits_state(f"{context} failure state")
         except Exception as screenshot_ex:
             logging.error("[YouLikeHits][Failure] Could not save screenshot: %s", screenshot_ex)
@@ -691,11 +781,12 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         screenshot_dir
                         / f"youlikehits_failure_recovered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
                     )
-                    driver.save_screenshot(str(recovery_path))
-                    logging.error(
-                        "[YouLikeHits][Failure] Recovered screenshot saved to %s",
-                        recovery_path,
-                    )
+                    # # driver.save_screenshot(str(recovery_path))
+                    # # logging.error(
+                    # #     "[YouLikeHits][Failure] Recovered screenshot saved to %s",
+                    # #     recovery_path,
+                    # # )
+                    pass
                 except Exception as recovery_ex:
                     logging.error(
                         "[YouLikeHits][Failure] Could not save recovered screenshot: %s",
@@ -729,6 +820,18 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             logging.info("[YouLikeHits] Driver quit failed during login cleanup")
         raise
 
+    youlikehits_watch_url = "https://www.youlikehits.com/youtubenew2.php"
+    youlikehits_hits_today_selector = (
+        "#bodybg > table > tbody > tr > td > table > tbody > tr > td "
+        "> div:nth-child(4) > table > tbody > tr:nth-child(2) > td > center "
+        "> div:nth-child(1)"
+    )
+    bonus_hits_state = {
+        "claimed_max_bonus": False,
+        "initial_hits": None,
+        "next_iteration": 500,
+    }
+
     def collect_bonus_points() -> None:
         """collect if bonus points are available"""
         try:
@@ -745,7 +848,103 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             capture_youlikehits_failure("collect_bonus_points", ex)
             raise
 
+    def read_youlikehits_hits_today() -> int | None:
+        try:
+            switch_youlikehits_main_window("[Bonus] Before reading stats hits")
+            driver.get("https://www.youlikehits.com/stats.php")
+            log_youlikehits_state("[Bonus] Opened stats page")
+            hits_text = WebDriverWait(driver, 15).until(
+                ec.presence_of_element_located((
+                    By.CSS_SELECTOR,
+                    youlikehits_hits_today_selector,
+                ))
+            ).text
+            hits_match = re.search(r"[\d,]+", hits_text)
+            if not hits_match:
+                logging.info(
+                    "[YouLikeHits][Bonus] Could not parse hits count from text: %s",
+                    hits_text,
+                )
+                return None
+            hits_today = int(hits_match.group(0).replace(",", ""))
+            logging.info(
+                "[YouLikeHits][Bonus] Hits you made today: %d",
+                hits_today,
+            )
+            return hits_today
+        except (TimeoutException, NoSuchElementException, WebDriverException) as ex:
+            logging.info(
+                "[YouLikeHits][Bonus] Could not read hits count: %s",
+                type(ex).__name__,
+            )
+            return None
+
+    def initialize_bonus_hit_checkpoint() -> None:
+        hits_today = read_youlikehits_hits_today()
+        if hits_today is None:
+            logging.info(
+                "[YouLikeHits][Bonus] Could not initialize hits checkpoint. "
+                "Using local iteration 500."
+            )
+            bonus_hits_state["initial_hits"] = 0
+            bonus_hits_state["next_iteration"] = 500
+            return
+
+        bonus_hits_state["initial_hits"] = hits_today
+        if hits_today >= 500:
+            bonus_hits_state["next_iteration"] = 0
+            logging.info(
+                "[YouLikeHits][Bonus] Hits already at max bonus threshold: %d",
+                hits_today,
+            )
+            return
+
+        bonus_hits_state["next_iteration"] = 500 - hits_today
+        logging.info(
+            "[YouLikeHits][Bonus] Initial hits=%d. Bonus check will run after %d watch iterations.",
+            hits_today,
+            bonus_hits_state["next_iteration"],
+        )
+
+    def collect_bonus_after_hit_checkpoint(iteration: int) -> bool:
+        if bonus_hits_state["claimed_max_bonus"]:
+            return False
+
+        if iteration < bonus_hits_state["next_iteration"]:
+            return False
+
+        logging.info(
+            "[YouLikeHits][Bonus] Watch iteration %d reached max bonus checkpoint %d",
+            iteration,
+            bonus_hits_state["next_iteration"],
+        )
+        hits_today = read_youlikehits_hits_today()
+        if hits_today is None:
+            return True
+
+        if hits_today < 500:
+            watches_needed = 500 - hits_today
+            bonus_hits_state["next_iteration"] = iteration + watches_needed + 1
+            logging.info(
+                "[YouLikeHits][Bonus] Hits today %d below max bonus threshold 500. "
+                "Next check at iteration %d after %d more watch iteration(s).",
+                hits_today,
+                bonus_hits_state["next_iteration"],
+                watches_needed,
+            )
+            return True
+
+        collect_bonus_points()
+        bonus_hits_state["claimed_max_bonus"] = True
+        logging.info(
+            "[YouLikeHits][Bonus] Max bonus checkpoint handled at hits=%d. "
+            "No more bonus checks this run.",
+            hits_today,
+        )
+        return True
+
     collect_bonus_points()
+    initialize_bonus_hit_checkpoint()
 
     def while_loop_watch(hours_time: int) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
@@ -769,10 +968,35 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     EVENT.wait(0.5)
             return None
 
+        def read_watch_video_name_fast() -> str | None:
+            try:
+                title_text = driver.execute_script(
+                    """
+                    const title = document.querySelector(arguments[0]);
+                    return title ? (title.textContent || '').trim() : '';
+                    """,
+                    video_title_selector,
+                )
+                return title_text or None
+            except (JavascriptException, WebDriverException):
+                return None
+
+        def read_watch_list_text_fast() -> str:
+            try:
+                list_text = driver.execute_script(
+                    """
+                    const list = document.querySelector('#listall');
+                    return list ? (list.textContent || '').trim() : '';
+                    """
+                )
+                return list_text or ""
+            except (JavascriptException, WebDriverException):
+                return ""
+
         try:
             try:
                 logging.info("Watch Loop Started")
-                driver.get("https://www.youlikehits.com/youtubenew2.php")
+                driver.get(youlikehits_watch_url)
                 log_youlikehits_state("Opened watch page")
                 EVENT.wait(secrets.choice(range(4, 6)))
                 try:
@@ -791,7 +1015,19 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 while datetime.now() < cutoff:
                     iteration += 1
                     logging.info("[YouLikeHits][Watch] Iteration %d started", iteration)
+                    if collect_bonus_after_hit_checkpoint(iteration):
+                        driver.get(youlikehits_watch_url)
+                        log_youlikehits_state(
+                            "[Watch] Reopened watch page after bonus checkpoint"
+                        )
+                        EVENT.wait(secrets.choice(range(4, 6)))
+                        driver.execute_script("window.scrollTo(0, 600);")
+                        continue
                     EVENT.wait(secrets.choice(range(3, 4)))
+                    cleanup_youlikehits_child_windows(
+                        "[Watch] Start iteration cleanup",
+                        max_to_close=40,
+                    )
                     driver.switch_to.window(driver.window_handles[0])
                     try:
                         driver.find_element(
@@ -819,6 +1055,8 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
                         driver.refresh()
                         continue
+                    before_follow_handles = set(driver.window_handles)
+                    target_handle = None
                     try:
                         driver.find_element(By.CLASS_NAME, 'followbutton').click()
                         EVENT.wait(0.25)
@@ -831,7 +1069,26 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         logging.info("[YouLikeHits][Watch] Could not click follow button for %s", video_name)
                         EVENT.wait(10)
                     try:
-                        driver.switch_to.window(driver.window_handles[1])
+                        current_handles = driver.window_handles
+                        new_handles = [
+                            handle
+                            for handle in current_handles
+                            if handle not in before_follow_handles
+                        ]
+                        if new_handles:
+                            target_handle = new_handles[-1]
+                        elif len(current_handles) > 1:
+                            target_handle = current_handles[-1]
+                        else:
+                            raise NoSuchWindowException(
+                                "No YouLikeHits target window opened"
+                            )
+                        cleanup_youlikehits_child_windows(
+                            "[Watch] Cleanup extra windows after follow",
+                            keep_handle=target_handle,
+                            max_to_close=40,
+                        )
+                        driver.switch_to.window(target_handle)
                         log_youlikehits_state(f"[Watch] Switched to target window for {video_name}")
                         EVENT.wait(2)
                         try:
@@ -843,10 +1100,10 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             pass
                         if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
                             logging.info("[YouLikeHits][Watch] Target window is not a valid YouTube video for %s", video_name)
-                            try:
-                                driver.close()
-                            except NoSuchWindowException:
-                                EVENT.wait(0.25)
+                            close_youlikehits_child_window(
+                                target_handle,
+                                "[Watch] Invalid target window",
+                            )
                             driver.switch_to.window(driver.window_handles[0])
                             driver.switch_to.default_content()
                             EVENT.wait(secrets.choice(range(1, 2)))
@@ -882,9 +1139,12 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     driver.switch_to.window(driver.window_handles[0])
                     driver.switch_to.default_content()
                     try:
-                        counter = 0
-                        while True:
-                            current_video_name = read_watch_video_name("next video wait")
+                        wait_started_at = datetime.now()
+                        while datetime.now() < cutoff:
+                            waited_seconds = int(
+                                (datetime.now() - wait_started_at).total_seconds()
+                            )
+                            current_video_name = read_watch_video_name_fast()
                             if not current_video_name:
                                 logging.info(
                                     "[YouLikeHits][Watch] Could not read refreshed video name after %s, refreshing",
@@ -893,21 +1153,36 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 driver.refresh()
                                 break
                             if current_video_name != video_name:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Next video detected after %ds: %s",
+                                    waited_seconds,
+                                    current_video_name,
+                                )
                                 break
-                            EVENT.wait(5)
-                            counter += 1
-                            if counter % 6 == 0:
-                                logging.info("[YouLikeHits][Watch] Waiting for next video after %s, waited %ds", video_name, counter * 5)
-                            if counter >= 60:
-                                try:
-                                    logging.info("[YouLikeHits][Watch] Video list did not advance after %s, refreshing and closing child window", video_name)
-                                    driver.refresh()
-                                    driver.switch_to.window(driver.window_handles[1])
-                                    driver.close()
-                                    break
-                                except NoSuchWindowException:
-                                    logging.info("[YouLikeHits][Watch] Child window already closed while waiting for next video")
-                                    break
+                            if "Points Added" in read_watch_list_text_fast():
+                                logging.info(
+                                    "[YouLikeHits][Watch] Video completed after %ds. Current title: %s",
+                                    waited_seconds,
+                                    current_video_name,
+                                )
+                                break
+                            EVENT.wait(2)
+                        else:
+                            try:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Watch loop cutoff reached while waiting after %s, refreshing and closing child window",
+                                    video_name,
+                                )
+                                driver.refresh()
+                                if target_handle:
+                                    close_youlikehits_child_window(
+                                        target_handle,
+                                        "[Watch] Target did not advance",
+                                    )
+                            except NoSuchWindowException:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Child window already closed while waiting for next video"
+                                )
                     except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
                         logging.info("[YouLikeHits][Watch] Exception while waiting for next video after %s: %s", video_name, type(ex).__name__)
                         EVENT.wait(0.25)
@@ -915,10 +1190,16 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             logging.info("[YouLikeHits][Watch] Video entry disappeared, refreshing watch page")
                             driver.refresh()
                     try:
-                        driver.switch_to.window(driver.window_handles[1])
-                        driver.close()
+                        if target_handle:
+                            close_youlikehits_child_window(
+                                target_handle,
+                                f"[Watch] Final target close for {video_name}",
+                            )
                         logging.info("[YouLikeHits][Watch] Closed target window for %s", video_name)
-                    except IndexError:
+                        switch_youlikehits_main_window(
+                            "[Watch] Returned to main after target close"
+                        )
+                    except (IndexError, NoSuchWindowException, WebDriverException):
                         logging.info("[YouLikeHits][Watch] No target window left to close for %s", video_name)
                         pass
             except NoSuchElementException:
@@ -1277,6 +1558,46 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     Returns:
     - None(NoneType)
     """
+    def bool_config_value(value) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, (int, float)):
+            return value != 0
+        return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+    debug_screenshots = bool_config_value(
+        req_dict.get("debug_screenshots", req_dict.get("debug", False))
+    )
+
+    def save_ytmonsterru_debug_screenshot(path: Path) -> bool:
+        if not debug_screenshots:
+            return False
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return bool(driver.save_screenshot(str(path)))
+
+    def save_ytmonsterru_debug_bytes(path: Path, data: bytes) -> bool:
+        if not debug_screenshots:
+            return False
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "wb") as debug_file:
+            debug_file.write(data)
+        return True
+
+    def save_ytmonsterru_debug_cv2(path: Path, image) -> bool:
+        if not debug_screenshots:
+            return False
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return bool(cv2.imwrite(str(path), image))
+
+    def save_ytmonsterru_debug_pil(image: Image.Image, path: Path) -> bool:
+        if not debug_screenshots:
+            return False
+        path.parent.mkdir(parents=True, exist_ok=True)
+        image.save(path)
+        return True
+
     def log_ytmonsterru_state(message: str) -> None:
         try:
             current_url = driver.current_url
@@ -1327,11 +1648,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         )
 
         try:
-            driver.save_screenshot(str(screenshot_path))
-            logging.error(
-                "[YTMonsterRU][Failure] Screenshot saved to %s",
-                screenshot_path,
-            )
+            if save_ytmonsterru_debug_screenshot(screenshot_path):
+                logging.error(
+                    "[YTMonsterRU][Failure] Screenshot saved to %s",
+                    screenshot_path,
+                )
             log_ytmonsterru_state(f"{context} failure state")
         except (OSError, WebDriverException) as screenshot_ex:
             logging.error(
@@ -1356,8 +1677,38 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
         try:
             puzzle_popups = driver.find_elements(By.CSS_SELECTOR, "div.popupRecaptcha")
-            if any(popup.is_displayed() for popup in puzzle_popups):
-                return False
+            popup_visible = any(popup.is_displayed() for popup in puzzle_popups)
+            if popup_visible:
+                canvases = driver.find_elements(
+                    By.CSS_SELECTOR,
+                    "div.popupRecaptcha canvas, canvas#targets, canvas#scene",
+                )
+                for canvas in canvases:
+                    if not canvas.is_displayed():
+                        continue
+                    size = canvas.size
+                    if size.get("width", 0) > 20 and size.get("height", 0) > 20:
+                        return False
+                page_has_visible_canvas = driver.execute_script(
+                    """
+                    const canvases = Array.from(
+                        document.querySelectorAll('div.popupRecaptcha canvas, canvas#targets, canvas#scene')
+                    );
+                    return canvases.some((canvas) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const style = window.getComputedStyle(canvas);
+                        const width = rect.width || Number(canvas.getAttribute('width')) || 0;
+                        const height = rect.height || Number(canvas.getAttribute('height')) || 0;
+                        return width > 20
+                            && height > 20
+                            && style.display !== 'none'
+                            && style.visibility !== 'hidden'
+                            && style.opacity !== '0';
+                    });
+                    """
+                )
+                if page_has_visible_canvas:
+                    return False
         except WebDriverException:
             pass
 
@@ -1397,6 +1748,300 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             )
             EVENT.wait(wait_seconds)
 
+        def ytmonsterru_puzzle_canvas_visible() -> bool:
+            try:
+                driver.switch_to.default_content()
+                visible_canvas_count = driver.execute_script(
+                    """
+                    const canvases = Array.from(
+                        document.querySelectorAll('div.popupRecaptcha canvas, canvas#targets, canvas#scene')
+                    );
+                    return canvases.filter((canvas) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const style = window.getComputedStyle(canvas);
+                        const width = rect.width || Number(canvas.getAttribute('width')) || 0;
+                        const height = rect.height || Number(canvas.getAttribute('height')) || 0;
+                        return width > 20
+                            && height > 20
+                            && style.display !== 'none'
+                            && style.visibility !== 'hidden'
+                            && style.opacity !== '0';
+                    }).length;
+                    """
+                )
+                if visible_canvas_count:
+                    return True
+                popups = driver.find_elements(By.CSS_SELECTOR, puzzle_selector)
+                if not any(popup.is_displayed() for popup in popups):
+                    return False
+                canvases = driver.find_elements(
+                    By.CSS_SELECTOR,
+                    f"{puzzle_selector} canvas",
+                )
+                for canvas in canvases:
+                    if not canvas.is_displayed():
+                        continue
+                    size = canvas.size
+                    if size.get("width", 0) > 20 and size.get("height", 0) > 20:
+                        return True
+                return False
+            except WebDriverException:
+                return False
+
+        def save_ytmonsterru_reset_debug(reason: str, stage: str) -> None:
+            try:
+                debug_dir = Path("screenshots/debug")
+                debug_dir.mkdir(parents=True, exist_ok=True)
+                safe_reason = re.sub(r"[^A-Za-z0-9_]+", "_", reason).strip("_")
+                screenshot_path = (
+                    debug_dir
+                    / f"reset_page_{stage}_{safe_reason}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                )
+                if save_ytmonsterru_debug_screenshot(screenshot_path):
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Reset debug screenshot saved to %s",
+                        screenshot_path,
+                    )
+            except (OSError, WebDriverException) as debug_ex:
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Could not save reset debug screenshot: %s",
+                    type(debug_ex).__name__,
+                )
+
+        def click_ytmonsterru_reset_page(reason: str, body_text: str | None = None) -> bool:
+            if ytmonsterru_puzzle_canvas_visible():
+                return False
+
+            if no_ytmonsterru_videos_left():
+                raise NoYTMonsterVideosLeft
+
+            for _wait_idx in range(6):
+                EVENT.wait(0.5)
+                if ytmonsterru_puzzle_canvas_visible():
+                    return False
+
+            try:
+                driver.switch_to.default_content()
+                page_text = (
+                    body_text
+                    if body_text is not None
+                    else driver.find_element(By.TAG_NAME, "body").text
+                )
+            except WebDriverException:
+                page_text = body_text or ""
+
+            normalized_text = page_text.lower()
+            reset_visible = (
+                "reset page" in normalized_text
+                or "\u043f\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c" in normalized_text
+            )
+            if not reset_visible:
+                return False
+
+            if ytmonsterru_puzzle_popup_visible():
+                return False
+
+            save_ytmonsterru_reset_debug(reason, "before_click")
+
+            try:
+                clicked = driver.execute_script(
+                    """
+                    const reloadText = '\\u043f\\u0435\\u0440\\u0435\\u0437\\u0430\\u0433\\u0440\\u0443\\u0437\\u0438\\u0442\\u044c';
+                    const clickAt = (x, y) => {
+                        const targetAtPoint = document.elementFromPoint(x, y);
+                        if (!targetAtPoint) {
+                            return false;
+                        }
+                        const eventOptions = {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                            clientX: x,
+                            clientY: y,
+                        };
+                        targetAtPoint.dispatchEvent(new MouseEvent('mousemove', eventOptions));
+                        targetAtPoint.dispatchEvent(new MouseEvent('mousedown', eventOptions));
+                        targetAtPoint.dispatchEvent(new MouseEvent('mouseup', eventOptions));
+                        targetAtPoint.dispatchEvent(new MouseEvent('click', eventOptions));
+                        return true;
+                    };
+                    const clickable = Array.from(
+                        document.querySelectorAll('a, button, input, [onclick], [role="button"]')
+                    );
+                    const elementText = (element) => [
+                        element.textContent || '',
+                        element.value || '',
+                        element.href || '',
+                        element.getAttribute('onclick') || ''
+                    ].join(' ').toLowerCase();
+                    let target = clickable.find((element) => {
+                        const text = elementText(element);
+                        return text.includes('reload') || text.includes(reloadText);
+                    });
+                    if (!target) {
+                        const links = Array.from(document.querySelectorAll('a'));
+                        target = links[1] || links[0] || null;
+                    }
+                    if (target) {
+                        target.scrollIntoView({block: 'center', inline: 'center'});
+                        const rect = target.getBoundingClientRect();
+                        return clickAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                    }
+                    const heading = Array.from(document.querySelectorAll('h1, h2, h3, div, body'))
+                        .find((element) => (element.textContent || '').toLowerCase().includes('reset page'));
+                    if (heading) {
+                        const rect = heading.getBoundingClientRect();
+                        return clickAt(rect.left + rect.width / 2 + 45, rect.bottom + 22);
+                    }
+                    return false;
+                    """
+                )
+                if clicked:
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Reset page reload link clicked after %s.",
+                        reason,
+                    )
+                    save_ytmonsterru_reset_debug(reason, "after_click")
+                    EVENT.wait(5)
+                    return True
+            except WebDriverException as reset_ex:
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Reset page direct click failed after %s: %s",
+                    reason,
+                    type(reset_ex).__name__,
+                )
+
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] Reset page still visible after %s. Retrying click without wait fallback.",
+                reason,
+            )
+            EVENT.wait(2)
+            return True
+
+            try:
+                clicked = driver.execute_script(
+                    """
+                    const links = Array.from(document.querySelectorAll('a'));
+                    const linkText = (link) => [
+                        link.textContent || '',
+                        link.href || '',
+                        link.getAttribute('onclick') || ''
+                    ].join(' ').toLowerCase();
+                    let target = links.find((link) => {
+                        const text = linkText(link);
+                        return text.includes('reload') || text.includes('перезагрузить');
+                    });
+                    if (!target && links.length > 1) {
+                        target = links[1];
+                    }
+                    if (!target && links.length) {
+                        target = links[0];
+                    }
+                    if (!target) {
+                        return false;
+                    }
+                    target.scrollIntoView({block: 'center', inline: 'center'});
+                    target.click();
+                    return true;
+                    """
+                )
+                if clicked:
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Reset page reload link clicked after %s.",
+                        reason,
+                    )
+                    EVENT.wait(5)
+                    return True
+            except WebDriverException as reset_ex:
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Reset page JS click failed after %s: %s",
+                    reason,
+                    type(reset_ex).__name__,
+                )
+
+            try:
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Reset page detected after %s, forcing reload fallback.",
+                    reason,
+                )
+                driver.execute_script("window.location.reload()")
+                EVENT.wait(5)
+                return True
+            except WebDriverException:
+                return False
+
+        def wait_out_ytmonsterru_page_wait(reason: str) -> bool:
+            try:
+                driver.switch_to.default_content()
+                body_text = driver.find_element(By.TAG_NAME, "body").text
+            except WebDriverException:
+                return False
+
+            if ytmonsterru_puzzle_canvas_visible():
+                return False
+
+            if no_ytmonsterru_videos_left():
+                raise NoYTMonsterVideosLeft
+
+            if click_ytmonsterru_reset_page(reason, body_text):
+                return True
+
+            wait_match = re.search(
+                r"\bWait\s+(\d+)\s*sec\b",
+                body_text,
+                re.IGNORECASE,
+            )
+            if not wait_match:
+                return False
+
+            wait_seconds = int(wait_match.group(1)) + 5
+            logging.warning(
+                "[YTMonsterRU][ImagePuzzle] Page wait detected during %s. "
+                "Waiting %d sec before checking puzzle again.",
+                reason,
+                wait_seconds,
+            )
+            EVENT.wait(wait_seconds)
+            return True
+
+        def ytmonsterru_puzzle_popup_visible() -> bool:
+            try:
+                puzzle_popups = driver.find_elements(By.CSS_SELECTOR, puzzle_selector)
+                return any(popup.is_displayed() for popup in puzzle_popups)
+            except WebDriverException:
+                return False
+
+        def refresh_ytmonsterru_puzzle_page(reason: str) -> None:
+            try:
+                current_url = driver.current_url
+            except WebDriverException:
+                current_url = "<unavailable>"
+
+            logging.info(
+                "[YTMonsterRU][ImagePuzzle] Hard refreshing puzzle page after %s | url=%s",
+                reason,
+                current_url,
+            )
+            try:
+                driver.execute_cdp_cmd("Page.reload", {"ignoreCache": True})
+            except WebDriverException as cdp_ex:
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] CDP hard refresh failed after %s: %s. "
+                    "Falling back to JS reload.",
+                    reason,
+                    type(cdp_ex).__name__,
+                )
+                driver.execute_script("window.location.reload()")
+
+            EVENT.wait(8)
+            try:
+                ready_state = driver.execute_script("return document.readyState")
+            except WebDriverException:
+                ready_state = "<unavailable>"
+            log_ytmonsterru_state(
+                f"[ImagePuzzle] After hard refresh for {reason} | ready={ready_state}"
+            )
+
         def request_new_ytmonsterru_puzzle(reason: str, allow_refresh: bool = True) -> bool:
             try:
                 driver.switch_to.default_content()
@@ -1408,8 +2053,25 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except WebDriverException:
                 body_text = ""
 
+            if ytmonsterru_puzzle_canvas_visible():
+                return False
+
             if no_ytmonsterru_videos_left():
                 raise NoYTMonsterVideosLeft
+
+            if click_ytmonsterru_reset_page(reason, body_text):
+                return True
+
+            if wait_out_ytmonsterru_page_wait(reason):
+                return True
+
+            if allow_refresh and ytmonsterru_puzzle_popup_visible():
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Refreshing visible puzzle directly after %s.",
+                    reason,
+                )
+                refresh_ytmonsterru_puzzle_page(reason)
+                return True
 
             reload_page_markers = (
                 "reset page",
@@ -1448,8 +2110,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 "[YTMonsterRU][ImagePuzzle] Refreshing page to request a new puzzle image after %s.",
                 reason,
             )
-            driver.refresh()
-            EVENT.wait(5)
+            refresh_ytmonsterru_puzzle_page(reason)
             return True
 
         try:
@@ -1475,12 +2136,38 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     return True
 
                 # Attempt Automated Solve using CLIP
+                if wait_out_ytmonsterru_page_wait("before automated solve"):
+                    continue
                 logging.info("[YTMonsterRU][ImagePuzzle] Attempting automated solve iteration...")
                 EVENT.wait(2)
 
                 debug_dir = Path("screenshots/debug")
                 debug_dir.mkdir(parents=True, exist_ok=True)
-                for stale_pattern in ("bottom_crop_*_thresh.png", "bottom_crop_*_scene.png"):
+                stale_patterns = (
+                    "raw_element_*.png",
+                    "bottom_crop_*_mask.png",
+                    "bottom_crop_*_scene.png",
+                    "top_crop_*_original.png",
+                    "top_crop_*_inverted.png",
+                    "bottom_background_diff.png",
+                    "bottom_background_removed_scene.png",
+                    "bottom_objects_only.png",
+                    "bottom_background_removed_mask.png",
+                    "bottom_boxes.png",
+                    "bottom_watershed_boxes.png",
+                    "bottom_watershed_mask.png",
+                    "bottom_sam2_boxes.png",
+                    "bottom_sam2_input_black.png",
+                    "bottom_sam2_mask.png",
+                    "bottom_sam2_objects_only.png",
+                    "bottom_sam2_too_close.png",
+                    "bottom_mobilesam_boxes.png",
+                    "pre_submit_canvas_*.png",
+                    "post_submit_*.png",
+                    "no_canvas_*.png",
+                    "reset_page_*.png",
+                )
+                for stale_pattern in stale_patterns:
                     for stale_debug in debug_dir.glob(stale_pattern):
                         try:
                             stale_debug.unlink()
@@ -1500,12 +2187,14 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     # Fallback in case they change the structure again
                     images = driver.find_elements(By.CSS_SELECTOR, f"{puzzle_selector} img, {puzzle_selector} canvas")
 
-                # # for i, img_el in enumerate(images):
-                # #     try:
-                # #         with open(debug_dir / f"raw_element_{i}.png", "wb") as f:
-                # #             f.write(img_el.screenshot_as_png)
-                # #     except Exception as e:
-                # #         logging.info("Failed to save raw_element_%d: %s", i, e)
+                for i, img_el in enumerate(images):
+                    try:
+                        save_ytmonsterru_debug_bytes(
+                            debug_dir / f"raw_element_{i}.png",
+                            img_el.screenshot_as_png,
+                        )
+                    except Exception as e:
+                        logging.info("Failed to save raw_element_%d: %s", i, e)
 
                 if len(images) >= 2:
                     top_img_element = images[0]
@@ -1718,6 +2407,543 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         ][:10]
                         return boxes + contour_boxes, detected_shapes
 
+                    def split_touching_shapes_with_watershed(mask, existing_shapes):
+                        split_shapes = []
+                        watershed_mask = np.zeros_like(mask)
+                        split_kernel = cv2.getStructuringElement(
+                            cv2.MORPH_ELLIPSE,
+                            (3, 3),
+                        )
+
+                        def valid_split_box(box):
+                            box_x, box_y, box_w, box_h = box
+                            if not (8 <= box_w <= 115 and 8 <= box_h <= 115):
+                                return False
+                            white_area = cv2.countNonZero(
+                                mask[box_y:box_y + box_h, box_x:box_x + box_w]
+                            )
+                            if not (35 <= white_area <= 2600):
+                                return False
+                            density = (
+                                float(white_area) / (box_w * box_h)
+                                if box_w and box_h
+                                else 0
+                            )
+                            return density >= 0.04
+
+                        for x, y, w, h in existing_shapes:
+                            pad = 4
+                            crop_x1 = max(0, x - pad)
+                            crop_y1 = max(0, y - pad)
+                            crop_x2 = min(mask.shape[1], x + w + pad)
+                            crop_y2 = min(mask.shape[0], y + h + pad)
+                            crop = mask[crop_y1:crop_y2, crop_x1:crop_x2]
+                            cleaned = cv2.morphologyEx(
+                                crop,
+                                cv2.MORPH_OPEN,
+                                split_kernel,
+                                iterations=1,
+                            )
+                            if cv2.countNonZero(cleaned) < 35:
+                                split_shapes.append((x, y, w, h))
+                                watershed_mask[y:y + h, x:x + w] = mask[y:y + h, x:x + w]
+                                continue
+
+                            sure_bg = cv2.dilate(cleaned, split_kernel, iterations=2)
+                            dist = cv2.distanceTransform(cleaned, cv2.DIST_L2, 5)
+                            max_dist = float(dist.max())
+                            if max_dist <= 0:
+                                split_shapes.append((x, y, w, h))
+                                watershed_mask[y:y + h, x:x + w] = mask[y:y + h, x:x + w]
+                                continue
+
+                            _ret, sure_fg = cv2.threshold(
+                                dist,
+                                0.35 * max_dist,
+                                255,
+                                0,
+                            )
+                            sure_fg = np.uint8(sure_fg)
+                            label_count, markers = cv2.connectedComponents(sure_fg)
+                            if label_count <= 2:
+                                split_shapes.append((x, y, w, h))
+                                watershed_mask[y:y + h, x:x + w] = mask[y:y + h, x:x + w]
+                                continue
+
+                            unknown = cv2.subtract(sure_bg, sure_fg)
+                            markers = markers + 1
+                            markers[unknown == 255] = 0
+                            watershed_input = cv2.cvtColor(cleaned, cv2.COLOR_GRAY2BGR)
+                            markers = cv2.watershed(watershed_input, markers)
+
+                            crop_split_shapes = []
+                            for marker_id in range(2, int(markers.max()) + 1):
+                                marker_mask = np.zeros_like(crop)
+                                marker_mask[markers == marker_id] = 255
+                                marker_mask = cv2.bitwise_and(marker_mask, cleaned)
+                                marker_mask = remove_small_mask_components(
+                                    marker_mask,
+                                    min_area=24,
+                                )
+                                if cv2.countNonZero(marker_mask) < 35:
+                                    continue
+                                contours, _hierarchy = cv2.findContours(
+                                    marker_mask,
+                                    cv2.RETR_EXTERNAL,
+                                    cv2.CHAIN_APPROX_SIMPLE,
+                                )
+                                if not contours:
+                                    continue
+                                merged_contour = np.vstack(contours)
+                                bx, by, bw, bh = cv2.boundingRect(merged_contour)
+                                absolute_box = (
+                                    crop_x1 + int(bx),
+                                    crop_y1 + int(by),
+                                    int(bw),
+                                    int(bh),
+                                )
+                                if not valid_split_box(absolute_box):
+                                    continue
+                                crop_split_shapes.append(absolute_box)
+                                sx, sy, sw, sh = absolute_box
+                                local_mask = marker_mask[by:by + bh, bx:bx + bw]
+                                watershed_mask[sy:sy + sh, sx:sx + sw] = cv2.bitwise_or(
+                                    watershed_mask[sy:sy + sh, sx:sx + sw],
+                                    local_mask,
+                                )
+
+                            if len(crop_split_shapes) >= 2:
+                                split_shapes.extend(crop_split_shapes)
+                            else:
+                                split_shapes.append((x, y, w, h))
+                                watershed_mask[y:y + h, x:x + w] = mask[y:y + h, x:x + w]
+
+                        deduped_shapes = []
+                        for shape in sorted(
+                            split_shapes,
+                            key=lambda item: item[2] * item[3],
+                            reverse=True,
+                        ):
+                            sx, sy, sw, sh = shape
+                            center_x = sx + sw / 2
+                            center_y = sy + sh / 2
+                            duplicate = False
+                            for dx, dy, dw, dh in deduped_shapes:
+                                other_x = dx + dw / 2
+                                other_y = dy + dh / 2
+                                distance = (
+                                    (center_x - other_x) ** 2
+                                    + (center_y - other_y) ** 2
+                                ) ** 0.5
+                                if distance < 8:
+                                    duplicate = True
+                                    break
+                            if not duplicate:
+                                deduped_shapes.append(shape)
+
+                        return deduped_shapes[:10], watershed_mask
+
+                    def boxes_from_segmentation_masks(
+                        segmentation_masks,
+                        white_hint_mask,
+                        strict_icon_mask=None,
+                    ):
+                        scene_h, scene_w = white_hint_mask.shape
+                        boxes = []
+                        mask_by_idx = {}
+                        for mask_idx, segmentation_mask in enumerate(segmentation_masks):
+                            candidate_mask = np.asarray(segmentation_mask)
+                            if candidate_mask.dtype != np.uint8:
+                                candidate_mask = candidate_mask.astype(np.uint8)
+                            if candidate_mask.max() <= 1:
+                                candidate_mask *= 255
+                            if candidate_mask.shape != white_hint_mask.shape:
+                                candidate_mask = cv2.resize(
+                                    candidate_mask,
+                                    (scene_w, scene_h),
+                                    interpolation=cv2.INTER_NEAREST,
+                                )
+                            object_overlap = cv2.bitwise_and(
+                                candidate_mask,
+                                white_hint_mask,
+                            )
+                            strict_overlap = None
+                            if strict_icon_mask is not None:
+                                strict_overlap = cv2.bitwise_and(
+                                    candidate_mask,
+                                    strict_icon_mask,
+                                )
+                                strict_area = int(cv2.countNonZero(strict_overlap))
+                                loose_area = int(cv2.countNonZero(object_overlap))
+                                if loose_area <= 0:
+                                    continue
+                                strict_ratio = float(strict_area) / loose_area
+                                if strict_area < 35 or strict_ratio < 0.18:
+                                    continue
+                                object_overlap = strict_overlap
+                            white_area = int(cv2.countNonZero(object_overlap))
+                            if white_area < 35:
+                                continue
+                            contours, _hierarchy = cv2.findContours(
+                                object_overlap,
+                                cv2.RETR_EXTERNAL,
+                                cv2.CHAIN_APPROX_SIMPLE,
+                            )
+                            if not contours:
+                                continue
+                            merged_contour = np.vstack(contours)
+                            x, y, w, h = cv2.boundingRect(merged_contour)
+                            aspect_ratio = float(w) / h if h else 0
+                            density = float(white_area) / (w * h) if w and h else 0
+                            if not (8 <= w <= 120 and 8 <= h <= 120):
+                                continue
+                            if not (0.20 <= aspect_ratio <= 5.0):
+                                continue
+                            if density < 0.035:
+                                continue
+                            if x <= 1 or y <= 1 or x + w >= scene_w - 1 or y + h >= scene_h - 1:
+                                continue
+                            boxes.append((int(x), int(y), int(w), int(h), white_area, mask_idx))
+                            mask_by_idx[mask_idx] = object_overlap
+
+                        deduped = []
+                        combined_mask = np.zeros_like(white_hint_mask)
+                        for box in sorted(boxes, key=lambda item: item[4], reverse=True):
+                            x, y, w, h, area, mask_idx = box
+                            center_x = x + w / 2
+                            center_y = y + h / 2
+                            duplicate = False
+                            for dx, dy, dw, dh, _darea, _dmask_idx in deduped:
+                                other_x = dx + dw / 2
+                                other_y = dy + dh / 2
+                                distance = (
+                                    (center_x - other_x) ** 2
+                                    + (center_y - other_y) ** 2
+                                ) ** 0.5
+                                overlap_x1 = max(x, dx)
+                                overlap_y1 = max(y, dy)
+                                overlap_x2 = min(x + w, dx + dw)
+                                overlap_y2 = min(y + h, dy + dh)
+                                overlap_w = max(0, overlap_x2 - overlap_x1)
+                                overlap_h = max(0, overlap_y2 - overlap_y1)
+                                overlap_area = overlap_w * overlap_h
+                                smaller_area = min(w * h, dw * dh)
+                                overlap_ratio = (
+                                    overlap_area / smaller_area
+                                    if smaller_area
+                                    else 0
+                                )
+                                small_near_larger = area <= 150 and distance < 20
+                                if (
+                                    distance < 8
+                                    or overlap_ratio >= 0.45
+                                    or small_near_larger
+                                ):
+                                    duplicate = True
+                                    break
+                            if not duplicate:
+                                deduped.append(box)
+                                combined_mask = cv2.bitwise_or(
+                                    combined_mask,
+                                    mask_by_idx[mask_idx],
+                                )
+                        return deduped[:10], combined_mask
+
+                    def save_segmentation_debug_boxes(boxes, output_name, color):
+                        debug_img = bottom_arr.copy()
+                        for idx, (x, y, w, h, area, _mask_idx) in enumerate(boxes, start=1):
+                            cv2.rectangle(
+                                debug_img,
+                                (x, y),
+                                (x + w, y + h),
+                                color,
+                                1,
+                            )
+                            cv2.putText(
+                                debug_img,
+                                str(idx),
+                                (x, max(8, y - 3)),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.35,
+                                color,
+                                1,
+                                cv2.LINE_AA,
+                            )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / output_name,
+                            debug_img,
+                        )
+
+                    def run_sam2_detector(white_hint_mask, strict_icon_mask=None):
+                        sam_input_mask = white_hint_mask
+                        if (
+                            strict_icon_mask is not None
+                            and cv2.countNonZero(strict_icon_mask) >= 80
+                        ):
+                            sam_input_mask = strict_icon_mask
+                        sam2_input_arr = cv2.bitwise_and(
+                            bottom_arr,
+                            bottom_arr,
+                            mask=sam_input_mask,
+                        )
+                        sam2_input_img = Image.fromarray(
+                            cv2.cvtColor(sam2_input_arr, cv2.COLOR_BGR2RGB)
+                        )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_sam2_input_black.png",
+                            sam2_input_arr,
+                        )
+
+                        def build_sam_prompt_boxes():
+                            candidates = []
+                            large_component_boxes = []
+                            label_count, _labels, stats, _centroids = cv2.connectedComponentsWithStats(
+                                sam_input_mask,
+                                8,
+                            )
+                            for label_idx in range(1, label_count):
+                                box_x = int(stats[label_idx, cv2.CC_STAT_LEFT])
+                                box_y = int(stats[label_idx, cv2.CC_STAT_TOP])
+                                box_w = int(stats[label_idx, cv2.CC_STAT_WIDTH])
+                                box_h = int(stats[label_idx, cv2.CC_STAT_HEIGHT])
+                                white_area = int(stats[label_idx, cv2.CC_STAT_AREA])
+                                aspect_ratio = float(box_w) / box_h if box_h else 0
+                                density = (
+                                    float(white_area) / (box_w * box_h)
+                                    if box_w and box_h
+                                    else 0
+                                )
+                                if white_area < 80:
+                                    continue
+                                if not (8 <= box_w <= 120 and 8 <= box_h <= 120):
+                                    continue
+                                if not (0.20 <= aspect_ratio <= 5.0):
+                                    continue
+                                if density < 0.04:
+                                    continue
+                                large_component_boxes.append(
+                                    (box_x, box_y, box_w, box_h, white_area)
+                                )
+
+                            prompt_source = (
+                                large_component_boxes
+                                if len(large_component_boxes) >= 3
+                                else [
+                                    (
+                                        box_x,
+                                        box_y,
+                                        box_w,
+                                        box_h,
+                                        cv2.countNonZero(
+                                            sam_input_mask[
+                                                box_y:box_y + box_h,
+                                                box_x:box_x + box_w,
+                                            ]
+                                        ),
+                                    )
+                                    for box_x, box_y, box_w, box_h in original_shapes
+                                ]
+                            )
+
+                            for box_x, box_y, box_w, box_h, white_area in prompt_source:
+                                white_area = cv2.countNonZero(
+                                    sam_input_mask[box_y:box_y + box_h, box_x:box_x + box_w]
+                                )
+                                if white_area < 35:
+                                    continue
+                                candidates.append((box_x, box_y, box_w, box_h, white_area))
+
+                            prompt_boxes = []
+                            for box_x, box_y, box_w, box_h, area in sorted(
+                                candidates,
+                                key=lambda candidate: candidate[4],
+                                reverse=True,
+                            ):
+                                if not (8 <= box_w <= 120 and 8 <= box_h <= 120):
+                                    continue
+                                padded_box = [
+                                    max(0, int(box_x - 8)),
+                                    max(0, int(box_y - 8)),
+                                    min(bottom_img.width, int(box_x + box_w + 8)),
+                                    min(bottom_img.height, int(box_y + box_h + 8)),
+                                ]
+                                center_x = (padded_box[0] + padded_box[2]) / 2
+                                center_y = (padded_box[1] + padded_box[3]) / 2
+                                duplicate = False
+                                for existing_box in prompt_boxes:
+                                    existing_x = (existing_box[0] + existing_box[2]) / 2
+                                    existing_y = (existing_box[1] + existing_box[3]) / 2
+                                    distance = (
+                                        (center_x - existing_x) ** 2
+                                        + (center_y - existing_y) ** 2
+                                    ) ** 0.5
+                                    if distance < 8:
+                                        duplicate = True
+                                        break
+                                if not duplicate:
+                                    prompt_boxes.append(padded_box)
+                                if len(prompt_boxes) >= 10:
+                                    break
+                            return prompt_boxes
+
+                        try:
+                            prompt_boxes = build_sam_prompt_boxes()
+                            if not prompt_boxes:
+                                logging.info(
+                                    "[YTMonsterRU][ImagePuzzle] SAM 2.1 skipped: no prompt boxes"
+                                )
+                                empty_mask = np.zeros_like(white_hint_mask)
+                                return [], empty_mask
+
+                            sam_processor = load_transformers_component(
+                                Sam2Processor,
+                                YTMONSTERRU_SAM_MODEL_NAME,
+                            )
+                            sam_model = load_transformers_component(
+                                Sam2Model,
+                                YTMONSTERRU_SAM_MODEL_NAME,
+                            )
+                            device = torch.device(
+                                "cuda" if torch.cuda.is_available() else "cpu"
+                            )
+                            sam_model.to(device)
+                            sam_inputs = sam_processor(
+                                images=sam2_input_img,
+                                input_boxes=[prompt_boxes],
+                                return_tensors="pt",
+                            )
+                            sam_inputs = {
+                                key: value.to(device) if hasattr(value, "to") else value
+                                for key, value in sam_inputs.items()
+                            }
+                            with torch.no_grad():
+                                sam_outputs = sam_model(**sam_inputs)
+
+                            processed_masks = sam_processor.post_process_masks(
+                                sam_outputs.pred_masks.detach().cpu(),
+                                sam_inputs["original_sizes"].detach().cpu(),
+                            )[0]
+                            sam_masks = []
+                            for prompt_idx in range(processed_masks.shape[0]):
+                                best_mask_idx = 0
+                                best_overlap_score = -1.0
+                                for mask_idx in range(processed_masks.shape[1]):
+                                    candidate_mask = processed_masks[
+                                        prompt_idx,
+                                        mask_idx,
+                                    ].numpy()
+                                    candidate_mask = candidate_mask.astype(np.uint8)
+                                    if candidate_mask.max() <= 1:
+                                        candidate_mask *= 255
+                                    overlap = cv2.bitwise_and(
+                                        candidate_mask,
+                                        sam_input_mask,
+                                    )
+                                    overlap_area = cv2.countNonZero(overlap)
+                                    contours, _hierarchy = cv2.findContours(
+                                        overlap,
+                                        cv2.RETR_EXTERNAL,
+                                        cv2.CHAIN_APPROX_SIMPLE,
+                                    )
+                                    if not contours:
+                                        continue
+                                    x, y, w, h = cv2.boundingRect(np.vstack(contours))
+                                    density = (
+                                        float(overlap_area) / (w * h)
+                                        if w and h
+                                        else 0
+                                    )
+                                    overlap_score = overlap_area * min(
+                                        1.0,
+                                        density / 0.08,
+                                    )
+                                    if overlap_score > best_overlap_score:
+                                        best_overlap_score = overlap_score
+                                        best_mask_idx = mask_idx
+                                sam_masks.append(
+                                    processed_masks[prompt_idx, best_mask_idx].numpy()
+                                )
+
+                            sam2_boxes, sam2_mask = boxes_from_segmentation_masks(
+                                sam_masks,
+                                white_hint_mask,
+                                strict_icon_mask,
+                            )
+                            save_segmentation_debug_boxes(
+                                sam2_boxes,
+                                "bottom_sam2_boxes.png",
+                                (0, 165, 255),
+                            )
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] SAM 2.1 boxes=%d",
+                                len(sam2_boxes),
+                            )
+                            save_ytmonsterru_debug_cv2(
+                                debug_dir / "bottom_sam2_mask.png",
+                                sam2_mask,
+                            )
+                            sam2_objects_only = cv2.bitwise_and(
+                                bottom_arr,
+                                bottom_arr,
+                                mask=sam2_mask,
+                            )
+                            save_ytmonsterru_debug_cv2(
+                                debug_dir / "bottom_sam2_objects_only.png",
+                                sam2_objects_only,
+                            )
+                            return sam2_boxes, sam2_mask
+                        except (OSError, RuntimeError, ValueError, IndexError) as sam_ex:
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] SAM 2.1 skipped: %s: %s",
+                                type(sam_ex).__name__,
+                                sam_ex,
+                            )
+                            return [], np.zeros_like(white_hint_mask)
+
+                        # # try:
+                        # #     from mobile_sam import SamAutomaticMaskGenerator, sam_model_registry
+                        # #
+                        # #     if not Path(YTMONSTERRU_MOBILE_SAM_CHECKPOINT).is_file():
+                        # #         logging.info(
+                        # #             "[YTMonsterRU][ImagePuzzle] MobileSAM debug skipped: checkpoint not found at %s",
+                        # #             YTMONSTERRU_MOBILE_SAM_CHECKPOINT,
+                        # #         )
+                        # #         return
+                        # #     mobile_sam_model = sam_model_registry["vit_t"](
+                        # #         checkpoint=YTMONSTERRU_MOBILE_SAM_CHECKPOINT,
+                        # #     )
+                        # #     device = "cuda" if torch.cuda.is_available() else "cpu"
+                        # #     mobile_sam_model.to(device=device)
+                        # #     mask_generator = SamAutomaticMaskGenerator(
+                        # #         mobile_sam_model,
+                        # #         points_per_side=32,
+                        # #         pred_iou_thresh=0.70,
+                        # #         stability_score_thresh=0.75,
+                        # #         crop_n_layers=0,
+                        # #     )
+                        # #     mobile_sam_masks = [
+                        # #         item["segmentation"]
+                        # #         for item in mask_generator.generate(scene_rgb)
+                        # #     ]
+                        # #     mobile_sam_boxes, _mobile_sam_mask = boxes_from_segmentation_masks(
+                        # #         mobile_sam_masks,
+                        # #         white_hint_mask,
+                        # #     )
+                        # #     save_segmentation_debug_boxes(
+                        # #         mobile_sam_boxes,
+                        # #         "bottom_mobilesam_boxes.png",
+                        # #         (255, 0, 255),
+                        # #     )
+                        # #     logging.info(
+                        # #         "[YTMonsterRU][ImagePuzzle] MobileSAM debug boxes=%d",
+                        # #         len(mobile_sam_boxes),
+                        # #     )
+                        # # except (ImportError, OSError, RuntimeError, ValueError) as sam_ex:
+                        # #     logging.info(
+                        # #         "[YTMonsterRU][ImagePuzzle] MobileSAM debug skipped: %s",
+                        # #         type(sam_ex).__name__,
+                        # #     )
+
                     def build_background_removed_mask():
                         assets_dir = Path("ytmonsterru_assets")
                         best_background_name = None
@@ -1751,6 +2977,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         build_background_removed_mask()
                     )
                     thresh = None
+                    strict_icon_mask = None
                     component_boxes = []
                     shapes = []
                     if background_removed_mask is not None:
@@ -1770,19 +2997,33 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 (0, 0, min_value),
                                 (179, max_saturation, 255),
                             )
+                            strict_white_mask = cv2.inRange(
+                                hsv,
+                                (0, 0, max(225, min_value)),
+                                (179, 65, 255),
+                            )
                             candidate_mask = cv2.bitwise_and(
                                 white_mask,
+                                background_removed_mask,
+                            )
+                            candidate_strict_icon_mask = cv2.bitwise_and(
+                                strict_white_mask,
                                 background_removed_mask,
                             )
                             candidate_mask = remove_small_mask_components(
                                 candidate_mask,
                                 min_area=24,
                             )
+                            candidate_strict_icon_mask = remove_small_mask_components(
+                                candidate_strict_icon_mask,
+                                min_area=18,
+                            )
                             candidate_boxes, candidate_shapes = find_white_scene_shapes(
                                 candidate_mask,
                             )
                             if len(candidate_shapes) > len(shapes):
                                 thresh = candidate_mask
+                                strict_icon_mask = candidate_strict_icon_mask
                                 component_boxes = candidate_boxes
                                 shapes = candidate_shapes
                             if len(shapes) >= 3:
@@ -1791,61 +3032,272 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     if thresh is None:
                         thresh = cv2.inRange(hsv, (0, 0, 235), (179, 70, 255))
                         thresh = remove_small_mask_components(thresh, min_area=24)
+                        strict_icon_mask = cv2.inRange(
+                            hsv,
+                            (0, 0, 235),
+                            (179, 55, 255),
+                        )
+                        strict_icon_mask = remove_small_mask_components(
+                            strict_icon_mask,
+                            min_area=18,
+                        )
                         component_boxes, shapes = find_white_scene_shapes(thresh)
+
+                    if strict_icon_mask is None:
+                        strict_icon_mask = thresh
+                    save_ytmonsterru_debug_cv2(
+                        debug_dir / "bottom_strict_icon_mask.png",
+                        strict_icon_mask,
+                    )
 
                     logging.info(
                         "[YTMonsterRU][ImagePuzzle] Component boxes=%d, merged shapes=%d",
                         len(component_boxes),
                         len(shapes),
                     )
+                    original_shapes = list(shapes)
+                    # # watershed_shapes, watershed_shape_mask = split_touching_shapes_with_watershed(
+                    # #     thresh,
+                    # #     original_shapes,
+                    # # )
+                    # # logging.info(
+                    # #     "[YTMonsterRU][ImagePuzzle] Watershed split shapes=%d from current shapes=%d",
+                    # #     len(watershed_shapes),
+                    # #     len(original_shapes),
+                    # # )
+                    # # if len(watershed_shapes) > len(shapes):
+                    # #     shapes = watershed_shapes
 
                     # Save debugging images
                     filtered_shape_mask = np.zeros_like(thresh)
-                    for x, y, w, h in shapes:
+                    for x, y, w, h in original_shapes:
                         filtered_shape_mask[y:y + h, x:x + w] = thresh[y:y + h, x:x + w]
                     filtered_shape_mask = remove_small_mask_components(
                         filtered_shape_mask,
                         min_area=36,
                     )
+                    pre_sam_shape_mask = filtered_shape_mask.copy()
+                    sam2_boxes, sam2_shape_mask = run_sam2_detector(
+                        thresh,
+                        strict_icon_mask,
+                    )
+                    sam2_shapes = [
+                        (x, y, w, h)
+                        for x, y, w, h, _area, _mask_idx in sam2_boxes
+                    ]
+                    if len(sam2_shapes) >= len(original_shapes):
+                        shapes = sam2_shapes
+                        filtered_shape_mask = sam2_shape_mask
+                    else:
+                        shapes = original_shapes
+                        filtered_shape_mask = pre_sam_shape_mask
+                        logging.info(
+                            "[YTMonsterRU][ImagePuzzle] SAM 2.1 returned %d shape(s), "
+                            "keeping %d pre SAM shape(s) instead.",
+                            len(sam2_shapes),
+                            len(original_shapes),
+                        )
+                    logging.info(
+                        "[YTMonsterRU][ImagePuzzle] Active scene shapes=%d",
+                        len(shapes),
+                    )
 
-                    # # if _background_diff is not None:
-                        # # cv2.imwrite(
-                        # #     str(debug_dir / "bottom_background_diff.png"),
-                        # #     _background_diff,
-                        # # )
-                        # # objects_only_scene = cv2.bitwise_and(
-                        # #     bottom_arr,
-                        # #     bottom_arr,
-                        # #     mask=filtered_shape_mask,
-                        # # )
-                        # # cv2.imwrite(
-                        # #     str(debug_dir / "bottom_background_removed_scene.png"),
-                        # #     objects_only_scene,
-                        # # )
-                        # # cv2.imwrite(
-                        # #     str(debug_dir / "bottom_objects_only.png"),
-                        # #     objects_only_scene,
-                        # # )
-                        # # pass
+                    def sam2_shapes_too_close(shape_boxes):
+                        def center(box):
+                            box_x, box_y, box_w, box_h = box
+                            return box_x + box_w / 2, box_y + box_h / 2
+
+                        def edge_gap(left, right):
+                            left_x, left_y, left_w, left_h = left
+                            right_x, right_y, right_w, right_h = right
+                            horizontal_gap = max(
+                                0,
+                                max(left_x, right_x)
+                                - min(left_x + left_w, right_x + right_w),
+                            )
+                            vertical_gap = max(
+                                0,
+                                max(left_y, right_y)
+                                - min(left_y + left_h, right_y + right_h),
+                            )
+                            return (horizontal_gap ** 2 + vertical_gap ** 2) ** 0.5
+
+                        for left_idx, left_box in enumerate(shape_boxes):
+                            for right_idx, right_box in enumerate(
+                                shape_boxes[left_idx + 1:],
+                                start=left_idx + 1,
+                            ):
+                                left_center_x, left_center_y = center(left_box)
+                                right_center_x, right_center_y = center(right_box)
+                                center_distance = (
+                                    (left_center_x - right_center_x) ** 2
+                                    + (left_center_y - right_center_y) ** 2
+                                ) ** 0.5
+                                gap = edge_gap(left_box, right_box)
+                                if gap <= 8 or center_distance <= 36:
+                                    return left_idx, right_idx, gap, center_distance
+                        return None
+
+                    def sam2_shapes_nested(shape_boxes):
+                        def intersection_area(left, right):
+                            left_x, left_y, left_w, left_h = left
+                            right_x, right_y, right_w, right_h = right
+                            overlap_x1 = max(left_x, right_x)
+                            overlap_y1 = max(left_y, right_y)
+                            overlap_x2 = min(left_x + left_w, right_x + right_w)
+                            overlap_y2 = min(left_y + left_h, right_y + right_h)
+                            overlap_w = max(0, overlap_x2 - overlap_x1)
+                            overlap_h = max(0, overlap_y2 - overlap_y1)
+                            return overlap_w * overlap_h
+
+                        for left_idx, left_box in enumerate(shape_boxes):
+                            left_area = left_box[2] * left_box[3]
+                            for right_idx, right_box in enumerate(
+                                shape_boxes[left_idx + 1:],
+                                start=left_idx + 1,
+                            ):
+                                right_area = right_box[2] * right_box[3]
+                                smaller_area = min(left_area, right_area)
+                                if smaller_area <= 0:
+                                    continue
+                                overlap_ratio = (
+                                    intersection_area(left_box, right_box)
+                                    / smaller_area
+                                )
+                                if overlap_ratio >= 0.70:
+                                    return left_idx, right_idx, overlap_ratio
+                        return None
+
+                    nested_pair = sam2_shapes_nested(shapes)
+                    if nested_pair:
+                        left_idx, right_idx, overlap_ratio = nested_pair
+                        nested_debug = bottom_arr.copy()
+                        for shape_idx, (x, y, w, h) in enumerate(shapes):
+                            color = (
+                                (0, 0, 255)
+                                if shape_idx in (left_idx, right_idx)
+                                else (0, 165, 255)
+                            )
+                            cv2.rectangle(
+                                nested_debug,
+                                (x, y),
+                                (x + w, y + h),
+                                color,
+                                2,
+                            )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_sam2_nested.png",
+                            nested_debug,
+                        )
+                        logging.warning(
+                            "[YTMonsterRU][ImagePuzzle] SAM 2.1 nested objects detected. "
+                            "Refreshing puzzle instead of clicking. pair=%d,%d overlap_ratio=%.2f",
+                            left_idx,
+                            right_idx,
+                            overlap_ratio,
+                        )
+                        request_new_ytmonsterru_puzzle("sam2 nested objects")
+                        continue
+
+                    close_pair = (
+                        None
+                        if len(shapes) == 3
+                        else sam2_shapes_too_close(shapes)
+                    )
+                    if close_pair:
+                        left_idx, right_idx, gap, center_distance = close_pair
+                        close_debug = bottom_arr.copy()
+                        for shape_idx, (x, y, w, h) in enumerate(shapes):
+                            color = (
+                                (0, 0, 255)
+                                if shape_idx in (left_idx, right_idx)
+                                else (0, 165, 255)
+                            )
+                            cv2.rectangle(
+                                close_debug,
+                                (x, y),
+                                (x + w, y + h),
+                                color,
+                                2,
+                            )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_sam2_too_close.png",
+                            close_debug,
+                        )
+                        logging.warning(
+                            "[YTMonsterRU][ImagePuzzle] SAM 2.1 objects too close. "
+                            "Refreshing puzzle instead of clicking. pair=%d,%d gap=%.1f center_distance=%.1f",
+                            left_idx,
+                            right_idx,
+                            gap,
+                            center_distance,
+                        )
+                        request_new_ytmonsterru_puzzle("sam2 objects too close")
+                        continue
+
+                    if _background_diff is not None:
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_background_diff.png",
+                            _background_diff,
+                        )
+                        objects_only_scene = cv2.bitwise_and(
+                            bottom_arr,
+                            bottom_arr,
+                            mask=filtered_shape_mask,
+                        )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_background_removed_scene.png",
+                            objects_only_scene,
+                        )
+                        save_ytmonsterru_debug_cv2(
+                            debug_dir / "bottom_objects_only.png",
+                            objects_only_scene,
+                        )
+                    save_ytmonsterru_debug_cv2(
+                        debug_dir / "bottom_background_removed_mask.png",
+                        filtered_shape_mask,
+                    )
+                    bottom_boxes_debug = bottom_arr.copy()
+                    for x, y, w, h in original_shapes:
+                        cv2.rectangle(
+                            bottom_boxes_debug,
+                            (x, y),
+                            (x + w, y + h),
+                            (0, 255, 0),
+                            1,
+                        )
+                    save_ytmonsterru_debug_cv2(
+                        debug_dir / "bottom_boxes.png",
+                        bottom_boxes_debug,
+                    )
                     # # cv2.imwrite(
-                    # #     str(debug_dir / "bottom_background_removed_mask.png"),
-                    # #     filtered_shape_mask,
+                    # #     str(debug_dir / "bottom_watershed_mask.png"),
+                    # #     watershed_shape_mask,
                     # # )
-                    # # bottom_boxes_debug = bottom_arr.copy()
-                    # # for x, y, w, h in shapes:
+                    # # watershed_boxes_debug = bottom_arr.copy()
+                    # # for x, y, w, h in watershed_shapes:
                     # #     cv2.rectangle(
-                    # #         bottom_boxes_debug,
+                    # #         watershed_boxes_debug,
                     # #         (x, y),
                     # #         (x + w, y + h),
-                    # #         (0, 255, 0),
+                    # #         (255, 0, 0),
                     # #         1,
                     # #     )
-                    # # cv2.imwrite(str(debug_dir / "bottom_boxes.png"), bottom_boxes_debug)
+                    # # cv2.imwrite(
+                    # #     str(debug_dir / "bottom_watershed_boxes.png"),
+                    # #     watershed_boxes_debug,
+                    # # )
 
-                    # # for idx, tc in enumerate(top_crops_original):
-                    # #     tc.save(debug_dir / f"top_crop_{idx}_original.png")
-                    # # for idx, tc in enumerate(top_crops):
-                    # #     tc.save(debug_dir / f"top_crop_{idx}_inverted.png")
+                    for idx, tc in enumerate(top_crops_original):
+                        save_ytmonsterru_debug_pil(
+                            tc,
+                            debug_dir / f"top_crop_{idx}_original.png",
+                        )
+                    for idx, tc in enumerate(top_crops):
+                        save_ytmonsterru_debug_pil(
+                            tc,
+                            debug_dir / f"top_crop_{idx}_inverted.png",
+                        )
 
                     # We need at least 3 shapes detected to solve this puzzle.
                     if len(shapes) >= 3:
@@ -1861,11 +3313,15 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             )
                             crop = bottom_mask_img.crop(crop_box)
                             bottom_crops.append(crop)
-                            # # idx = len(bottom_crops) - 1
-                            # # crop.save(debug_dir / f"bottom_crop_{idx}_mask.png")
-                            # # bottom_img.crop(crop_box).save(
-                            # #     debug_dir / f"bottom_crop_{idx}_scene.png"
-                            # # )
+                            idx = len(bottom_crops) - 1
+                            save_ytmonsterru_debug_pil(
+                                crop,
+                                debug_dir / f"bottom_crop_{idx}_mask.png",
+                            )
+                            save_ytmonsterru_debug_pil(
+                                bottom_img.crop(crop_box),
+                                debug_dir / f"bottom_crop_{idx}_scene.png",
+                            )
 
                         def find_best_assignment(score_matrix):
                             best_match = None
@@ -1890,26 +3346,95 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                     best_min_score = min_score
                             return best_match, best_score, best_min_score
 
-                        processor = load_transformers_component(
-                            CLIPProcessor,
-                            YTMONSTERRU_CLIP_MODEL_NAME,
-                        )
-                        model = load_transformers_component(
-                            CLIPModel,
-                            YTMONSTERRU_CLIP_MODEL_NAME,
-                            use_safetensors=False,
-                        )
-                        model.eval()
+                        def extract_dinov3_features(processor, model, images):
+                            inputs = processor(images=images, return_tensors="pt")
+                            device = torch.device(
+                                "cuda" if torch.cuda.is_available() else "cpu"
+                            )
+                            model.to(device)
+                            inputs = {
+                                key: value.to(device) if hasattr(value, "to") else value
+                                for key, value in inputs.items()
+                            }
+                            with torch.no_grad():
+                                outputs = model(**inputs)
 
-                        top_inputs = processor(images=top_crops, return_tensors="pt")
-                        bottom_inputs = processor(images=bottom_crops, return_tensors="pt")
+                            if (
+                                hasattr(outputs, "pooler_output")
+                                and outputs.pooler_output is not None
+                            ):
+                                return outputs.pooler_output
+                            if (
+                                hasattr(outputs, "image_embeds")
+                                and outputs.image_embeds is not None
+                            ):
+                                return outputs.image_embeds
+                            if hasattr(outputs, "last_hidden_state"):
+                                return outputs.last_hidden_state[:, 0]
+                            if isinstance(outputs, torch.Tensor):
+                                return outputs
+                            raise ValueError("DINOv3 output did not include image features")
 
-                        with torch.no_grad():
-                            top_out = model.get_image_features(**top_inputs)
-                            bottom_out = model.get_image_features(**bottom_inputs)
+                        def extract_clip_features(processor, model, images):
+                            inputs = processor(images=images, return_tensors="pt")
+                            with torch.no_grad():
+                                outputs = model.get_image_features(**inputs)
+                            if isinstance(outputs, torch.Tensor):
+                                return outputs
+                            if hasattr(outputs, "image_embeds"):
+                                return outputs.image_embeds
+                            return outputs.pooler_output
 
-                            top_features = top_out if isinstance(top_out, torch.Tensor) else (top_out.image_embeds if hasattr(top_out, 'image_embeds') else top_out.pooler_output)
-                            bottom_features = bottom_out if isinstance(bottom_out, torch.Tensor) else (bottom_out.image_embeds if hasattr(bottom_out, 'image_embeds') else bottom_out.pooler_output)
+                        try:
+                            processor = load_transformers_component(
+                                AutoImageProcessor,
+                                YTMONSTERRU_DINOV3_MODEL_NAME,
+                            )
+                            model = load_transformers_component(
+                                AutoModel,
+                                YTMONSTERRU_DINOV3_MODEL_NAME,
+                            )
+                            model.eval()
+                            top_features = extract_dinov3_features(
+                                processor,
+                                model,
+                                top_crops,
+                            )
+                            bottom_features = extract_dinov3_features(
+                                processor,
+                                model,
+                                bottom_crops,
+                            )
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] Used DINOv3 for crop matching."
+                            )
+                        except (OSError, RuntimeError, ValueError, ImportError) as dino_ex:
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] DINOv3 matching unavailable: %s: %s. "
+                                "Falling back to CLIP.",
+                                type(dino_ex).__name__,
+                                dino_ex,
+                            )
+                            processor = load_transformers_component(
+                                CLIPProcessor,
+                                YTMONSTERRU_CLIP_MODEL_NAME,
+                            )
+                            model = load_transformers_component(
+                                CLIPModel,
+                                YTMONSTERRU_CLIP_MODEL_NAME,
+                                use_safetensors=False,
+                            )
+                            model.eval()
+                            top_features = extract_clip_features(
+                                processor,
+                                model,
+                                top_crops,
+                            )
+                            bottom_features = extract_clip_features(
+                                processor,
+                                model,
+                                bottom_crops,
+                            )
 
                         top_features /= top_features.norm(dim=-1, keepdim=True)
                         bottom_features /= bottom_features.norm(dim=-1, keepdim=True)
@@ -2020,26 +3545,63 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 center_x_css = (x + w/2) / scale_x
                                 center_y_css = (y + h/2) / scale_y
 
-                                ActionChains(driver).move_to_element_with_offset(
+                                driver.execute_script(
+                                    """
+                                    const canvas = arguments[0];
+                                    const x = arguments[1];
+                                    const y = arguments[2];
+                                    canvas.scrollIntoView({block: 'center', inline: 'center'});
+                                    const rect = canvas.getBoundingClientRect();
+                                    const eventOptions = {
+                                        bubbles: true,
+                                        cancelable: true,
+                                        view: window,
+                                        clientX: rect.left + x,
+                                        clientY: rect.top + y,
+                                    };
+                                    canvas.dispatchEvent(new MouseEvent('mousemove', eventOptions));
+                                    canvas.dispatchEvent(new MouseEvent('mousedown', eventOptions));
+                                    canvas.dispatchEvent(new MouseEvent('mouseup', eventOptions));
+                                    canvas.dispatchEvent(new MouseEvent('click', eventOptions));
+                                    """,
                                     bottom_img_element,
-                                    int(center_x_css - b_w/2),
-                                    int(center_y_css - b_h/2)
-                                ).click().perform()
+                                    float(center_x_css),
+                                    float(center_y_css),
+                                )
                                 # Wait 3 seconds so you can visually verify what it clicked
                                 time.sleep(3)
+
+                            pre_submit_canvas_path = (
+                                debug_dir
+                                / f"pre_submit_canvas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                            )
+                            try:
+                                if save_ytmonsterru_debug_bytes(
+                                    pre_submit_canvas_path,
+                                    bottom_img_element.screenshot_as_png,
+                                ):
+                                    logging.info(
+                                        "[YTMonsterRU][ImagePuzzle] Pre-submit canvas screenshot saved to %s",
+                                        pre_submit_canvas_path,
+                                    )
+                            except (OSError, WebDriverException) as screenshot_ex:
+                                logging.info(
+                                    "[YTMonsterRU][ImagePuzzle] Could not save pre-submit canvas screenshot: %s",
+                                    type(screenshot_ex).__name__,
+                                )
 
                             submit_button = driver.find_element(By.CSS_SELECTOR, "body > div.popupRecaptcha > div > button")
                             submit_button.click()
                             EVENT.wait(5)
-                            # # post_submit_path = (
-                            # #     debug_dir
-                            # #     / f"post_submit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-                            # # )
-                            # # driver.save_screenshot(str(post_submit_path))
-                            # # logging.info(
-                            # #     "[YTMonsterRU][ImagePuzzle] Post-submit screenshot saved to %s",
-                            # #     post_submit_path,
-                            # # )
+                            post_submit_path = (
+                                debug_dir
+                                / f"post_submit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                            )
+                            if save_ytmonsterru_debug_screenshot(post_submit_path):
+                                logging.info(
+                                    "[YTMonsterRU][ImagePuzzle] Post-submit screenshot saved to %s",
+                                    post_submit_path,
+                                )
 
                             # Check if puzzle is solved or respawned
                             try:
@@ -2069,6 +3631,34 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         continue
 
                 else:
+                    if wait_out_ytmonsterru_page_wait("no canvas elements"):
+                        continue
+                    try:
+                        no_canvas_path = (
+                            debug_dir
+                            / f"no_canvas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                        )
+                        screenshot_saved = save_ytmonsterru_debug_screenshot(
+                            no_canvas_path,
+                        )
+                        body_text = driver.find_element(By.TAG_NAME, "body").text.strip()
+                        if screenshot_saved:
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] No-canvas screenshot saved to %s. "
+                                "Body text: %s",
+                                no_canvas_path,
+                                body_text[:500],
+                            )
+                        else:
+                            logging.info(
+                                "[YTMonsterRU][ImagePuzzle] No-canvas body text: %s",
+                                body_text[:500],
+                            )
+                    except WebDriverException as no_canvas_ex:
+                        logging.info(
+                            "[YTMonsterRU][ImagePuzzle] Could not save no-canvas debug state: %s",
+                            type(no_canvas_ex).__name__,
+                        )
                     logging.warning(
                         "[YTMonsterRU][ImagePuzzle] Found less than 2 distinct image/canvas "
                         "elements inside the popup. Got %d. Requesting a new puzzle image.",
@@ -2099,14 +3689,13 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 screenshot_dir
                 / f"ytmonsterru_image_puzzle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
             )
-            driver.save_screenshot(str(screenshot_path))
-            logging.info(
-                "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
-                "Screenshot saved to %s",
-                context,
-                screenshot_path,
-            )
-            pass
+            if save_ytmonsterru_debug_screenshot(screenshot_path):
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Manual image puzzle detected during %s. "
+                    "Screenshot saved to %s",
+                    context,
+                    screenshot_path,
+                )
         except (OSError, WebDriverException) as screenshot_ex:
             logging.info(
                 "[YTMonsterRU][ImagePuzzle] Could not save puzzle screenshot: %s",
@@ -2136,6 +3725,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         undetected=False,
     )
     logging.info("[YTMonsterRU] Driver created")
+    logging.info("[YTMonsterRU] Debug screenshots enabled: %s", debug_screenshots)
     driver.implicitly_wait(6.5)
     EVENT.wait(secrets.choice(range(1, 4)))
     try:
@@ -2288,6 +3878,30 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 )
                 return False
 
+        def submit_available_coin_claim(reason: str) -> bool:
+            try:
+                driver.switch_to.default_content()
+                claim_button = WebDriverWait(driver, 3).until(
+                    ec.element_to_be_clickable((
+                        By.CSS_SELECTOR,
+                        "body > div.top > div.butt > input[type=submit]",
+                    ))
+                )
+                claim_button.send_keys(Keys.ENTER)
+                logging.info(
+                    "[YTMonsterRU][Watch] Submitted visible coin claim button after %s",
+                    reason,
+                )
+                EVENT.wait(3)
+                return True
+            except WebDriverException as claim_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not submit visible coin claim button after %s: %s",
+                    reason,
+                    type(claim_ex).__name__,
+                )
+                return False
+
         def close_current_ytmonsterru_task(reason: str) -> None:
             try:
                 driver.switch_to.default_content()
@@ -2302,6 +3916,30 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     "[YTMonsterRU][Watch] Could not read page text before closing task after %s: %s",
                     reason,
                     type(text_ex).__name__,
+                )
+
+            try:
+                debug_dir = Path("screenshots/debug")
+                debug_dir.mkdir(parents=True, exist_ok=True)
+                safe_reason = re.sub(r"[^a-zA-Z0-9]+", "_", reason).strip("_")
+                close_task_path = (
+                    debug_dir
+                    / (
+                        "ytmonsterru_close_task_"
+                        f"{safe_reason[:60]}_"
+                        f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                    )
+                )
+                if save_ytmonsterru_debug_screenshot(close_task_path):
+                    logging.info(
+                        "[YTMonsterRU][Watch] Close-task screenshot saved to %s",
+                        close_task_path,
+                    )
+            except (OSError, WebDriverException) as screenshot_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not save close-task screenshot after %s: %s",
+                    reason,
+                    type(screenshot_ex).__name__,
                 )
 
             try:
@@ -2336,6 +3974,202 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     type(switch_ex).__name__,
                 )
 
+        def close_extra_ytmonsterru_task_windows(context: str) -> None:
+            try:
+                handles = driver.window_handles
+            except WebDriverException as handles_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not inspect windows before %s: %s",
+                    context,
+                    type(handles_ex).__name__,
+                )
+                return
+
+            if len(handles) <= 1:
+                return
+
+            main_handle = handles[0]
+            logging.info(
+                "[YTMonsterRU][Watch] Closing %d extra task window(s) before %s",
+                len(handles) - 1,
+                context,
+            )
+            for handle in handles[1:]:
+                try:
+                    driver.switch_to.window(handle)
+                    driver.close()
+                except WebDriverException as close_ex:
+                    logging.info(
+                        "[YTMonsterRU][Watch] Could not close extra task window before %s: %s",
+                        context,
+                        type(close_ex).__name__,
+                    )
+
+            try:
+                driver.switch_to.window(main_handle)
+                driver.switch_to.default_content()
+                log_ytmonsterru_state(f"[Watch] Main window restored before {context}")
+            except WebDriverException as switch_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not restore main window before %s: %s",
+                    context,
+                    type(switch_ex).__name__,
+                )
+
+        def read_ytmonsterru_timer(max_wait: int = 5) -> float | None:
+            deadline = datetime.now() + timedelta(seconds=max_wait)
+            while datetime.now() < deadline:
+                try:
+                    driver.switch_to.default_content()
+                    time_text = driver.find_element(By.CLASS_NAME, "time").text.strip()
+                    if time_text:
+                        return float(time_text)
+                except (NoSuchElementException, ValueError, WebDriverException):
+                    pass
+                EVENT.wait(0.5)
+            return None
+
+        def wait_for_ytmonsterru_no_videos(max_wait: int = 5) -> bool:
+            deadline = datetime.now() + timedelta(seconds=max_wait)
+            while datetime.now() < deadline:
+                if no_ytmonsterru_videos_left():
+                    return True
+                EVENT.wait(0.5)
+            return False
+
+        def ytmonsterru_canvas_visible() -> bool:
+            try:
+                driver.switch_to.default_content()
+                visible_count = driver.execute_script(
+                    """
+                    const canvases = Array.from(
+                        document.querySelectorAll('div.popupRecaptcha canvas, canvas#targets, canvas#scene')
+                    );
+                    return canvases.filter((canvas) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const style = window.getComputedStyle(canvas);
+                        const width = rect.width || Number(canvas.getAttribute('width')) || 0;
+                        const height = rect.height || Number(canvas.getAttribute('height')) || 0;
+                        return width > 20
+                            && height > 20
+                            && style.display !== 'none'
+                            && style.visibility !== 'hidden'
+                            && style.opacity !== '0';
+                    }).length;
+                    """
+                )
+                return bool(visible_count)
+            except WebDriverException:
+                return False
+
+        def wait_for_ytmonsterru_canvas(max_wait: int = 5) -> bool:
+            deadline = datetime.now() + timedelta(seconds=max_wait)
+            while datetime.now() < deadline:
+                if ytmonsterru_canvas_visible():
+                    return True
+                EVENT.wait(0.5)
+            return False
+
+        def read_ytmonsterru_page_wait_seconds(max_wait: int = 5) -> int | None:
+            deadline = datetime.now() + timedelta(seconds=max_wait)
+            while datetime.now() < deadline:
+                try:
+                    driver.switch_to.default_content()
+                    body_text = driver.find_element(By.TAG_NAME, "body").text
+                except WebDriverException:
+                    body_text = ""
+                wait_match = re.search(
+                    r"\bWait\s+(\d+)\s*sec\b",
+                    body_text,
+                    re.IGNORECASE,
+                )
+                if wait_match:
+                    return int(wait_match.group(1))
+                EVENT.wait(0.5)
+            return None
+
+        def click_ytmonsterru_reset_link(reason: str) -> bool:
+            try:
+                driver.switch_to.default_content()
+                clicked = driver.execute_script(
+                    """
+                    const reloadText = '\\u043f\\u0435\\u0440\\u0435\\u0437\\u0430\\u0433\\u0440\\u0443\\u0437\\u0438\\u0442\\u044c';
+                    const clickAt = (element) => {
+                        element.scrollIntoView({block: 'center', inline: 'center'});
+                        const rect = element.getBoundingClientRect();
+                        const x = rect.left + rect.width / 2;
+                        const y = rect.top + rect.height / 2;
+                        const eventOptions = {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                            clientX: x,
+                            clientY: y,
+                        };
+                        element.dispatchEvent(new MouseEvent('mousemove', eventOptions));
+                        element.dispatchEvent(new MouseEvent('mousedown', eventOptions));
+                        element.dispatchEvent(new MouseEvent('mouseup', eventOptions));
+                        element.dispatchEvent(new MouseEvent('click', eventOptions));
+                        return true;
+                    };
+                    const candidates = Array.from(
+                        document.querySelectorAll('a, button, input, [onclick], [role="button"]')
+                    );
+                    const target = candidates.find((element) => {
+                        const text = [
+                            element.textContent || '',
+                            element.value || '',
+                            element.href || '',
+                            element.getAttribute('onclick') || ''
+                        ].join(' ').toLowerCase();
+                        return text.includes('reload') || text.includes(reloadText);
+                    });
+                    return target ? clickAt(target) : false;
+                    """
+                )
+                if clicked:
+                    logging.info(
+                        "[YTMonsterRU][Watch] Reset link clicked after %s",
+                        reason,
+                    )
+                    EVENT.wait(3)
+                    return True
+            except WebDriverException as reset_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not click reset link after %s: %s",
+                    reason,
+                    type(reset_ex).__name__,
+                )
+            return False
+
+        def play_ytmonsterru_video_and_claim(timer_seconds: float) -> bool:
+            try:
+                driver.switch_to.frame("video-start")
+                EVENT.wait(secrets.choice(range(1, 3)))
+                if handle_unavailable_youtube_embed():
+                    return True
+                if not submit_youtube_play():
+                    if handle_unavailable_youtube_embed():
+                        return True
+                    return False
+            except WebDriverException as play_ex:
+                logging.info(
+                    "[YTMonsterRU][Watch] Could not start YouTube video after timer %.1f: %s",
+                    timer_seconds,
+                    type(play_ex).__name__,
+                )
+                return False
+
+            wait_seconds = timer_seconds + 3
+            logging.info(
+                "[YTMonsterRU][Watch] Timer found %.1fs. Waiting %.1fs before claim.",
+                timer_seconds,
+                wait_seconds,
+            )
+            EVENT.wait(wait_seconds)
+            driver.switch_to.default_content()
+            return submit_available_coin_claim(f"timer {timer_seconds:.1f}s completed")
+
         try:
             j = 1
             now = datetime.now()
@@ -2347,6 +4181,9 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     logging.info("[YTMonsterRU][Watch] Time limit reached")
                     break
                 logging.info("[YTMonsterRU][Watch] Iteration %d started", j)
+                close_extra_ytmonsterru_task_windows(
+                    f"opening iteration {j}"
+                )
                 driver.find_element(
                     By.CSS_SELECTOR,
                     "a[href='/task/youtube/']",
@@ -2355,65 +4192,58 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 EVENT.wait(secrets.choice(range(2, 4)))
                 driver.switch_to.window(driver.window_handles[1])
                 log_ytmonsterru_state("[Watch] Switched to task window")
-                handle_yt_monster_image_puzzle("task window open")
-                if no_ytmonsterru_videos_left():
+
+                timer_seconds = read_ytmonsterru_timer(max_wait=5)
+
+                if timer_seconds is None and wait_for_ytmonsterru_no_videos(max_wait=5):
                     logging.info("[YTMonsterRU][Watch] No YouTube videos left. Ending watch loop.")
                     break
-                driver.switch_to.frame('video-start')
-                EVENT.wait(secrets.choice(range(2, 4)))
-                if handle_unavailable_youtube_embed():
-                    driver.switch_to.window(driver.window_handles[0])
-                    log_ytmonsterru_state("[Watch] Returned to main window after unavailable video")
-                    j += 1
-                    continue
-                if not submit_youtube_play():
-                    if handle_unavailable_youtube_embed():
+
+                if timer_seconds is None and wait_for_ytmonsterru_canvas(max_wait=5):
+                    handle_yt_monster_image_puzzle(
+                        "visible puzzle before timer",
+                        timeout=900,
+                    )
+                    timer_seconds = read_ytmonsterru_timer(max_wait=5)
+
+                if timer_seconds is None:
+                    page_wait_seconds = read_ytmonsterru_page_wait_seconds(max_wait=5)
+                    if page_wait_seconds is not None:
+                        wait_seconds = page_wait_seconds + 5
+                        logging.info(
+                            "[YTMonsterRU][Watch] Puzzle cooldown wait detected: %d sec. "
+                            "Waiting %d sec before reset.",
+                            page_wait_seconds,
+                            wait_seconds,
+                        )
+                        EVENT.wait(wait_seconds)
+                        click_ytmonsterru_reset_link(
+                            f"puzzle cooldown wait {page_wait_seconds} sec"
+                        )
+                        continue
+
+                    if submit_unplayable_video_error("missing timer"):
                         driver.switch_to.window(driver.window_handles[0])
-                        log_ytmonsterru_state("[Watch] Returned to main window after unavailable video")
+                        log_ytmonsterru_state("[Watch] Returned to main window after missing timer error")
                         j += 1
                         continue
-                    raise NoSuchElementException(
-                        "Could not activate YouTube play button"
-                    )
-                EVENT.wait(secrets.choice(range(2, 4)))
-                driver.switch_to.window(driver.window_handles[1])
-                driver.switch_to.default_content()
-                handle_yt_monster_image_puzzle("after video play")
-                time_text = driver.find_element(By.CLASS_NAME, 'time').text.strip()
-                try:
-                    wait_seconds = float(time_text) + 15
-                except ValueError:
+                    close_current_ytmonsterru_task("missing timer without puzzle or wait")
+                    j += 1
+                    continue
+
+                if not play_ytmonsterru_video_and_claim(timer_seconds):
                     if submit_unplayable_video_error(
-                        f"invalid timer text {time_text!r}"
+                        f"video did not start after timer {timer_seconds:.1f}s"
                     ):
                         driver.switch_to.window(driver.window_handles[0])
                         log_ytmonsterru_state("[Watch] Returned to main window after unplayable video")
                         j += 1
                         continue
                     close_current_ytmonsterru_task(
-                        f"invalid timer text {time_text!r} and missing error button"
+                        f"video did not start after timer {timer_seconds:.1f}s"
                     )
                     j += 1
                     continue
-                logging.info(
-                    "[YTMonsterRU][Watch] Waiting %.1fs for claim button",
-                    wait_seconds,
-                )
-                try:
-                    WebDriverWait(driver, wait_seconds).until(
-                        ec.element_to_be_clickable((
-                            By.CSS_SELECTOR,
-                            "body > div.top > div.butt > input[type=submit]",
-                        ))
-                    ).send_keys(Keys.ENTER)
-                except TimeoutException:
-                    if no_ytmonsterru_videos_left():
-                        logging.info(
-                            "[YTMonsterRU][Watch] No YouTube videos left while waiting for claim button. "
-                            "Ending watch loop."
-                        )
-                        break
-                    raise
                 logging.info("[YTMonsterRU][Watch] Total watched videos: %d", j)
                 driver.switch_to.window(driver.window_handles[0])
                 log_ytmonsterru_state("[Watch] Returned to main window")
@@ -2486,7 +4316,6 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         way = 0
         skip = False
         i = 0
-        # # driver.save_screenshot("screenshots/inscreenshot.png")
         def predict_image(current_way: str) -> None:
             """Predict and interact with an image on a webpage using OpenAI CLIP for zero-shot image classification.
             Args:
