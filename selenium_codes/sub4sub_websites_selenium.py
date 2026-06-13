@@ -632,6 +632,44 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     Returns:
     - None(NoneType)
     """
+    def bool_config_value(value) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        if isinstance(value, (int, float)):
+            return value != 0
+        return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+    debug_screenshots = bool_config_value(
+        req_dict.get("debug_screenshots", req_dict.get("debug", False))
+    )
+
+    def save_youlikehits_debug_screenshot(name: str) -> Path | None:
+        if not debug_screenshots:
+            return None
+        screenshot_dir = Path("screenshots/debug")
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+        safe_name = re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
+        screenshot_path = (
+            screenshot_dir
+            / f"youlikehits_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+        )
+        try:
+            driver.save_screenshot(str(screenshot_path))
+            logging.info(
+                "[YouLikeHits][Debug] Screenshot saved to %s",
+                screenshot_path,
+            )
+            return screenshot_path
+        except (OSError, WebDriverException) as screenshot_ex:
+            logging.info(
+                "[YouLikeHits][Debug] Could not save screenshot %s: %s",
+                name,
+                type(screenshot_ex).__name__,
+            )
+            return None
+
     def log_youlikehits_state(message: str) -> None:
         """Log the current browser state to trace where execution stalls."""
         try:
@@ -769,9 +807,8 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         screenshot_path = screenshot_dir / f"youlikehits_failure_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 
         try:
-            # # driver.save_screenshot(str(screenshot_path))
-            # # logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
-            pass
+            if debug_screenshots and driver.save_screenshot(str(screenshot_path)):
+                logging.error("[YouLikeHits][Failure] Screenshot saved to %s", screenshot_path)
             log_youlikehits_state(f"{context} failure state")
         except Exception as screenshot_ex:
             logging.error("[YouLikeHits][Failure] Could not save screenshot: %s", screenshot_ex)
@@ -781,12 +818,11 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         screenshot_dir
                         / f"youlikehits_failure_recovered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
                     )
-                    # # driver.save_screenshot(str(recovery_path))
-                    # # logging.error(
-                    # #     "[YouLikeHits][Failure] Recovered screenshot saved to %s",
-                    # #     recovery_path,
-                    # # )
-                    pass
+                    if debug_screenshots and driver.save_screenshot(str(recovery_path)):
+                        logging.error(
+                            "[YouLikeHits][Failure] Recovered screenshot saved to %s",
+                            recovery_path,
+                        )
                 except Exception as recovery_ex:
                     logging.error(
                         "[YouLikeHits][Failure] Could not save recovered screenshot: %s",
@@ -797,6 +833,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
     driver: webdriver = set_driver_opt(req_dict, headless=True, website='YOULIKEHITS')
     logging.info("[YouLikeHits] Driver created")
+    logging.info("[YouLikeHits] Debug screenshots enabled: %s", debug_screenshots)
     try:
         driver.get("https://www.youlikehits.com/login.php")  # Type_Undefined
         log_youlikehits_state("Opened login page")
@@ -1100,19 +1137,41 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             pass
                         if len(driver.find_elements(By.XPATH, "//*[@id='title']/h1/yt-formatted-string")) == 0:
                             logging.info("[YouLikeHits][Watch] Target window is not a valid YouTube video for %s", video_name)
+                            save_youlikehits_debug_screenshot(
+                                "watch_invalid_target_window"
+                            )
                             close_youlikehits_child_window(
                                 target_handle,
                                 "[Watch] Invalid target window",
                             )
                             driver.switch_to.window(driver.window_handles[0])
                             driver.switch_to.default_content()
+                            save_youlikehits_debug_screenshot(
+                                "watch_main_before_invalid_target_skip"
+                            )
                             EVENT.wait(secrets.choice(range(1, 2)))
                             try:
-                                driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
+                                WebDriverWait(driver, 5).until(
+                                    ec.element_to_be_clickable((
+                                        By.XPATH,
+                                        '//*[@id="listall"]/center/a[2]',
+                                    ))
+                                ).click()
                                 EVENT.wait(3)
                                 driver.refresh()
-                            except (NoSuchElementException, ElementNotInteractableException):
-                                logging.info("[YouLikeHits][Watch] Skip button unavailable after invalid target, refreshing")
+                            except (
+                                StaleElementReferenceException,
+                                TimeoutException,
+                                NoSuchElementException,
+                                ElementNotInteractableException,
+                            ) as skip_ex:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Skip button unavailable after invalid target: %s. Refreshing",
+                                    type(skip_ex).__name__,
+                                )
+                                save_youlikehits_debug_screenshot(
+                                    "watch_invalid_target_skip_failed"
+                                )
                                 driver.refresh()
                             continue
                         else:
@@ -1126,11 +1185,30 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         driver.switch_to.default_content()
                         if type(ex) is NoSuchWindowException:
                             try:
-                                driver.find_element(By.XPATH, '//*[@id="listall"]/center/a[2]').click()
+                                save_youlikehits_debug_screenshot(
+                                    "watch_main_before_closed_target_skip"
+                                )
+                                WebDriverWait(driver, 5).until(
+                                    ec.element_to_be_clickable((
+                                        By.XPATH,
+                                        '//*[@id="listall"]/center/a[2]',
+                                    ))
+                                ).click()
                                 EVENT.wait(3.25)
                                 driver.refresh()
-                            except (NoSuchElementException, ElementNotInteractableException):
-                                logging.info("[YouLikeHits][Watch] Skip button unavailable after closed target window, refreshing")
+                            except (
+                                StaleElementReferenceException,
+                                TimeoutException,
+                                NoSuchElementException,
+                                ElementNotInteractableException,
+                            ) as skip_ex:
+                                logging.info(
+                                    "[YouLikeHits][Watch] Skip button unavailable after closed target window: %s. Refreshing",
+                                    type(skip_ex).__name__,
+                                )
+                                save_youlikehits_debug_screenshot(
+                                    "watch_closed_target_skip_failed"
+                                )
                                 driver.refresh()
                             continue
                         EVENT.wait(0.25)
@@ -1220,6 +1298,13 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             while datetime.now() < cutoff:
                 iteration += 1
                 logging.info("[YouLikeHits][Listen] Iteration %d started", iteration)
+                if collect_bonus_after_hit_checkpoint(iteration):
+                    driver.get("https://www.youlikehits.com/soundcloudplays.php")
+                    log_youlikehits_state(
+                        "[Listen] Reopened listen page after bonus checkpoint"
+                    )
+                    EVENT.wait(secrets.choice(range(3, 4)))
+                    continue
                 EVENT.wait(secrets.choice(range(3, 4)))
                 driver.switch_to.window(driver.window_handles[0])
                 try:
@@ -1359,23 +1444,48 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             )
             return False
 
-        def skip_visit_button(btn_index: int) -> None:
+        def find_visit_card_for_button(button):
+            return button.find_element(
+                By.XPATH,
+                "./ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' cards ')][1]",
+            )
+
+        def skip_visit_button(btn_index: int, card_id: str | None = None) -> None:
             try:
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
-                cards = driver.find_elements(By.CSS_SELECTOR, "#listall center")
-                if btn_index > len(cards):
-                    return
-                skip_link = cards[btn_index - 1].find_element(
-                    By.XPATH,
-                    ".//a[normalize-space()='skip']",
-                )
+                if card_id:
+                    card = driver.find_element(By.ID, card_id)
+                else:
+                    cards = driver.find_elements(
+                        By.CSS_SELECTOR,
+                        "#listall > div.cards",
+                    )
+                    if btn_index > len(cards):
+                        logging.info(
+                            "[YouLikeHits][Visit] Skip card missing for unavailable button %d",
+                            btn_index,
+                        )
+                        return
+                    card = cards[btn_index - 1]
+                skip_link = card.find_element(By.XPATH, ".//a[normalize-space()='skip']")
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", skip_link)
-                ActionChains(driver).move_to_element(skip_link).click().perform()
-                logging.info("[YouLikeHits][Visit] Skipped unavailable button %d", btn_index)
-            except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
-                    JavascriptException, StaleElementReferenceException, IndexError):
-                logging.info("[YouLikeHits][Visit] Could not skip unavailable button %d", btn_index)
+                try:
+                    ActionChains(driver).move_to_element(skip_link).click().perform()
+                except (ElementClickInterceptedException, ElementNotInteractableException):
+                    driver.execute_script("arguments[0].click();", skip_link)
+                logging.info(
+                    "[YouLikeHits][Visit] Skipped unavailable button %d card=%s",
+                    btn_index,
+                    card_id or "<by-index>",
+                )
+            except (IndexError, WebDriverException) as skip_ex:
+                logging.info(
+                    "[YouLikeHits][Visit] Could not skip unavailable button %d card=%s: %s",
+                    btn_index,
+                    card_id or "<by-index>",
+                    type(skip_ex).__name__,
+                )
 
         try:
             start = datetime.now()
@@ -1386,6 +1496,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             logging.info("Visit Loop Started")
             log_youlikehits_state("Opened visit page")
             iteration = 0
+            visit_engagement_count = 0
             while datetime.now() < cutoff:
                 iteration += 1
                 logging.info("[YouLikeHits][Visit] Iteration %d started", iteration)
@@ -1398,6 +1509,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 logging.info("[YouLikeHits][Visit] Found %d visit buttons", len(buttons))
                 refresh_after_target = False
                 for btn_index in range(1, len(buttons) + 1):
+                    clicked_card_id = None
                     try:
                         driver.switch_to.window(driver.window_handles[0])
                         driver.switch_to.default_content()
@@ -1405,10 +1517,16 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         if btn_index > len(buttons):
                             break
                         btn = buttons[btn_index - 1]
+                        clicked_card_id = find_visit_card_for_button(btn).get_attribute("id")
                         EVENT.wait(secrets.choice(range(2, 4)))
                         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
                         ActionChains(driver).move_to_element(btn).click().perform()
-                        logging.info("[YouLikeHits][Visit] Submitted visit button %d/%d", btn_index, len(buttons))
+                        logging.info(
+                            "[YouLikeHits][Visit] Submitted visit button %d/%d card=%s",
+                            btn_index,
+                            len(buttons),
+                            clicked_card_id,
+                        )
                     except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
                             JavascriptException, StaleElementReferenceException):
                         logging.info("[YouLikeHits][Visit] Could not activate visit button %d/%d", btn_index, len(buttons))
@@ -1420,6 +1538,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         log_youlikehits_state(f"[Visit] Switched to target window for button {btn_index}/{len(buttons)}")
                     except (IndexError, NoSuchWindowException):
                         logging.info("[YouLikeHits][Visit] Target window missing for button %d/%d", btn_index, len(buttons))
+                        skip_visit_button(btn_index, clicked_card_id)
                         continue
                     visit_completed = wait_for_visit_result(btn_index, len(buttons))
                     if not visit_completed:
@@ -1435,7 +1554,16 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     logging.info("[YouLikeHits][Visit] Closed target window for button %d/%d", btn_index, len(buttons))
                     driver.switch_to.window(driver.window_handles[0])
                     if refresh_after_target:
-                        skip_visit_button(btn_index)
+                        skip_visit_button(btn_index, clicked_card_id)
+                        break
+                    visit_engagement_count += 1
+                    if collect_bonus_after_hit_checkpoint(visit_engagement_count):
+                        driver.get("https://www.youlikehits.com/websites.php")
+                        log_youlikehits_state(
+                            "[Visit] Reopened visit page after bonus checkpoint"
+                        )
+                        EVENT.wait(secrets.choice(range(3, 5)))
+                        refresh_after_target = True
                         break
                 driver.refresh()
                 logging.info("[YouLikeHits][Visit] Refreshed visit page for next batch")

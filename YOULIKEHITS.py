@@ -13,7 +13,8 @@ required_dict = {
     "username_youlikehits": userinfo["youlikehits_username"],
     "pw_youlikehits": userinfo["youlikehits_password"],
     "yt_useragent": userinfo["youtube_useragent"],
-    "github_token": userinfo["github_token"]
+    "github_token": userinfo["github_token"],
+    "debug_screenshots": True
 }
 
 if __name__ == "__main__":
