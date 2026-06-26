@@ -750,7 +750,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             driver.close()
             logging.info("[YouLikeHits] %s | child window closed", context)
             return True
-        except (NoSuchWindowException, TimeoutException, WebDriverException) as close_ex:
+        except WebDriverException as close_ex:
             logging.info(
                 "[YouLikeHits] %s | child window close skipped after %s",
                 context,
@@ -931,7 +931,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 bonus_state["claimed"],
             )
             return bonus_state
-        except (JavascriptException, WebDriverException):
+        except WebDriverException:
             return None
 
     def bonus_page_shows_current_cap_handled(bonus_state: dict | None) -> bool:
@@ -975,7 +975,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 except (ElementClickInterceptedException, ElementNotInteractableException):
                     driver.execute_script("arguments[0].click();", claim_button)
                 return True
-            except (TimeoutException, NoSuchElementException, WebDriverException):
+            except WebDriverException:
                 continue
         return False
 
@@ -1075,7 +1075,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 hits_today,
             )
             return hits_today
-        except (TimeoutException, NoSuchElementException, WebDriverException) as ex:
+        except WebDriverException as ex:
             logging.info(
                 "[YouLikeHits][Bonus] Could not read hits count: %s",
                 type(ex).__name__,
@@ -1091,7 +1091,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         hits_today,
                     )
                     return hits_today
-            except (JavascriptException, WebDriverException):
+            except WebDriverException:
                 pass
             try:
                 driver.get("https://www.youlikehits.com/bonuspoints.php")
@@ -1272,7 +1272,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     video_title_selector,
                 )
                 return title_text or None
-            except (JavascriptException, WebDriverException):
+            except WebDriverException:
                 return None
 
         def read_watch_list_text_fast() -> str:
@@ -1284,7 +1284,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     """
                 )
                 return list_text or ""
-            except (JavascriptException, WebDriverException):
+            except WebDriverException:
                 return ""
 
         def submit_watch_follow_button(video_name: str) -> bool:
@@ -1547,7 +1547,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                         save_youlikehits_debug_screenshot(
                                             "watch_stalled_target_window"
                                         )
-                                except (NoSuchWindowException, WebDriverException):
+                                except WebDriverException:
                                     logging.info(
                                         "[YouLikeHits][Watch] Target window unavailable during stall capture"
                                     )
@@ -1613,7 +1613,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         switch_youlikehits_main_window(
                             "[Watch] Returned to main after target close"
                         )
-                    except (IndexError, NoSuchWindowException, WebDriverException):
+                    except (IndexError, WebDriverException):
                         logging.info("[YouLikeHits][Watch] No target window left to close for %s", video_name)
                         pass
             except NoSuchElementException:
@@ -1752,7 +1752,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             try:
                 driver.switch_to.default_content()
                 return driver.find_element(By.TAG_NAME, "body").text.strip()
-            except (NoSuchElementException, StaleElementReferenceException, WebDriverException):
+            except WebDriverException:
                 return ""
 
         def parse_visit_wait_seconds(text: str) -> int | None:
@@ -4529,7 +4529,7 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     time_text = driver.find_element(By.CLASS_NAME, "time").text.strip()
                     if time_text:
                         return float(time_text)
-                except (NoSuchElementException, ValueError, WebDriverException):
+                except (ValueError, WebDriverException):
                     pass
                 EVENT.wait(0.5)
             return None
