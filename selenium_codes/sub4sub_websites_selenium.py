@@ -14,6 +14,7 @@ from threading import Event
 from datetime import datetime, timedelta
 from pathlib import Path
 from itertools import permutations
+from zoneinfo import ZoneInfo
 import os
 import secrets
 import shutil
@@ -641,8 +642,18 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             return value != 0
         return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
+    def int_config_value(value, default: int) -> int:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+
     debug_screenshots = bool_config_value(
         req_dict.get("debug_screenshots", req_dict.get("debug", False))
+    )
+    youlikehits_watch_wait_watchdog_seconds = int_config_value(
+        req_dict.get("youlikehits_watch_wait_watchdog_seconds"),
+        10 * 60,
     )
 
     def save_youlikehits_debug_screenshot(name: str) -> Path | None:
@@ -867,25 +878,181 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         "claimed_max_bonus": False,
         "initial_hits": None,
         "next_iteration": 500,
+        "failed_reads": 0,
+        "retry_gap": 50,
+        "pre_reset_last_attempt": None,
+        "pre_reset_collected_date": None,
+        "engagement_counts": {},
+        "last_bonus_claim_time": None,
+        "last_reset_after_claim": None,
     }
 
-    def collect_bonus_points() -> None:
+    def current_turkey_datetime() -> datetime:
+        try:
+            return datetime.now(ZoneInfo("Europe/Istanbul"))
+        except Exception:
+            return datetime.now()
+
+    def parse_youlikehits_bonus_page(body_text: str) -> dict:
+        hits_match = re.search(
+            r"([\d,]+)\s*/\s*500\s*hits",
+            body_text,
+            re.IGNORECASE,
+        )
+        earned_match = re.search(
+            r"Points\s+earned\s+so\s+far\s+today:\s*([\d,]+)",
+            body_text,
+            re.IGNORECASE,
+        )
+        claimed_match = re.search(
+            r"Claimed:\s*([\d,]+)",
+            body_text,
+            re.IGNORECASE,
+        )
+        return {
+            "hits": int(hits_match.group(1).replace(",", "")) if hits_match else None,
+            "earned": int(earned_match.group(1).replace(",", "")) if earned_match else None,
+            "claimed": int(claimed_match.group(1).replace(",", "")) if claimed_match else None,
+            "no_bonus_available": "no bonus to claim yet" in body_text.lower(),
+        }
+
+    def read_youlikehits_bonus_page_state() -> dict | None:
+        try:
+            body_text = driver.execute_script(
+                "return document.body ? document.body.innerText : '';"
+            )
+            bonus_state = parse_youlikehits_bonus_page(body_text or "")
+            if bonus_state["hits"] is None:
+                return None
+            logging.info(
+                "[YouLikeHits][Bonus] Bonus page count: %s / 500 hits, earned=%s, claimed=%s",
+                bonus_state["hits"],
+                bonus_state["earned"],
+                bonus_state["claimed"],
+            )
+            return bonus_state
+        except (JavascriptException, WebDriverException):
+            return None
+
+    def bonus_page_shows_current_cap_handled(bonus_state: dict | None) -> bool:
+        if not bonus_state or bonus_state["hits"] is None or bonus_state["hits"] < 500:
+            return False
+
+        earned = bonus_state["earned"]
+        claimed = bonus_state["claimed"]
+        if earned is not None and claimed is not None and claimed >= earned:
+            return True
+
+        return bool(bonus_state["no_bonus_available"])
+
+    def click_youlikehits_bonus_claim_button() -> bool:
+        claim_locators = (
+            (By.CLASS_NAME, "buybutton"),
+            (
+                By.XPATH,
+                "//input[contains(translate(@value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'claim')]",
+            ),
+            (
+                By.XPATH,
+                "//button[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'claim')]",
+            ),
+            (
+                By.XPATH,
+                "//a[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'claim')]",
+            ),
+        )
+        for locator in claim_locators:
+            try:
+                claim_button = WebDriverWait(driver, 2).until(
+                    ec.element_to_be_clickable(locator)
+                )
+                driver.execute_script(
+                    "arguments[0].scrollIntoView({block: 'center'});",
+                    claim_button,
+                )
+                try:
+                    claim_button.click()
+                except (ElementClickInterceptedException, ElementNotInteractableException):
+                    driver.execute_script("arguments[0].click();", claim_button)
+                return True
+            except (TimeoutException, NoSuchElementException, WebDriverException):
+                continue
+        return False
+
+    def clear_bonus_state_after_daily_reset_if_needed() -> None:
+        claim_time = bonus_hits_state["last_bonus_claim_time"]
+        if not claim_time:
+            return
+
+        if claim_time.hour < 7:
+            reset_time = claim_time.replace(hour=7, minute=0, second=0, microsecond=0)
+        else:
+            reset_time = (
+                claim_time + timedelta(days=1)
+            ).replace(hour=7, minute=0, second=0, microsecond=0)
+
+        if bonus_hits_state["last_reset_after_claim"] == reset_time:
+            return
+
+        if current_turkey_datetime() < reset_time:
+            return
+
+        bonus_hits_state["claimed_max_bonus"] = False
+        bonus_hits_state["initial_hits"] = 0
+        bonus_hits_state["next_iteration"] = 500
+        bonus_hits_state["failed_reads"] = 0
+        bonus_hits_state["pre_reset_collected_date"] = None
+        bonus_hits_state["engagement_counts"].clear()
+        bonus_hits_state["last_reset_after_claim"] = reset_time
+        logging.info(
+            "[YouLikeHits][Bonus] Daily 7 AM Turkey reset passed. "
+            "Bonus checkpoint state cleared for the new hit cycle."
+        )
+
+    def collect_bonus_points() -> bool:
         """collect if bonus points are available"""
         try:
             log_youlikehits_state("Opening bonus points page")
             driver.get("https://www.youlikehits.com/bonuspoints.php")
             EVENT.wait(secrets.choice(range(2, 4)))
-            try:
-                driver.find_element(By.CLASS_NAME, "buybutton").click()
+            bonus_state = read_youlikehits_bonus_page_state()
+            if click_youlikehits_bonus_claim_button():
                 logging.info("[YouLikeHits] Bonus points claimed")
-            except (NoSuchElementException, ElementNotInteractableException):
-                logging.info("[YouLikeHits] No bonus points available")
-                EVENT.wait(0.25)
+                bonus_hits_state["last_bonus_claim_time"] = current_turkey_datetime()
+                return True
+
+            if bonus_page_shows_current_cap_handled(bonus_state):
+                logging.info(
+                    "[YouLikeHits][Bonus] Bonus page shows hit cap already counted."
+                )
+                bonus_hits_state["last_bonus_claim_time"] = current_turkey_datetime()
+                return True
+
+            logging.info("[YouLikeHits] No bonus points available")
+            EVENT.wait(0.25)
+            return False
         except Exception as ex:
             capture_youlikehits_failure("collect_bonus_points", ex)
             raise
 
     def read_youlikehits_hits_today() -> int | None:
+        def parse_hits_count(hits_text: str, prefer_heading: bool = False) -> int | None:
+            text_match = re.search(
+                r"Hits\s+You\s+Made\s+Today[\s\S]{0,120}?([\d,]+)",
+                hits_text,
+                re.IGNORECASE,
+            )
+            if text_match:
+                return int(text_match.group(1).replace(",", ""))
+
+            if prefer_heading:
+                return None
+
+            direct_match = re.search(r"[\d,]+", hits_text)
+            if direct_match:
+                return int(direct_match.group(0).replace(",", ""))
+            return None
+
         try:
             switch_youlikehits_main_window("[Bonus] Before reading stats hits")
             driver.get("https://www.youlikehits.com/stats.php")
@@ -896,14 +1063,13 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     youlikehits_hits_today_selector,
                 ))
             ).text
-            hits_match = re.search(r"[\d,]+", hits_text)
-            if not hits_match:
+            hits_today = parse_hits_count(hits_text)
+            if hits_today is None:
                 logging.info(
                     "[YouLikeHits][Bonus] Could not parse hits count from text: %s",
                     hits_text,
                 )
                 return None
-            hits_today = int(hits_match.group(0).replace(",", ""))
             logging.info(
                 "[YouLikeHits][Bonus] Hits you made today: %d",
                 hits_today,
@@ -914,7 +1080,52 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 "[YouLikeHits][Bonus] Could not read hits count: %s",
                 type(ex).__name__,
             )
+            try:
+                body_text = driver.execute_script(
+                    "return document.body ? document.body.innerText : '';"
+                )
+                hits_today = parse_hits_count(body_text or "", prefer_heading=True)
+                if hits_today is not None:
+                    logging.info(
+                        "[YouLikeHits][Bonus] Hits you made today from body text: %d",
+                        hits_today,
+                    )
+                    return hits_today
+            except (JavascriptException, WebDriverException):
+                pass
+            try:
+                driver.get("https://www.youlikehits.com/bonuspoints.php")
+                EVENT.wait(secrets.choice(range(2, 4)))
+                bonus_state = read_youlikehits_bonus_page_state()
+                if bonus_state and bonus_state["hits"] is not None:
+                    return bonus_state["hits"]
+            except WebDriverException:
+                pass
             return None
+
+    def collect_bonus_before_reset_if_needed() -> bool:
+        clear_bonus_state_after_daily_reset_if_needed()
+        now_tr = current_turkey_datetime()
+
+        if not (now_tr.hour == 6 and now_tr.minute >= 45):
+            return False
+
+        if bonus_hits_state["pre_reset_collected_date"] == now_tr.date():
+            return False
+
+        last_attempt = bonus_hits_state["pre_reset_last_attempt"]
+        if last_attempt and (now_tr - last_attempt).total_seconds() < 300:
+            return False
+
+        bonus_hits_state["pre_reset_last_attempt"] = now_tr
+        logging.info(
+            "[YouLikeHits][Bonus] 6:45 AM Turkey reset window reached. "
+            "Trying bonus collection before 7 AM reset."
+        )
+        if collect_bonus_points():
+            bonus_hits_state["claimed_max_bonus"] = True
+            bonus_hits_state["pre_reset_collected_date"] = now_tr.date()
+        return True
 
     def initialize_bonus_hit_checkpoint() -> None:
         hits_today = read_youlikehits_hits_today()
@@ -943,41 +1154,82 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             bonus_hits_state["next_iteration"],
         )
 
-    def collect_bonus_after_hit_checkpoint(iteration: int) -> bool:
+    def collect_bonus_after_hit_checkpoint(engagement_count: int, source: str) -> bool:
+        clear_bonus_state_after_daily_reset_if_needed()
+        engagement_counts = bonus_hits_state["engagement_counts"]
+        engagement_counts[source] = max(
+            engagement_counts.get(source, 0),
+            engagement_count,
+        )
+        total_engagements = sum(engagement_counts.values())
+
         if bonus_hits_state["claimed_max_bonus"]:
             return False
 
-        if iteration < bonus_hits_state["next_iteration"]:
+        if total_engagements < bonus_hits_state["next_iteration"]:
             return False
 
         logging.info(
-            "[YouLikeHits][Bonus] Watch iteration %d reached max bonus checkpoint %d",
-            iteration,
+            "[YouLikeHits][Bonus] Engagement count %d reached max bonus checkpoint %d",
+            total_engagements,
             bonus_hits_state["next_iteration"],
         )
         hits_today = read_youlikehits_hits_today()
         if hits_today is None:
+            logging.info(
+                "[YouLikeHits][Bonus] Hits count unavailable at checkpoint. "
+                "Trying bonus collection anyway."
+            )
+            if collect_bonus_points():
+                bonus_hits_state["claimed_max_bonus"] = True
+                logging.info(
+                    "[YouLikeHits][Bonus] Max bonus checkpoint handled without stats read."
+                )
+                return True
+
+            bonus_hits_state["failed_reads"] += 1
+            retry_gap = bonus_hits_state["retry_gap"]
+            bonus_hits_state["next_iteration"] = total_engagements + retry_gap
+            logging.info(
+                "[YouLikeHits][Bonus] Hits count unavailable. "
+                "Bonus unavailable. Next bonus check postponed to engagement %d "
+                "after %d more engagement(s). "
+                "Failed read count=%d",
+                bonus_hits_state["next_iteration"],
+                retry_gap,
+                bonus_hits_state["failed_reads"],
+            )
             return True
+
+        bonus_hits_state["failed_reads"] = 0
 
         if hits_today < 500:
             watches_needed = 500 - hits_today
-            bonus_hits_state["next_iteration"] = iteration + watches_needed + 1
+            bonus_hits_state["next_iteration"] = total_engagements + watches_needed + 1
             logging.info(
                 "[YouLikeHits][Bonus] Hits today %d below max bonus threshold 500. "
-                "Next check at iteration %d after %d more watch iteration(s).",
+                "Next check at engagement %d after %d more engagement(s).",
                 hits_today,
                 bonus_hits_state["next_iteration"],
                 watches_needed,
             )
             return True
 
-        collect_bonus_points()
-        bonus_hits_state["claimed_max_bonus"] = True
-        logging.info(
-            "[YouLikeHits][Bonus] Max bonus checkpoint handled at hits=%d. "
-            "No more bonus checks this run.",
-            hits_today,
-        )
+        if collect_bonus_points():
+            bonus_hits_state["claimed_max_bonus"] = True
+            logging.info(
+                "[YouLikeHits][Bonus] Max bonus checkpoint handled at hits=%d. "
+                "No more bonus checks this run.",
+                hits_today,
+            )
+        else:
+            retry_gap = bonus_hits_state["retry_gap"]
+            bonus_hits_state["next_iteration"] = total_engagements + retry_gap
+            logging.info(
+                "[YouLikeHits][Bonus] Hits are at max threshold but bonus was unavailable. "
+                "Next bonus check at engagement %d.",
+                bonus_hits_state["next_iteration"],
+            )
         return True
 
     collect_bonus_points()
@@ -986,6 +1238,11 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     def while_loop_watch(hours_time: int) -> None:
         """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
         video_title_selector = '#listall > center > b:nth-child(1) > font'
+
+        def normalize_watch_video_name(video_name: str | None) -> str:
+            if not video_name:
+                return ""
+            return re.sub(r"\s+", " ", video_name).strip().lower()
 
         def read_watch_video_name(context: str) -> str | None:
             for attempt in range(1, 5):
@@ -1030,6 +1287,34 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except (JavascriptException, WebDriverException):
                 return ""
 
+        def submit_watch_follow_button(video_name: str) -> bool:
+            for attempt in range(1, 4):
+                try:
+                    follow_button = WebDriverWait(driver, 5).until(
+                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
+                    )
+                    follow_button.click()
+                    EVENT.wait(0.25)
+                    follow_button = WebDriverWait(driver, 5).until(
+                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
+                    )
+                    follow_button.click()
+                    EVENT.wait(1)
+                    follow_button = WebDriverWait(driver, 5).until(
+                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
+                    )
+                    follow_button.send_keys(Keys.ENTER)
+                    return True
+                except WebDriverException as click_ex:
+                    logging.info(
+                        "[YouLikeHits][Watch] Follow button attempt %d/3 failed for %s: %s",
+                        attempt,
+                        video_name,
+                        type(click_ex).__name__,
+                    )
+                    EVENT.wait(1)
+            return False
+
         try:
             try:
                 logging.info("Watch Loop Started")
@@ -1052,7 +1337,15 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 while datetime.now() < cutoff:
                     iteration += 1
                     logging.info("[YouLikeHits][Watch] Iteration %d started", iteration)
-                    if collect_bonus_after_hit_checkpoint(iteration):
+                    if collect_bonus_before_reset_if_needed():
+                        driver.get(youlikehits_watch_url)
+                        log_youlikehits_state(
+                            "[Watch] Reopened watch page after 6:45 AM bonus check"
+                        )
+                        EVENT.wait(secrets.choice(range(4, 6)))
+                        driver.execute_script("window.scrollTo(0, 600);")
+                        continue
+                    if collect_bonus_after_hit_checkpoint(iteration, "watch"):
                         driver.get(youlikehits_watch_url)
                         log_youlikehits_state(
                             "[Watch] Reopened watch page after bonus checkpoint"
@@ -1087,6 +1380,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         video_name = read_watch_video_name("current video read")
                         if not video_name:
                             raise NoSuchElementException("Could not read current YouLikeHits video title")
+                        normalized_video_name = normalize_watch_video_name(video_name)
                         logging.info("[YouLikeHits][Watch] Current video: %s", video_name)
                     except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
                         logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
@@ -1094,17 +1388,13 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         continue
                     before_follow_handles = set(driver.window_handles)
                     target_handle = None
-                    try:
-                        driver.find_element(By.CLASS_NAME, 'followbutton').click()
-                        EVENT.wait(0.25)
-                        driver.find_element(By.CLASS_NAME, 'followbutton').click()
-                        EVENT.wait(1)
-                        driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
+                    if submit_watch_follow_button(video_name):
                         log_youlikehits_state(f"[Watch] Follow button submitted for {video_name}")
-                    except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
-                            JavascriptException):
+                    else:
                         logging.info("[YouLikeHits][Watch] Could not click follow button for %s", video_name)
                         EVENT.wait(10)
+                        driver.refresh()
+                        continue
                     try:
                         current_handles = driver.window_handles
                         new_handles = [
@@ -1230,7 +1520,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 )
                                 driver.refresh()
                                 break
-                            if current_video_name != video_name:
+                            if normalize_watch_video_name(current_video_name) != normalized_video_name:
                                 logging.info(
                                     "[YouLikeHits][Watch] Next video detected after %ds: %s",
                                     waited_seconds,
@@ -1243,6 +1533,52 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                     waited_seconds,
                                     current_video_name,
                                 )
+                                break
+                            if waited_seconds >= youlikehits_watch_wait_watchdog_seconds:
+                                logging.info(
+                                    "[YouLikeHits][Watch] No page advancement after %ds for %s. "
+                                    "Skipping current task to avoid stall.",
+                                    waited_seconds,
+                                    video_name,
+                                )
+                                try:
+                                    if target_handle:
+                                        driver.switch_to.window(target_handle)
+                                        save_youlikehits_debug_screenshot(
+                                            "watch_stalled_target_window"
+                                        )
+                                except (NoSuchWindowException, WebDriverException):
+                                    logging.info(
+                                        "[YouLikeHits][Watch] Target window unavailable during stall capture"
+                                    )
+                                driver.switch_to.window(driver.window_handles[0])
+                                driver.switch_to.default_content()
+                                save_youlikehits_debug_screenshot(
+                                    "watch_stalled_main_window"
+                                )
+                                try:
+                                    WebDriverWait(driver, 5).until(
+                                        ec.element_to_be_clickable((
+                                            By.XPATH,
+                                            '//*[@id="listall"]/center/a[2]',
+                                        ))
+                                    ).click()
+                                    logging.info(
+                                        "[YouLikeHits][Watch] Skip clicked after stalled task"
+                                    )
+                                    EVENT.wait(3)
+                                except (
+                                    StaleElementReferenceException,
+                                    TimeoutException,
+                                    NoSuchElementException,
+                                    ElementNotInteractableException,
+                                    WebDriverException,
+                                ) as skip_ex:
+                                    logging.info(
+                                        "[YouLikeHits][Watch] Skip unavailable after stalled task: %s",
+                                        type(skip_ex).__name__,
+                                    )
+                                driver.refresh()
                                 break
                             EVENT.wait(2)
                         else:
@@ -1298,7 +1634,14 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             while datetime.now() < cutoff:
                 iteration += 1
                 logging.info("[YouLikeHits][Listen] Iteration %d started", iteration)
-                if collect_bonus_after_hit_checkpoint(iteration):
+                if collect_bonus_before_reset_if_needed():
+                    driver.get("https://www.youlikehits.com/soundcloudplays.php")
+                    log_youlikehits_state(
+                        "[Listen] Reopened listen page after 6:45 AM bonus check"
+                    )
+                    EVENT.wait(secrets.choice(range(3, 4)))
+                    continue
+                if collect_bonus_after_hit_checkpoint(iteration, "listen"):
                     driver.get("https://www.youlikehits.com/soundcloudplays.php")
                     log_youlikehits_state(
                         "[Listen] Reopened listen page after bonus checkpoint"
@@ -1388,6 +1731,9 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     def while_loop_visit(hours_time: int) -> None:
         """Visit sites by clicking each 'followbutton' on /websites.php until time runs out"""
         missing_site_message = "couldn't locate the website you're attempting to visit"
+        visit_completed_result = "completed"
+        visit_retry_result = "retry"
+        visit_skip_result = "skip"
 
         def read_visit_frame_text(frame_name: str) -> str:
             try:
@@ -1402,22 +1748,69 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 except WebDriverException:
                     pass
 
-        def target_site_unavailable() -> bool:
-            frame_text = "\n".join((
-                read_visit_frame_text("frame1"),
-                read_visit_frame_text("frame2"),
-            )).lower()
-            return missing_site_message in frame_text
+        def read_visit_default_text() -> str:
+            try:
+                driver.switch_to.default_content()
+                return driver.find_element(By.TAG_NAME, "body").text.strip()
+            except (NoSuchElementException, StaleElementReferenceException, WebDriverException):
+                return ""
 
-        def wait_for_visit_result(btn_index: int, total_buttons: int) -> bool:
-            for _ in range(24):
-                if target_site_unavailable():
+        def parse_visit_wait_seconds(text: str) -> int | None:
+            seconds_patterns = (
+                r"(\d+)\s*Seconds?\s+Left",
+                r"You\s+will\s+receive[\s\S]{0,80}?in\s+(\d+)\s+seconds?",
+                r"Please\s+wait[\s\S]{0,80}?(\d+)\s+seconds?",
+            )
+            for pattern in seconds_patterns:
+                seconds_match = re.search(pattern, text, re.IGNORECASE)
+                if seconds_match:
+                    return int(seconds_match.group(1))
+            return None
+
+        def wait_for_visit_result(btn_index: int, total_buttons: int) -> str:
+            visit_timer_seen = False
+            check_deadline = datetime.now() + timedelta(seconds=90)
+            while datetime.now() < check_deadline:
+                default_text = read_visit_default_text()
+                frame1_text = read_visit_frame_text("frame1")
+                frame2_text = read_visit_frame_text("frame2")
+                combined_text = "\n".join((default_text, frame1_text, frame2_text))
+
+                if "slow down speedy" in combined_text.lower():
+                    wait_seconds = parse_visit_wait_seconds(combined_text) or 20
                     logging.info(
-                        "[YouLikeHits][Visit] Target unavailable for button %d/%d",
+                        "[YouLikeHits][Visit] Slow Down Speedy detected for button %d/%d. "
+                        "Waiting %d second(s) before retry.",
                         btn_index,
                         total_buttons,
+                        wait_seconds,
                     )
-                    return False
+                    save_youlikehits_debug_screenshot("visit_slow_down_speedy")
+                    EVENT.wait(wait_seconds + 2)
+                    return visit_retry_result
+
+                visit_wait_seconds = parse_visit_wait_seconds(
+                    "\n".join((default_text, frame1_text))
+                )
+                if visit_wait_seconds is not None:
+                    if visit_timer_seen:
+                        logging.info(
+                            "[YouLikeHits][Visit] Visit timer already waited for button %d/%d",
+                            btn_index,
+                            total_buttons,
+                        )
+                        return visit_completed_result
+                    visit_timer_seen = True
+                    logging.info(
+                        "[YouLikeHits][Visit] Visit timer detected for button %d/%d. "
+                        "Waiting %d second(s).",
+                        btn_index,
+                        total_buttons,
+                        visit_wait_seconds,
+                    )
+                    EVENT.wait(visit_wait_seconds + 2)
+                    continue
+
                 try:
                     driver.switch_to.default_content()
                     driver.switch_to.frame("frame1")
@@ -1428,7 +1821,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             btn_index,
                             total_buttons,
                         )
-                        return True
+                        return visit_completed_result
                 except NoSuchFrameException:
                     pass
                 finally:
@@ -1436,13 +1829,32 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         driver.switch_to.default_content()
                     except WebDriverException:
                         pass
+
+                if missing_site_message in frame2_text.lower() and not visit_timer_seen:
+                    logging.info(
+                        "[YouLikeHits][Visit] Target unavailable for button %d/%d",
+                        btn_index,
+                        total_buttons,
+                    )
+                    return visit_skip_result
+
                 EVENT.wait(1)
+
+            if visit_timer_seen:
+                logging.info(
+                    "[YouLikeHits][Visit] Visit timer window expired after waiting for button %d/%d. "
+                    "Treating as completed.",
+                    btn_index,
+                    total_buttons,
+                )
+                return visit_completed_result
+
             logging.info(
                 "[YouLikeHits][Visit] No visit completion detected for button %d/%d",
                 btn_index,
                 total_buttons,
             )
-            return False
+            return visit_retry_result
 
         def find_visit_card_for_button(button):
             return button.find_element(
@@ -1500,6 +1912,14 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             while datetime.now() < cutoff:
                 iteration += 1
                 logging.info("[YouLikeHits][Visit] Iteration %d started", iteration)
+                if collect_bonus_before_reset_if_needed():
+                    driver.get("https://www.youlikehits.com/websites.php")
+                    log_youlikehits_state(
+                        "[Visit] Reopened visit page after 6:45 AM bonus check"
+                    )
+                    EVENT.wait(secrets.choice(range(3, 5)))
+                    driver.execute_script("window.scrollTo(0, 600)")
+                    continue
                 driver.switch_to.window(driver.window_handles[0])
                 driver.switch_to.default_content()
                 buttons = driver.find_elements(By.CLASS_NAME, "followbutton")
@@ -1540,8 +1960,8 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         logging.info("[YouLikeHits][Visit] Target window missing for button %d/%d", btn_index, len(buttons))
                         skip_visit_button(btn_index, clicked_card_id)
                         continue
-                    visit_completed = wait_for_visit_result(btn_index, len(buttons))
-                    if not visit_completed:
+                    visit_result = wait_for_visit_result(btn_index, len(buttons))
+                    if visit_result != visit_completed_result:
                         refresh_after_target = True
                     try:
                         WebDriverWait(driver, 2).until(ec.alert_is_present())
@@ -1554,10 +1974,11 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     logging.info("[YouLikeHits][Visit] Closed target window for button %d/%d", btn_index, len(buttons))
                     driver.switch_to.window(driver.window_handles[0])
                     if refresh_after_target:
-                        skip_visit_button(btn_index, clicked_card_id)
+                        if visit_result == visit_skip_result:
+                            skip_visit_button(btn_index, clicked_card_id)
                         break
                     visit_engagement_count += 1
-                    if collect_bonus_after_hit_checkpoint(visit_engagement_count):
+                    if collect_bonus_after_hit_checkpoint(visit_engagement_count, "visit"):
                         driver.get("https://www.youlikehits.com/websites.php")
                         log_youlikehits_state(
                             "[Visit] Reopened visit page after bonus checkpoint"
@@ -2046,58 +2467,6 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             EVENT.wait(2)
             return True
 
-            try:
-                clicked = driver.execute_script(
-                    """
-                    const links = Array.from(document.querySelectorAll('a'));
-                    const linkText = (link) => [
-                        link.textContent || '',
-                        link.href || '',
-                        link.getAttribute('onclick') || ''
-                    ].join(' ').toLowerCase();
-                    let target = links.find((link) => {
-                        const text = linkText(link);
-                        return text.includes('reload') || text.includes('перезагрузить');
-                    });
-                    if (!target && links.length > 1) {
-                        target = links[1];
-                    }
-                    if (!target && links.length) {
-                        target = links[0];
-                    }
-                    if (!target) {
-                        return false;
-                    }
-                    target.scrollIntoView({block: 'center', inline: 'center'});
-                    target.click();
-                    return true;
-                    """
-                )
-                if clicked:
-                    logging.info(
-                        "[YTMonsterRU][ImagePuzzle] Reset page reload link clicked after %s.",
-                        reason,
-                    )
-                    EVENT.wait(5)
-                    return True
-            except WebDriverException as reset_ex:
-                logging.info(
-                    "[YTMonsterRU][ImagePuzzle] Reset page JS click failed after %s: %s",
-                    reason,
-                    type(reset_ex).__name__,
-                )
-
-            try:
-                logging.info(
-                    "[YTMonsterRU][ImagePuzzle] Reset page detected after %s, forcing reload fallback.",
-                    reason,
-                )
-                driver.execute_script("window.location.reload()")
-                EVENT.wait(5)
-                return True
-            except WebDriverException:
-                return False
-
         def wait_out_ytmonsterru_page_wait(reason: str) -> bool:
             try:
                 driver.switch_to.default_content()
@@ -2182,7 +2551,15 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 body_text = ""
 
             if ytmonsterru_puzzle_canvas_visible():
-                return False
+                if not allow_refresh:
+                    return False
+                logging.info(
+                    "[YTMonsterRU][ImagePuzzle] Visible puzzle canvas found after %s. "
+                    "Hard refreshing to request a new puzzle image.",
+                    reason,
+                )
+                refresh_ytmonsterru_puzzle_page(reason)
+                return True
 
             if no_ytmonsterru_videos_left():
                 raise NoYTMonsterVideosLeft

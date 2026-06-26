@@ -14,7 +14,8 @@ required_dict = {
     "email_ytmonsterru": userinfo["ytmonsterru_email"],
     "pw_ytmonsterru": userinfo["ytmonsterru_password"],
     "yt_useragent": userinfo["youtube_useragent"],
-    "github_token": userinfo["github_token"]
+    "github_token": userinfo["github_token"],
+    "debug_screenshots": False
 }
 
 if __name__ == "__main__":

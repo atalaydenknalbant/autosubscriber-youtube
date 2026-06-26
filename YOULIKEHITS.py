@@ -14,7 +14,7 @@ required_dict = {
     "pw_youlikehits": userinfo["youlikehits_password"],
     "yt_useragent": userinfo["youtube_useragent"],
     "github_token": userinfo["github_token"],
-    "debug_screenshots": True
+    "debug_screenshots": False
 }
 
 if __name__ == "__main__":
