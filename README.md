@@ -22,14 +22,14 @@ A Python Selenium framework autonomously handles YouTube channel subscriptions v
 ## 🌐 Included sub4sub Websites
 ### Websites 
 [![YTMonster](https://i.imgur.com/ft5Gp5Z.png)](https://www.ytmonster.net/r/atalaymro1)
-[![YTMonster RU](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/)
+[![YTMonster RU](https://i.imgur.com/Z9qA6ea.png)](https://ytmonster.ru/?r=604276)
 [![YOULIKEHITS](https://i.imgur.com/N47FKmk.png)](http://ylkhts.cc/?id=2445892)
 [![traffup](https://i.imgur.com/brIRpUl.png)](https://traffup.net/free/?rf=416827789)
 
-<div style="text-align: center;">
+<div style="text-align: center;">    
     <div style="display: inline-block; margin-right: 20px;">
         <h3>Requires Google Login</h3>
-        <a href="https://www.like4like.org">
+        <a href="https://www.like4like.org">   
             <img src="https://i.imgur.com/CiDYTMI.png" />
         </a>
         <a href="https://ytbpals.com/">
