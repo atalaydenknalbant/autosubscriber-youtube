@@ -1,4 +1,6 @@
-from app.browser_embed import ChromeWindowMonitor
+import inspect
+
+from app.browser_embed import ChromeWindowMonitor, Win32ChromeBackend
 from app.worker import build_parser
 
 
@@ -51,3 +53,14 @@ def test_worker_parser_accepts_main_process_embed_token() -> None:
     )
 
     assert args.embed_token == "run-token"
+
+
+def test_win32_backend_stateless_helpers_are_static() -> None:
+    for method_name in (
+        "find_browser_pids",
+        "enumerate_windows",
+        "detach_to_offscreen",
+        "resize",
+    ):
+        descriptor = inspect.getattr_static(Win32ChromeBackend, method_name)
+        assert isinstance(descriptor, staticmethod)

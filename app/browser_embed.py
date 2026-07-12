@@ -30,7 +30,8 @@ def _import_windows_modules():
 
 
 class Win32ChromeBackend:
-    def find_browser_pids(self, token: str) -> set[int]:
+    @staticmethod
+    def find_browser_pids(token: str) -> set[int]:
         psutil, _, _, _ = _import_windows_modules()
         matched: set[int] = set()
 
@@ -38,7 +39,9 @@ class Win32ChromeBackend:
             try:
                 name = (process.info.get("name") or "").lower()
                 command = " ".join(process.info.get("cmdline") or [])
-                if "chrome" not in name or token not in command:
+                if "chrome" not in name:
+                    continue
+                if token not in command:
                     continue
                 matched.add(int(process.info["pid"]))
                 matched.update(child.pid for child in process.children(recursive=True))
@@ -47,7 +50,8 @@ class Win32ChromeBackend:
 
         return matched
 
-    def enumerate_windows(self, pids: set[int]) -> list[int]:
+    @staticmethod
+    def enumerate_windows(pids: set[int]) -> list[int]:
         if not pids:
             return []
 
@@ -98,7 +102,8 @@ class Win32ChromeBackend:
         win32gui.ShowWindow(hwnd, win32con.SW_SHOWNOACTIVATE)
         self.resize(hwnd, parent_hwnd)
 
-    def detach_to_offscreen(self, hwnd: int) -> None:
+    @staticmethod
+    def detach_to_offscreen(hwnd: int) -> None:
         _, win32con, win32gui, _ = _import_windows_modules()
         if not win32gui.IsWindow(hwnd):
             return
@@ -112,7 +117,8 @@ class Win32ChromeBackend:
             win32con.SWP_NOZORDER | win32con.SWP_NOACTIVATE,
         )
 
-    def resize(self, hwnd: int, parent_hwnd: int) -> None:
+    @staticmethod
+    def resize(hwnd: int, parent_hwnd: int) -> None:
         _, win32con, win32gui, _ = _import_windows_modules()
         if not win32gui.IsWindow(hwnd) or not win32gui.IsWindow(parent_hwnd):
             return

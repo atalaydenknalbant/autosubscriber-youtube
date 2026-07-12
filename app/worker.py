@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
 import sys
-import threading
 import uuid
 
-from app import debug_runtime
 from app.site_registry import (
     SITES,
     build_required_dict,
@@ -50,24 +47,6 @@ def configure_logging() -> None:
     root_logger.handlers.clear()
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.INFO)
-
-
-def start_command_listener(sws_module) -> None:
-    def listen() -> None:
-        for raw_line in sys.stdin:
-            line = raw_line.strip()
-            if not line:
-                continue
-            try:
-                message = json.loads(line)
-            except json.JSONDecodeError:
-                logging.info("[AppWorker] Ignoring invalid command")
-                continue
-            if message.get("type") == "debug":
-                debug_runtime.execute_debug_code(message.get("code", ""), sws_module)
-
-    thread = threading.Thread(target=listen, daemon=True)
-    thread.start()
 
 
 def verify_packaged_runtime() -> None:
@@ -178,7 +157,6 @@ def main(argv: list[str] | None = None) -> int:
 
     from selenium_codes import sub4sub_websites_selenium as sws
 
-    start_command_listener(sws)
     spec = SITES[args.site]
     logging.info("[AppWorker] Starting %s", spec.display_name)
     try:
@@ -189,8 +167,6 @@ def main(argv: list[str] | None = None) -> int:
     except Exception:
         logging.exception("[AppWorker] Site run failed")
         return 1
-    finally:
-        debug_runtime.clear_active_driver()
     logging.info("[AppWorker] Finished %s", spec.display_name)
     return 0
 

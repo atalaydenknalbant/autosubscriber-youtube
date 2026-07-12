@@ -301,13 +301,6 @@ def register_app_driver(
         website: str,
         headless: bool,
 ) -> None:
-    try:
-        from app import debug_runtime
-
-        debug_runtime.set_active_driver(driver, website, req_dict)
-    except Exception as debug_ex:
-        logging.info("[App] Could not register active driver: %s", type(debug_ex).__name__)
-
     embed_parent_hwnd = req_dict.get("app_embed_parent_hwnd")
     embed_token = req_dict.get("app_embed_window_token")
     if headless or not embed_parent_hwnd or not embed_token:
