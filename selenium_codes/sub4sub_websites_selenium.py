@@ -28,16 +28,8 @@ import numpy as np
 # Prevent Transformers from spawning the online safetensors conversion thread.
 os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "1")
 
-from transformers import (
-    TrOCRProcessor,
-    VisionEncoderDecoderModel,
-    CLIPProcessor,
-    CLIPModel,
-    Sam2Model,
-    Sam2Processor,
-    AutoImageProcessor,
-    AutoModel,
-)
+
+
 from PIL import Image, ImageOps
 from io import BytesIO
 import re
@@ -90,6 +82,37 @@ def load_transformers_component(component, model_name: str, **kwargs):
             )
             EVENT.wait(HF_MODEL_LOAD_RETRY_SECONDS)
     raise last_error
+
+def load_trocr_processor(model_name: str):
+    """
+    Load the TrOCR image processor and tokenizer lazily.
+
+    This keeps the desktop app startup fast because Transformers is imported
+    only when Traffup OCR is actually used. Loading XLMRobertaTokenizer
+    directly also avoids the generic tokenizer backend route for this
+    vision encoder decoder checkpoint.
+    """
+    from transformers import (
+        AutoImageProcessor,
+        TrOCRProcessor,
+        XLMRobertaTokenizer,
+    )
+
+    image_processor = load_transformers_component(
+        AutoImageProcessor,
+        model_name,
+    )
+
+    tokenizer = load_transformers_component(
+        XLMRobertaTokenizer,
+        model_name,
+    )
+
+    return TrOCRProcessor(
+        image_processor=image_processor,
+        tokenizer=tokenizer,
+    )
+
 
 
 def cleanup_stale_chrome_temp_dirs() -> None:
@@ -262,6 +285,42 @@ def normalize_headless_viewport(driver: webdriver) -> None:
         pass
 
 
+def bool_config_value(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def register_app_driver(
+        driver: webdriver,
+        req_dict: dict,
+        website: str,
+        headless: bool,
+) -> None:
+    try:
+        from app import debug_runtime
+
+        debug_runtime.set_active_driver(driver, website, req_dict)
+    except Exception as debug_ex:
+        logging.info("[App] Could not register active driver: %s", type(debug_ex).__name__)
+
+    embed_parent_hwnd = req_dict.get("app_embed_parent_hwnd")
+    embed_token = req_dict.get("app_embed_window_token")
+    if headless or not embed_parent_hwnd or not embed_token:
+        return
+
+    try:
+        from app.browser_embed import embed_driver_chrome
+
+        embed_driver_chrome(driver, int(embed_parent_hwnd), str(embed_token))
+    except Exception as embed_ex:
+        logging.info("[App] Could not embed Chrome window: %s", type(embed_ex).__name__)
+
+
 def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str = "") -> bool:
     """Change YouTube video resolution to given resolution.
     Args:
@@ -324,6 +383,15 @@ def set_driver_opt(req_dict: dict,
     """
     close_existing_chrome_processes()
     cleanup_stale_chrome_temp_dirs()
+
+    if "headless" in req_dict:
+        headless = bool_config_value(req_dict.get("headless"))
+
+    embed_parent_hwnd = req_dict.get("app_embed_parent_hwnd")
+    embed_token = req_dict.get("app_embed_window_token")
+    if embed_token and not headless:
+        force_default_view = True
+
     # In headless mode we prefer Chrome's native default viewport unless explicitly overridden.
     if headless and not force_default_view:
         force_default_view = True
@@ -335,11 +403,19 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument(f"--profile-directory={req_dict['chrome_profile_name']}")
     if headless:
         chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--window-position=-32000,-32000")
     else:
         EVENT.wait(0.25)
+    if embed_token and not headless:
+        chrome_options.add_argument(f"--autosubscriber-app-token={embed_token}")
+        chrome_options.add_argument("--window-position=-32000,-32000")
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "ytmonster":
-        chrome_options.add_extension('extensions/AutoTubeYouTube-nonstop.crx')
+        extension_path = (
+            Path(req_dict.get("app_asset_root", "."))
+            / "extensions/AutoTubeYouTube-nonstop.crx"
+        )
+        chrome_options.add_extension(str(extension_path))
     if website == "YOULIKEHITS":
         pass
     else:
@@ -390,6 +466,7 @@ def set_driver_opt(req_dict: dict,
         reset_device_metrics(driver)
         if headless:
             normalize_headless_viewport(driver)
+        register_app_driver(driver, req_dict, website, headless)
         return driver
 
     driver = webdriver.Chrome(service=Service(),
@@ -399,6 +476,7 @@ def set_driver_opt(req_dict: dict,
     if headless:
         normalize_headless_viewport(driver)
     driver.command_executor.set_timeout(1000)
+    register_app_driver(driver, req_dict, website, headless)
     return driver
 
 
@@ -3292,6 +3370,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             return prompt_boxes
 
                         try:
+                            from transformers import (
+                                Sam2Model,
+                                Sam2Processor,
+                            )
+
                             prompt_boxes = build_sam_prompt_boxes()
                             if not prompt_boxes:
                                 logging.info(
@@ -3450,7 +3533,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         # #     )
 
                     def build_background_removed_mask():
-                        assets_dir = Path("ytmonsterru_assets")
+                        assets_dir = (
+                            Path(req_dict.get("app_asset_root", "."))
+                            / "ytmonsterru_assets"
+                        )
                         best_background_name = None
                         best_background_diff = None
                         best_background_score = float("inf")
@@ -3891,6 +3977,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             return outputs.pooler_output
 
                         try:
+                            from transformers import (
+                                AutoImageProcessor,
+                                AutoModel,
+                            )
+
                             processor = load_transformers_component(
                                 AutoImageProcessor,
                                 YTMONSTERRU_DINOV3_MODEL_NAME,
@@ -3920,6 +4011,11 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 type(dino_ex).__name__,
                                 dino_ex,
                             )
+                            from transformers import (
+                                CLIPModel,
+                                CLIPProcessor,
+                            )
+
                             processor = load_transformers_component(
                                 CLIPProcessor,
                                 YTMONSTERRU_CLIP_MODEL_NAME,
@@ -4778,7 +4874,9 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
     driver.maximize_window()
-    captcha_processor = load_transformers_component(TrOCRProcessor, TROCR_MODEL_NAME)
+    from transformers import VisionEncoderDecoderModel
+
+    captcha_processor = load_trocr_processor(TROCR_MODEL_NAME)
     captcha_model = load_transformers_component(VisionEncoderDecoderModel, TROCR_MODEL_NAME)
     # # driver.save_screenshot("screenshots/screenshot.png")
 
@@ -4791,7 +4889,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         captcha_screenshot = captcha_element.screenshot_as_png
         captcha_image = Image.open(BytesIO(captcha_screenshot)).convert("RGB")
         pixel_values = captcha_processor(captcha_image, return_tensors="pt").pixel_values
-        generated_ids = captcha_model.generate(pixel_values)
+        with torch.inference_mode():
+            generated_ids = captcha_model.generate(pixel_values)
         generated_text = captcha_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
         corrected_text = re.sub(r'\D', '', generated_text)
         driver.find_element(By.ID, "code").send_keys(corrected_text)
@@ -4808,6 +4907,11 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     captcha_processor = None
     captcha_model = None
     torch.cuda.empty_cache()
+    from transformers import (
+        CLIPModel,
+        CLIPProcessor,
+    )
+
     processor = load_transformers_component(CLIPProcessor, CLIP_MODEL_NAME)
     model = load_transformers_component(CLIPModel, CLIP_MODEL_NAME, use_safetensors=False)
     model.eval()
@@ -5042,4 +5146,3 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 break
     watch_loop(14)
     driver.quit()
-

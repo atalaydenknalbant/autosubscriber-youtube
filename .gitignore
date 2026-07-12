@@ -1,4 +1,5 @@
 *.ini
+!config.default.ini
 /.idea/aws.xml
 /.idea/shelf/Default_Changelist.xml
 /.idea/misc.xml
@@ -30,3 +31,8 @@ config.ini
 /models--timm--vit_small_patch16_dinov3.lvd1689m/
 /.cache/huggingface/
 /screenshots/debug/*.png
+/.build_venv/
+/build/
+/dist/
+/.pytest_cache/
+__pycache__/

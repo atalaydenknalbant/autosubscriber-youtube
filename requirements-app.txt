@@ -1,0 +1,5 @@
+pyinstaller
+pywin32
+psutil
+PySide6
+pytest

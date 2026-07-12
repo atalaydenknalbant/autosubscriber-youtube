@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="app/assets/branding/autosubscriber-logo.png" width="180" alt="Autosubscriber App logo">
+</p>
+
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=atalaydenknalbant/autosubscriber-youtube) [![version](https://img.shields.io/github/v/release/atalaydenknalbant/autosubscriber-youtube)](https://github.com/atalaydenknalbant/autosubscriber-youtube/releases/latest)
 
