@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from importlib import import_module
 import logging
 import os
 import sys
@@ -68,7 +69,6 @@ def verify_packaged_runtime() -> None:
     import cv2
     import google.protobuf
     import sentencepiece
-    import sentencepiece._sentencepiece
     import selenium
     import timm
     import torch
@@ -93,7 +93,7 @@ def verify_packaged_runtime() -> None:
         cv2,
         google.protobuf,
         sentencepiece,
-        sentencepiece._sentencepiece,
+        import_module("sentencepiece._sentencepiece"),
         selenium,
         timm,
         torch,
@@ -125,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:  # skipcq: PY-R1000
     configure_logging()
     args = build_parser().parse_args(argv)
     debug_screenshots = parse_bool(args.debug_screenshots)

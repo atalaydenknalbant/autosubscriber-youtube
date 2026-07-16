@@ -95,8 +95,14 @@ class Win32ChromeBackend:
 
         for process in psutil.process_iter(["pid", "name", "cmdline"]):
             try:
-                name = (process.info.get("name") or "").lower()
-                command = " ".join(process.info.get("cmdline") or [])
+                process_name = process.info.get("name")
+                process_command = process.info.get("cmdline")
+                name = process_name.lower() if process_name is not None else ""
+                command = (
+                    " ".join(process_command)
+                    if process_command is not None
+                    else ""
+                )
                 if "chrome" not in name:
                     continue
                 if token not in command:
@@ -249,22 +255,22 @@ class Win32ChromeBackend:
             (screen_right, screen_bottom),
         )
 
-        properties = self.DwmThumbnailProperties()
-        properties.dwFlags = (
+        properties = self.DwmThumbnailProperties(
             self.DWM_TNP_RECTDESTINATION
             | self.DWM_TNP_OPACITY
             | self.DWM_TNP_VISIBLE
-            | self.DWM_TNP_SOURCECLIENTAREAONLY
+            | self.DWM_TNP_SOURCECLIENTAREAONLY,
+            wintypes.RECT(
+                destination_left,
+                destination_top,
+                destination_right,
+                destination_bottom,
+            ),
+            wintypes.RECT(),
+            255,
+            True,
+            True,
         )
-        properties.rcDestination = wintypes.RECT(
-            destination_left,
-            destination_top,
-            destination_right,
-            destination_bottom,
-        )
-        properties.opacity = 255
-        properties.fVisible = True
-        properties.fSourceClientAreaOnly = True
         result = self._dwm_api().DwmUpdateThumbnailProperties(
             wintypes.HANDLE(thumbnail_handle),
             ctypes.byref(properties),
