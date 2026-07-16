@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import ctypes
 import logging
-import threading
-import time
 from typing import Any, Protocol
+from ctypes import wintypes
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -30,6 +30,64 @@ def _import_windows_modules():
 
 
 class Win32ChromeBackend:
+    DWM_TNP_RECTDESTINATION = 0x00000001
+    DWM_TNP_OPACITY = 0x00000004
+    DWM_TNP_VISIBLE = 0x00000008
+    DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010
+    GA_ROOT = 2
+
+    class DwmThumbnailProperties(ctypes.Structure):
+        _fields_ = [
+            ("dwFlags", wintypes.DWORD),
+            ("rcDestination", wintypes.RECT),
+            ("rcSource", wintypes.RECT),
+            ("opacity", wintypes.BYTE),
+            ("fVisible", wintypes.BOOL),
+            ("fSourceClientAreaOnly", wintypes.BOOL),
+        ]
+
+    def __init__(self) -> None:
+        self._thumbnails: dict[int, tuple[int, int, int]] = {}
+
+    @staticmethod
+    def _dwm_api():
+        dwmapi = ctypes.WinDLL("dwmapi", use_last_error=True)
+        dwmapi.DwmRegisterThumbnail.argtypes = [
+            wintypes.HWND,
+            wintypes.HWND,
+            ctypes.POINTER(wintypes.HANDLE),
+        ]
+        dwmapi.DwmRegisterThumbnail.restype = wintypes.LONG
+        dwmapi.DwmUnregisterThumbnail.argtypes = [wintypes.HANDLE]
+        dwmapi.DwmUnregisterThumbnail.restype = wintypes.LONG
+        dwmapi.DwmUpdateThumbnailProperties.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(Win32ChromeBackend.DwmThumbnailProperties),
+        ]
+        dwmapi.DwmUpdateThumbnailProperties.restype = wintypes.LONG
+        return dwmapi
+
+    @staticmethod
+    def _check_dwm_result(result: int, operation: str) -> None:
+        if result != 0:
+            unsigned_result = result & 0xFFFFFFFF
+            raise OSError(
+                f"{operation} failed with HRESULT 0x{unsigned_result:08X}"
+            )
+
+    @staticmethod
+    def _source_size_for_host(width: int, height: int) -> tuple[int, int]:
+        width = max(1, width)
+        height = max(1, height)
+        if height > 220:
+            return width, height
+
+        scale = max(
+            (960 + width - 1) // width,
+            (540 + height - 1) // height,
+        )
+        return width * scale, height * scale
+
     @staticmethod
     def find_browser_pids(token: str) -> set[int]:
         psutil, _, _, _ = _import_windows_modules()
@@ -80,30 +138,60 @@ class Win32ChromeBackend:
         if not win32gui.IsWindow(hwnd) or not win32gui.IsWindow(parent_hwnd):
             raise OSError("Chrome or browser host window is no longer available")
 
-        style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-        style &= ~(
-            win32con.WS_POPUP
-            | win32con.WS_CAPTION
-            | win32con.WS_THICKFRAME
-            | win32con.WS_MINIMIZEBOX
-            | win32con.WS_MAXIMIZEBOX
-            | win32con.WS_SYSMENU
-        )
-        style |= win32con.WS_CHILD | win32con.WS_CLIPSIBLINGS | win32con.WS_CLIPCHILDREN
-        win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style)
-
         extended_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
         extended_style &= ~win32con.WS_EX_APPWINDOW
         extended_style |= win32con.WS_EX_TOOLWINDOW | win32con.WS_EX_NOACTIVATE
         win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, extended_style)
 
-        win32gui.SetParent(hwnd, int(parent_hwnd))
-        win32gui.EnableWindow(hwnd, False)
+        root_hwnd = int(win32gui.GetAncestor(parent_hwnd, self.GA_ROOT))
+        if not root_hwnd:
+            raise OSError("Application preview window is no longer available")
+
+        existing = self._thumbnails.get(hwnd)
+        if existing and existing[1] == parent_hwnd and existing[2] == root_hwnd:
+            self.resize(hwnd, parent_hwnd)
+            return
+        if existing:
+            self._unregister_thumbnail(hwnd)
+
+        thumbnail = wintypes.HANDLE()
+        result = self._dwm_api().DwmRegisterThumbnail(
+            root_hwnd,
+            hwnd,
+            ctypes.byref(thumbnail),
+        )
+        self._check_dwm_result(result, "DwmRegisterThumbnail")
+        if not thumbnail.value:
+            raise OSError("DwmRegisterThumbnail returned an empty handle")
+
+        self._thumbnails[hwnd] = (
+            int(thumbnail.value),
+            int(parent_hwnd),
+            root_hwnd,
+        )
         win32gui.ShowWindow(hwnd, win32con.SW_SHOWNOACTIVATE)
+        self._move_source_offscreen(hwnd)
         self.resize(hwnd, parent_hwnd)
 
+    def _unregister_thumbnail(self, hwnd: int) -> None:
+        thumbnail_data = self._thumbnails.pop(hwnd, None)
+        if not thumbnail_data:
+            return
+        result = self._dwm_api().DwmUnregisterThumbnail(
+            wintypes.HANDLE(thumbnail_data[0])
+        )
+        if result != 0:
+            logging.info(
+                "[AppEmbed] DwmUnregisterThumbnail failed for hwnd=%s",
+                hwnd,
+            )
+
     @staticmethod
-    def detach_to_offscreen(hwnd: int) -> None:
+    def _move_source_offscreen(hwnd: int) -> None:
+        Win32ChromeBackend._resize_source_offscreen(hwnd, 640, 480)
+
+    @staticmethod
+    def _resize_source_offscreen(hwnd: int, width: int, height: int) -> None:
         _, win32con, win32gui, _ = _import_windows_modules()
         if not win32gui.IsWindow(hwnd):
             return
@@ -112,30 +200,76 @@ class Win32ChromeBackend:
             None,
             -32000,
             -32000,
-            640,
-            480,
-            win32con.SWP_NOZORDER | win32con.SWP_NOACTIVATE,
-        )
-
-    @staticmethod
-    def resize(hwnd: int, parent_hwnd: int) -> None:
-        _, win32con, win32gui, _ = _import_windows_modules()
-        if not win32gui.IsWindow(hwnd) or not win32gui.IsWindow(parent_hwnd):
-            return
-        left, top, right, bottom = win32gui.GetClientRect(parent_hwnd)
-        width = max(1, right - left)
-        height = max(1, bottom - top)
-        win32gui.SetWindowPos(
-            hwnd,
-            None,
-            0,
-            0,
-            width,
-            height,
+            max(1, width),
+            max(1, height),
             win32con.SWP_NOZORDER
             | win32con.SWP_NOACTIVATE
             | win32con.SWP_FRAMECHANGED,
         )
+
+    def detach_to_offscreen(self, hwnd: int) -> None:
+        self._unregister_thumbnail(hwnd)
+        self._move_source_offscreen(hwnd)
+
+    def resize(self, hwnd: int, parent_hwnd: int) -> None:
+        _, _, win32gui, _ = _import_windows_modules()
+        if not win32gui.IsWindow(hwnd) or not win32gui.IsWindow(parent_hwnd):
+            return
+
+        thumbnail_data = self._thumbnails.get(hwnd)
+        if not thumbnail_data or thumbnail_data[1] != parent_hwnd:
+            return
+        thumbnail_handle, _, root_hwnd = thumbnail_data
+        if not win32gui.IsWindow(root_hwnd):
+            return
+
+        left, top, right, bottom = win32gui.GetClientRect(parent_hwnd)
+        host_width = right - left
+        host_height = bottom - top
+        source_width, source_height = self._source_size_for_host(
+            host_width,
+            host_height,
+        )
+        self._resize_source_offscreen(
+            hwnd,
+            source_width,
+            source_height,
+        )
+        screen_left, screen_top = win32gui.ClientToScreen(parent_hwnd, (left, top))
+        screen_right, screen_bottom = win32gui.ClientToScreen(
+            parent_hwnd,
+            (right, bottom),
+        )
+        destination_left, destination_top = win32gui.ScreenToClient(
+            root_hwnd,
+            (screen_left, screen_top),
+        )
+        destination_right, destination_bottom = win32gui.ScreenToClient(
+            root_hwnd,
+            (screen_right, screen_bottom),
+        )
+
+        properties = self.DwmThumbnailProperties()
+        properties.dwFlags = (
+            self.DWM_TNP_RECTDESTINATION
+            | self.DWM_TNP_OPACITY
+            | self.DWM_TNP_VISIBLE
+            | self.DWM_TNP_SOURCECLIENTAREAONLY
+        )
+        properties.rcDestination = wintypes.RECT(
+            destination_left,
+            destination_top,
+            destination_right,
+            destination_bottom,
+        )
+        properties.opacity = 255
+        properties.fVisible = True
+        properties.fSourceClientAreaOnly = True
+        result = self._dwm_api().DwmUpdateThumbnailProperties(
+            wintypes.HANDLE(thumbnail_handle),
+            ctypes.byref(properties),
+        )
+        self._check_dwm_result(result, "DwmUpdateThumbnailProperties")
 
 
 class ChromeWindowMonitor(QObject):
@@ -197,48 +331,3 @@ class ChromeWindowMonitor(QObject):
             self._windows = ordered
             self.windowsChanged.emit(self.windows)
         return self.windows
-
-
-def _compatibility_resize_loop(
-    backend: Win32ChromeBackend,
-    parent_hwnd: int,
-    child_hwnd: int,
-) -> None:
-    _, _, win32gui, _ = _import_windows_modules()
-    while win32gui.IsWindow(parent_hwnd) and win32gui.IsWindow(child_hwnd):
-        backend.resize(child_hwnd, parent_hwnd)
-        time.sleep(0.5)
-
-
-def embed_driver_chrome(
-    _driver: Any,
-    parent_hwnd: int,
-    token: str,
-) -> int | None:
-    """Compatibility path for the old Tkinter shell during the Qt migration."""
-    backend = Win32ChromeBackend()
-    chrome_hwnd = None
-    chrome_pid = None
-
-    for _attempt in range(30):
-        pids = backend.find_browser_pids(token)
-        windows = backend.enumerate_windows(pids)
-        if windows:
-            chrome_hwnd = windows[0]
-            chrome_pid = next(iter(pids), None)
-            break
-        time.sleep(0.5)
-
-    if chrome_hwnd is None:
-        logging.info("[AppEmbed] Could not find Chrome window for embedding")
-        return None
-
-    backend.attach(chrome_hwnd, int(parent_hwnd))
-    thread = threading.Thread(
-        target=_compatibility_resize_loop,
-        args=(backend, int(parent_hwnd), chrome_hwnd),
-        daemon=True,
-    )
-    thread.start()
-    logging.info("[AppEmbed] Embedded Chrome hwnd=%s pid=%s", chrome_hwnd, chrome_pid)
-    return chrome_hwnd

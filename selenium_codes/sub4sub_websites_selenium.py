@@ -4,7 +4,8 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException, ElementClickInterceptedException, \
     NoSuchWindowException, JavascriptException, NoSuchFrameException, \
-    WebDriverException, UnexpectedAlertPresentException
+    WebDriverException, UnexpectedAlertPresentException, \
+    InvalidSessionIdException, SessionNotCreatedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -55,6 +56,7 @@ STALE_CHROME_TEMP_PATTERNS = ("scoped_dir*", "chrome_drag*")
 STALE_CHROME_TEMP_MAX_AGE_SECONDS = 12 * 60 * 60
 STALE_CHROME_TEMP_STATE = {"cleaned": False}
 CHROME_PROCESS_CLEANUP_STATE = {"cleaned": False}
+CHROMEDRIVER_VERSION_STATE = {"checked": False}
 
 
 def load_transformers_component(component, model_name: str, **kwargs):
@@ -187,6 +189,164 @@ def close_existing_chrome_processes() -> None:
             ", ".join(closed_processes),
         )
 
+
+def installed_chrome_version() -> str | None:
+    if os.name != "nt":
+        return None
+
+    import winreg
+
+    registry_path = r"Software\Google\Chrome\BLBeacon"
+    registry_locations = (
+        (winreg.HKEY_CURRENT_USER, 0),
+        (winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_64KEY),
+        (winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_32KEY),
+    )
+    for registry_root, registry_view in registry_locations:
+        try:
+            with winreg.OpenKey(
+                registry_root,
+                registry_path,
+                0,
+                winreg.KEY_READ | registry_view,
+            ) as registry_key:
+                return str(winreg.QueryValueEx(registry_key, "version")[0])
+        except OSError:
+            continue
+    return None
+
+
+def selenium_driver_cache_path() -> Path:
+    return Path.home() / ".cache" / "selenium"
+
+
+def refresh_selenium_driver_cache() -> None:
+    cache_root = selenium_driver_cache_path()
+    chromedriver_cache = cache_root / "chromedriver"
+    metadata_path = cache_root / "se-metadata.json"
+
+    try:
+        if chromedriver_cache.is_dir():
+            shutil.rmtree(chromedriver_cache)
+        if metadata_path.is_file():
+            metadata_path.unlink()
+    except OSError as error:
+        logging.info("ChromeDriver cache refresh skipped: %s", error)
+
+    CHROMEDRIVER_VERSION_STATE["checked"] = False
+    CHROME_PROCESS_CLEANUP_STATE["cleaned"] = False
+
+
+def is_chrome_startup_recovery_exception(error: BaseException) -> bool:
+    return isinstance(
+        error,
+        (InvalidSessionIdException, SessionNotCreatedException),
+    )
+
+
+def _windows_process_is_running(image_name: str) -> bool:
+    if os.name != "nt":
+        return False
+
+    tasklist_path = (
+        Path(os.environ.get("SystemRoot", r"C:\Windows"))
+        / "System32"
+        / "tasklist.exe"
+    )
+    if not tasklist_path.is_file():
+        return False
+
+    result = subprocess.run(
+        [str(tasklist_path), "/FI", f"IMAGENAME eq {image_name}", "/NH"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return image_name.lower() in result.stdout.lower()
+
+
+def _remove_stale_devtools_port(req_dict: dict) -> int:
+    user_data_value = req_dict.get("chrome_userdata_directory")
+    if not user_data_value:
+        return 0
+
+    user_data_root = Path(str(user_data_value)).expanduser()
+    candidates = [user_data_root / "DevToolsActivePort"]
+    if user_data_root.is_dir():
+        candidates.extend(user_data_root.glob("*/DevToolsActivePort"))
+
+    removed = 0
+    for candidate in candidates:
+        try:
+            if candidate.is_file():
+                candidate.unlink()
+                removed += 1
+        except OSError as error:
+            logging.info(
+                "Could not remove stale Chrome profile file %s: %s",
+                candidate,
+                error,
+            )
+    return removed
+
+
+def recover_chrome_after_update(
+    req_dict: dict,
+    wait_timeout_seconds: float = 90,
+    poll_seconds: float = 2,
+) -> None:
+    """Wait for an active Chrome update, clear stale state, and refresh the driver."""
+    deadline = time.monotonic() + max(0, wait_timeout_seconds)
+    if _windows_process_is_running("chrome.exe"):
+        logging.info("Chrome update is still active. Waiting for Chrome to finish.")
+        while time.monotonic() < deadline:
+            if not _windows_process_is_running("chrome.exe"):
+                break
+            EVENT.wait(max(0.1, poll_seconds))
+
+    CHROME_PROCESS_CLEANUP_STATE["cleaned"] = False
+    close_existing_chrome_processes()
+    removed_ports = _remove_stale_devtools_port(req_dict)
+    if removed_ports:
+        logging.info(
+            "Removed %d stale Chrome profile startup file(s).",
+            removed_ports,
+        )
+    refresh_selenium_driver_cache()
+    EVENT.wait(2)
+
+
+def synchronize_chromedriver_with_chrome() -> None:
+    if CHROMEDRIVER_VERSION_STATE["checked"]:
+        return
+    CHROMEDRIVER_VERSION_STATE["checked"] = True
+
+    chrome_version = installed_chrome_version()
+    if not chrome_version:
+        return
+
+    driver_cache = selenium_driver_cache_path() / "chromedriver" / "win64"
+    if not driver_cache.is_dir():
+        return
+
+    cached_versions = [
+        path.name
+        for path in driver_cache.iterdir()
+        if path.is_dir() and re.fullmatch(r"\d+(?:\.\d+){3}", path.name)
+    ]
+    chrome_major = chrome_version.split(".", maxsplit=1)[0]
+    has_matching_driver = any(
+        version.split(".", maxsplit=1)[0] == chrome_major
+        for version in cached_versions
+    )
+    if cached_versions and not has_matching_driver:
+        logging.info(
+            "Chrome updated to version %s. Updating ChromeDriver before start.",
+            chrome_version,
+        )
+        refresh_selenium_driver_cache()
+        CHROMEDRIVER_VERSION_STATE["checked"] = True
+
 # Making Program to start with other locators instead of javascript locator
 YT_JAVASCRIPT = False
 
@@ -295,23 +455,11 @@ def bool_config_value(value) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
-def register_app_driver(
-        driver: webdriver,
-        req_dict: dict,
-        website: str,
-        headless: bool,
-) -> None:
-    embed_parent_hwnd = req_dict.get("app_embed_parent_hwnd")
-    embed_token = req_dict.get("app_embed_window_token")
-    if headless or not embed_parent_hwnd or not embed_token:
-        return
-
-    try:
-        from app.browser_embed import embed_driver_chrome
-
-        embed_driver_chrome(driver, int(embed_parent_hwnd), str(embed_token))
-    except Exception as embed_ex:
-        logging.info("[App] Could not embed Chrome window: %s", type(embed_ex).__name__)
+def is_visible_app_session(req_dict: dict) -> bool:
+    """Return whether Chrome is being rendered inside the desktop app."""
+    return bool(req_dict.get("app_embed_window_token")) and not bool_config_value(
+        req_dict.get("headless")
+    )
 
 
 def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str = "") -> bool:
@@ -376,11 +524,12 @@ def set_driver_opt(req_dict: dict,
     """
     close_existing_chrome_processes()
     cleanup_stale_chrome_temp_dirs()
+    synchronize_chromedriver_with_chrome()
+    _remove_stale_devtools_port(req_dict)
 
     if "headless" in req_dict:
         headless = bool_config_value(req_dict.get("headless"))
 
-    embed_parent_hwnd = req_dict.get("app_embed_parent_hwnd")
     embed_token = req_dict.get("app_embed_window_token")
     if embed_token and not headless:
         force_default_view = True
@@ -402,6 +551,11 @@ def set_driver_opt(req_dict: dict,
     if embed_token and not headless:
         chrome_options.add_argument(f"--autosubscriber-app-token={embed_token}")
         chrome_options.add_argument("--window-position=-32000,-32000")
+        chrome_options.add_argument("--disable-background-timer-throttling")
+        chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+        chrome_options.add_argument("--disable-renderer-backgrounding")
+    if website == "ytmonsterru":
+        chrome_options.add_argument("--autoplay-policy=no-user-gesture-required")
     chrome_options.add_argument("--user-agent=" + req_dict['yt_useragent'])
     if website == "ytmonster":
         extension_path = (
@@ -459,7 +613,6 @@ def set_driver_opt(req_dict: dict,
         reset_device_metrics(driver)
         if headless:
             normalize_headless_viewport(driver)
-        register_app_driver(driver, req_dict, website, headless)
         return driver
 
     driver = webdriver.Chrome(service=Service(),
@@ -469,7 +622,6 @@ def set_driver_opt(req_dict: dict,
     if headless:
         normalize_headless_viewport(driver)
     driver.command_executor.set_timeout(1000)
-    register_app_driver(driver, req_dict, website, headless)
     return driver
 
 
@@ -865,6 +1017,8 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
     def capture_youlikehits_failure(context: str, ex: Exception) -> None:
         """Capture the failing line and a screenshot for YouLikeHits-only failures."""
+        if is_chrome_startup_recovery_exception(ex):
+            return
         if getattr(ex, "_youlikehits_captured", False):
             return
         setattr(ex, "_youlikehits_captured", True)
@@ -1831,6 +1985,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 r"(\d+)\s*Seconds?\s+Left",
                 r"You\s+will\s+receive[\s\S]{0,80}?in\s+(\d+)\s+seconds?",
                 r"Please\s+wait[\s\S]{0,80}?(\d+)\s+seconds?",
+                r"wait\s+(\d+)\s+seconds?",
             )
             for pattern in seconds_patterns:
                 seconds_match = re.search(pattern, text, re.IGNORECASE)
@@ -1970,6 +2125,171 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     type(skip_ex).__name__,
                 )
 
+        def run_single_card_visit_flow(cutoff: datetime) -> None:
+            visit_engagement_count = 0
+            iteration = 0
+
+            def visible_visit_button():
+                buttons = driver.find_elements(By.CSS_SELECTOR, "a#wh-visit")
+                return next(
+                    (button for button in buttons if button.is_displayed()),
+                    None,
+                )
+
+            def reopen_visit_page(context: str) -> None:
+                driver.get("https://www.youlikehits.com/websites.php")
+                log_youlikehits_state(context)
+                EVENT.wait(2)
+
+            while datetime.now() < cutoff:
+                iteration += 1
+                logging.info(
+                    "[YouLikeHits][Visit] Single-card iteration %d started",
+                    iteration,
+                )
+
+                if collect_bonus_before_reset_if_needed():
+                    reopen_visit_page(
+                        "[Visit] Reopened single-card page after 6:45 AM bonus check"
+                    )
+                    continue
+
+                switch_youlikehits_main_window(
+                    "[Visit] Before locating single-card visit button"
+                )
+                driver.switch_to.default_content()
+                visit_button = visible_visit_button()
+                if visit_button is None:
+                    page_text = read_visit_default_text()
+                    if "slow down speedy" in page_text.lower():
+                        wait_seconds = parse_visit_wait_seconds(page_text) or 20
+                        logging.info(
+                            "[YouLikeHits][Visit] Slow Down Speedy detected. "
+                            "Waiting %d second(s).",
+                            wait_seconds,
+                        )
+                        EVENT.wait(wait_seconds + 2)
+                        reopen_visit_page(
+                            "[Visit] Reopened single-card page after speed limit wait"
+                        )
+                        continue
+
+                    logging.info(
+                        "[YouLikeHits][Visit] Visit site button is no longer available, "
+                        "leaving loop"
+                    )
+                    break
+
+                task_url = visit_button.get_attribute("href") or "<unknown>"
+                page_text = read_visit_default_text()
+                wait_seconds = parse_visit_wait_seconds(page_text) or 20
+                handles_before_click = set(driver.window_handles)
+
+                try:
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center'});",
+                        visit_button,
+                    )
+                    try:
+                        ActionChains(driver).move_to_element(visit_button).click().perform()
+                    except (
+                        ElementClickInterceptedException,
+                        ElementNotInteractableException,
+                    ):
+                        driver.execute_script("arguments[0].click();", visit_button)
+                except (JavascriptException, StaleElementReferenceException) as click_ex:
+                    logging.info(
+                        "[YouLikeHits][Visit] Could not open single-card target: %s",
+                        type(click_ex).__name__,
+                    )
+                    EVENT.wait(2)
+                    continue
+
+                try:
+                    WebDriverWait(driver, 10).until(
+                        lambda active_driver: any(
+                            handle not in handles_before_click
+                            for handle in active_driver.window_handles
+                        )
+                    )
+                    target_handle = next(
+                        handle
+                        for handle in driver.window_handles
+                        if handle not in handles_before_click
+                    )
+                    driver.switch_to.window(target_handle)
+                    log_youlikehits_state(
+                        "[Visit] Switched to single-card target window"
+                    )
+                except (TimeoutException, StopIteration, NoSuchWindowException):
+                    logging.info(
+                        "[YouLikeHits][Visit] Single-card target window did not open. "
+                        "Retrying the current task."
+                    )
+                    switch_youlikehits_main_window(
+                        "[Visit] After missing single-card target window"
+                    )
+                    EVENT.wait(2)
+                    continue
+
+                logging.info(
+                    "[YouLikeHits][Visit] Keeping target open for %d second(s) | url=%s",
+                    wait_seconds,
+                    task_url,
+                )
+                EVENT.wait(wait_seconds + 2)
+
+                try:
+                    WebDriverWait(driver, 1).until(ec.alert_is_present())
+                    driver.switch_to.alert.accept()
+                    logging.info(
+                        "[YouLikeHits][Visit] Browser alert accepted after target wait"
+                    )
+                except (TimeoutException, NoSuchWindowException):
+                    pass
+
+                cleanup_youlikehits_child_windows(
+                    "[Visit] Cleanup after single-card target"
+                )
+                switch_youlikehits_main_window(
+                    "[Visit] Returned after single-card target"
+                )
+                EVENT.wait(3)
+                visit_engagement_count += 1
+
+                if collect_bonus_after_hit_checkpoint(
+                    visit_engagement_count,
+                    "visit",
+                ):
+                    reopen_visit_page(
+                        "[Visit] Reopened single-card page after bonus checkpoint"
+                    )
+                    continue
+
+                next_button = None
+                next_button_deadline = datetime.now() + timedelta(seconds=8)
+                while datetime.now() < next_button_deadline:
+                    next_button = visible_visit_button()
+                    if next_button is not None:
+                        break
+                    EVENT.wait(1)
+                if next_button is None:
+                    logging.info(
+                        "[YouLikeHits][Visit] Visit site button disappeared after task, "
+                        "leaving loop"
+                    )
+                    break
+
+                next_url = next_button.get_attribute("href") or "<unknown>"
+                if next_url == task_url:
+                    reopen_visit_page(
+                        "[Visit] Refreshed single-card page after completed task"
+                    )
+
+            switch_youlikehits_main_window(
+                "[Visit] Single-card visit loop finished"
+            )
+
         try:
             start = datetime.now()
             cutoff = start + timedelta(hours=hours_time)
@@ -1978,6 +2298,16 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             driver.execute_script("window.scrollTo(0, 600)")
             logging.info("Visit Loop Started")
             log_youlikehits_state("Opened visit page")
+            if driver.find_elements(
+                By.CSS_SELECTOR,
+                ".ylh-wrap, #wh-flow, .wh-card, #wh-visit",
+            ):
+                logging.info(
+                    "[YouLikeHits][Visit] New single-card website flow detected"
+                )
+                run_single_card_visit_flow(cutoff)
+                logging.info("Visit Loop Finished")
+                return
             iteration = 0
             visit_engagement_count = 0
             while datetime.now() < cutoff:
@@ -2235,6 +2565,8 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
         )
 
     def capture_ytmonsterru_failure(context: str, ex: Exception) -> None:
+        if is_chrome_startup_recovery_exception(ex):
+            return
         if getattr(ex, "_ytmonsterru_captured", False):
             return
         setattr(ex, "_ytmonsterru_captured", True)
@@ -4358,37 +4690,110 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
     # # comment_loop(14)
     def watch_loop(hours_time: int) -> None:  # noqa: PLR0915
-        def submit_youtube_play() -> bool:
-            play_selectors = [
-                (By.CLASS_NAME, "ytmCueOverlayPlayButton"),
-                (By.CLASS_NAME, "ytp-large-play-button-red-bg"),
-                (By.CLASS_NAME, "ytp-large-play-button"),
-                (By.CSS_SELECTOR, ".ytp-large-play-button"),
-                (By.CSS_SELECTOR, ".ytp-play-button"),
-                (By.CSS_SELECTOR, "button[aria-label*='Play']"),
-                (By.CSS_SELECTOR, "button[title*='Play']"),
-            ]
+        def youtube_playback_state() -> dict:
+            try:
+                state = driver.execute_script(
+                    """
+                    const video = document.querySelector('video');
+                    const player = document.getElementById('movie_player');
+                    let playerState = null;
+                    if (player && typeof player.getPlayerState === 'function') {
+                        playerState = player.getPlayerState();
+                    }
+                    return {
+                        playerState,
+                        paused: video ? video.paused : null,
+                        ended: video ? video.ended : null,
+                        currentTime: video ? video.currentTime : null,
+                        readyState: video ? video.readyState : null,
+                    };
+                    """
+                )
+                return state if isinstance(state, dict) else {}
+            except WebDriverException:
+                return {}
 
-            for locator in play_selectors:
-                try:
-                    WebDriverWait(driver, 3).until(
-                        ec.element_to_be_clickable(locator)
-                    ).send_keys(Keys.ENTER)
+        def wait_for_youtube_playback(timeout: float = 6) -> bool:
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                state = youtube_playback_state()
+                if state.get("playerState") == 1:
                     return True
+                if (
+                    state.get("paused") is False
+                    and state.get("ended") is False
+                    and (state.get("readyState") or 0) >= 2
+                ):
+                    return True
+                EVENT.wait(0.5)
+            return False
+
+        def submit_youtube_play() -> bool:
+            play_selector = (
+                ".ytmCueOverlayPlayButton, "
+                ".ytp-cued-thumbnail-overlay, "
+                ".ytp-large-play-button, "
+                ".ytp-play-button, "
+                "video.html5-main-video"
+            )
+
+            if wait_for_youtube_playback(timeout=1):
+                return True
+
+            try:
+                play_targets = WebDriverWait(driver, 10).until(
+                    lambda active_driver: active_driver.find_elements(
+                        By.CSS_SELECTOR,
+                        play_selector,
+                    )
+                )
+            except WebDriverException:
+                play_targets = []
+
+            for target in play_targets:
+                try:
+                    if not target.is_displayed():
+                        continue
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+                        target,
+                    )
+                    target.click()
                 except WebDriverException:
-                    pass
+                    try:
+                        ActionChains(driver).move_to_element(target).click().perform()
+                    except WebDriverException:
+                        continue
+                if wait_for_youtube_playback():
+                    return True
+                if (
+                    youtube_playback_state().get("playerState") == 3
+                    and wait_for_youtube_playback(timeout=12)
+                ):
+                    return True
 
             js_attempts = [
-                "document.querySelector('video')?.play()",
-                "document.querySelector('.html5-video-player video')?.play()",
-                "document.getElementById('movie_player')?.click()",
+                """
+                const player = document.getElementById('movie_player');
+                if (player && typeof player.playVideo === 'function') {
+                    player.playVideo();
+                }
+                """,
+                """
+                const video = document.querySelector('video');
+                if (video) {
+                    video.muted = true;
+                    video.play().catch(() => {});
+                }
+                """,
             ]
             for script in js_attempts:
                 try:
                     driver.execute_script(script)
+                except WebDriverException:
+                    continue
+                if wait_for_youtube_playback():
                     return True
-                except JavascriptException:
-                    pass
 
             click_targets = [
                 (By.ID, "movie_player"),
@@ -4402,9 +4807,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         ec.presence_of_element_located(locator)
                     )
                     ActionChains(driver).move_to_element(target).click().perform()
-                    return True
                 except WebDriverException:
-                    pass
+                    continue
+                if wait_for_youtube_playback():
+                    return True
 
             key_targets = [
                 (By.ID, "movie_player"),
@@ -4415,11 +4821,21 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     target = WebDriverWait(driver, 3).until(
                         ec.presence_of_element_located(locator)
                     )
-                    target.send_keys(Keys.SPACE)
-                    return True
+                    target.send_keys("k")
                 except WebDriverException:
-                    pass
+                    continue
+                if wait_for_youtube_playback():
+                    return True
 
+            state = youtube_playback_state()
+            logging.info(
+                "[YTMonsterRU][Watch] YouTube playback remained stopped | "
+                "player_state=%s | paused=%s | ready_state=%s | current_time=%s",
+                state.get("playerState"),
+                state.get("paused"),
+                state.get("readyState"),
+                state.get("currentTime"),
+            )
             return False
 
         def handle_unavailable_youtube_embed() -> bool:
@@ -4738,7 +5154,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
 
         def play_ytmonsterru_video_and_claim(timer_seconds: float) -> bool:
             try:
-                driver.switch_to.frame("video-start")
+                driver.switch_to.default_content()
+                WebDriverWait(driver, 10).until(
+                    ec.frame_to_be_available_and_switch_to_it((By.ID, "video-start"))
+                )
                 EVENT.wait(secrets.choice(range(1, 3)))
                 if handle_unavailable_youtube_embed():
                     return True
@@ -4754,6 +5173,10 @@ def ytmonsterru_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 )
                 return False
 
+            logging.info(
+                "[YTMonsterRU][Watch] YouTube playback confirmed for timer %.1fs",
+                timer_seconds,
+            )
             wait_seconds = timer_seconds + 3
             logging.info(
                 "[YTMonsterRU][Watch] Timer found %.1fs. Waiting %.1fs before claim.",
@@ -4866,7 +5289,8 @@ def traffup_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     driver.implicitly_wait(10)
     driver.get("https://traffup.net/login/")  # Type_Undefined
     EVENT.wait(secrets.choice(range(1, 4)))
-    driver.maximize_window()
+    if not is_visible_app_session(req_dict):
+        driver.maximize_window()
     from transformers import VisionEncoderDecoderModel
 
     captcha_processor = load_trocr_processor(TROCR_MODEL_NAME)

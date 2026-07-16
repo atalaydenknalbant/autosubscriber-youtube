@@ -59,8 +59,29 @@ def test_win32_backend_stateless_helpers_are_static() -> None:
     for method_name in (
         "find_browser_pids",
         "enumerate_windows",
-        "detach_to_offscreen",
-        "resize",
+        "_move_source_offscreen",
+        "_resize_source_offscreen",
     ):
         descriptor = inspect.getattr_static(Win32ChromeBackend, method_name)
         assert isinstance(descriptor, staticmethod)
+
+
+def test_win32_backend_tracks_live_thumbnail_state() -> None:
+    backend = Win32ChromeBackend()
+
+    assert backend._thumbnails == {}
+
+
+def test_main_preview_uses_host_dimensions() -> None:
+    assert Win32ChromeBackend._source_size_for_host(600, 720) == (600, 720)
+
+
+def test_small_preview_uses_large_matching_source_ratio() -> None:
+    source_width, source_height = Win32ChromeBackend._source_size_for_host(
+        280,
+        160,
+    )
+
+    assert source_width >= 960
+    assert source_height >= 540
+    assert source_width / source_height == 280 / 160

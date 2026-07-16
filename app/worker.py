@@ -4,7 +4,13 @@ import argparse
 import logging
 import os
 import sys
+import time
 import uuid
+
+from selenium.common.exceptions import (
+    InvalidSessionIdException,
+    SessionNotCreatedException,
+)
 
 from app.site_registry import (
     SITES,
@@ -47,6 +53,15 @@ def configure_logging() -> None:
     root_logger.handlers.clear()
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.INFO)
+
+
+def chrome_recovery_reason(error: BaseException) -> str:
+    message = str(error).lower()
+    if "devtools port" in message or "user-data-dir" in message:
+        return "Chrome profile startup lock detected"
+    if isinstance(error, InvalidSessionIdException):
+        return "Chrome restarted or disconnected during startup"
+    return "Chrome startup failed after a browser or driver change"
 
 
 def verify_packaged_runtime() -> None:
@@ -160,7 +175,24 @@ def main(argv: list[str] | None = None) -> int:
     spec = SITES[args.site]
     logging.info("[AppWorker] Starting %s", spec.display_name)
     try:
-        getattr(sws, spec.function_name)(req_dict)
+        site_function = getattr(sws, spec.function_name)
+        started_at = time.monotonic()
+        try:
+            site_function(req_dict)
+        except (InvalidSessionIdException, SessionNotCreatedException) as error:
+            startup_failure = (
+                isinstance(error, SessionNotCreatedException)
+                or time.monotonic() - started_at <= 45
+            )
+            if not startup_failure:
+                raise
+            logging.info(
+                "[AppWorker] %s. Cleaning startup state and restarting %s once.",
+                chrome_recovery_reason(error),
+                spec.display_name,
+            )
+            sws.recover_chrome_after_update(req_dict)
+            site_function(req_dict)
     except KeyboardInterrupt:
         logging.info("[AppWorker] Stopped by interrupt")
         return 130
