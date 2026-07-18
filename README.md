@@ -12,7 +12,7 @@ A Python Selenium framework autonomously handles YouTube channel subscriptions v
 
 ## ⚠️ Warning
 * If you are using Linux or Ubuntu it may delete your saved passwords and autofills in Chrome. Backup credentials before proceeding.
-* Chrome 136 and newer prevent automation using your real Chrome Default profile. For Google logins and full automation you must use a **copied user data folder**.
+* Chrome 136 and later prevent automation from using your default Chrome profile. For Google sign ins and full automation, you must use a copied **user data folder**.
 
 ## 🧾 Pre-requisites
 [![Selenium](https://lh3.googleusercontent.com/pw/ACtC-3eLj66WsfcMGU2zDkC8Db2Lu7E4yz1dCuHsgH3xOqgG4mp_JAInpyYvg5IfPMzulOUJuxwMYoEFIY0bnLE2-SpqAxRTyfrGhWIcL7EXSLfx4E5dNu8QGUJk9HbD99kun_jJdqvDBxxfGg7MxdaDFawf=s100-no?authuser=0)](https://pypi.org/project/selenium/)
