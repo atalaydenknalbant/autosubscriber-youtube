@@ -548,8 +548,9 @@ def set_driver_opt(req_dict: dict,
         chrome_options.add_argument("--window-position=-32000,-32000")
     else:
         EVENT.wait(0.25)
-    if embed_token and not headless:
+    if embed_token:
         chrome_options.add_argument(f"--autosubscriber-app-token={embed_token}")
+    if embed_token and not headless:
         chrome_options.add_argument("--window-position=-32000,-32000")
         chrome_options.add_argument("--disable-background-timer-throttling")
         chrome_options.add_argument("--disable-backgrounding-occluded-windows")

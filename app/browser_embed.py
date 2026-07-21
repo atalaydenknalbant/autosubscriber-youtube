@@ -13,6 +13,8 @@ class ChromeBackend(Protocol):
 
     def enumerate_windows(self, pids: set[int]) -> list[int]: ...
 
+    def hide_process_windows(self, pids: set[int]) -> None: ...
+
     def attach(self, hwnd: int, parent_hwnd: int) -> None: ...
 
     def detach_to_offscreen(self, hwnd: int) -> None: ...
@@ -138,6 +140,50 @@ class Win32ChromeBackend:
 
         win32gui.EnumWindows(callback, None)
         return matches
+
+    @staticmethod
+    def hide_process_windows(pids: set[int]) -> None:
+        if not pids:
+            return
+
+        _, win32con, win32gui, win32process = _import_windows_modules()
+
+        def callback(hwnd: int, _extra: Any) -> bool:
+            _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
+            if window_pid not in pids:
+                return True
+            window_class = win32gui.GetClassName(hwnd)
+            if not window_class.startswith("Chrome_WidgetWin_"):
+                return True
+
+            extended_style = win32gui.GetWindowLong(
+                hwnd,
+                win32con.GWL_EXSTYLE,
+            )
+            extended_style &= ~win32con.WS_EX_APPWINDOW
+            extended_style |= (
+                win32con.WS_EX_TOOLWINDOW | win32con.WS_EX_NOACTIVATE
+            )
+            win32gui.SetWindowLong(
+                hwnd,
+                win32con.GWL_EXSTYLE,
+                extended_style,
+            )
+            win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
+            win32gui.SetWindowPos(
+                hwnd,
+                None,
+                -32000,
+                -32000,
+                1,
+                1,
+                win32con.SWP_NOZORDER
+                | win32con.SWP_NOACTIVATE
+                | win32con.SWP_FRAMECHANGED,
+            )
+            return True
+
+        win32gui.EnumWindows(callback, None)
 
     def attach(self, hwnd: int, parent_hwnd: int) -> None:
         _, win32con, win32gui, _ = _import_windows_modules()
@@ -337,3 +383,36 @@ class ChromeWindowMonitor(QObject):
             self._windows = ordered
             self.windowsChanged.emit(self.windows)
         return self.windows
+
+
+class HeadlessChromeWindowGuard(QObject):
+    def __init__(
+        self,
+        token: str,
+        backend: ChromeBackend | None = None,
+        parent: QObject | None = None,
+        interval_ms: int = 150,
+    ) -> None:
+        super().__init__(parent)
+        self.token = token
+        self.backend = backend or Win32ChromeBackend()
+        self._timer = QTimer(self)
+        self._timer.setInterval(interval_ms)
+        self._timer.timeout.connect(self.scan)
+
+    def start(self) -> None:
+        self.scan()
+        self._timer.start()
+
+    def stop(self) -> None:
+        self._timer.stop()
+
+    def scan(self) -> None:
+        try:
+            pids = self.backend.find_browser_pids(self.token)
+            self.backend.hide_process_windows(pids)
+        except Exception as scan_ex:
+            logging.info(
+                "[AppHeadless] Chrome window hiding skipped: %s",
+                type(scan_ex).__name__,
+            )

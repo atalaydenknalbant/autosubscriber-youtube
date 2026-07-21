@@ -42,7 +42,7 @@ from PySide6.QtWidgets import (
 from app.theme import Colors
 
 
-IconName = Literal["play", "stop", "settings", "folder", "clear"]
+IconName = Literal["play", "stop", "settings", "folder", "broom"]
 
 
 class GradientHeader(QFrame):
@@ -231,9 +231,28 @@ class IconButton(QPushButton):
             painter.drawRoundedRect(QRectF(center.x() - 10, center.y() - 7, 20, 15), 2, 2)
             painter.drawLine(center.x() - 8, center.y() - 7, center.x() - 2, center.y() - 11)
             painter.drawLine(center.x() - 2, center.y() - 11, center.x() + 3, center.y() - 7)
-        elif self.icon_name == "clear":
-            painter.drawLine(center.x() - 8, center.y() - 8, center.x() + 8, center.y() + 8)
-            painter.drawLine(center.x() + 8, center.y() - 8, center.x() - 8, center.y() + 8)
+        elif self.icon_name == "broom":
+            painter.setBrush(Qt.NoBrush)
+            painter.drawLine(
+                center.x() + 8,
+                center.y() - 10,
+                center.x() - 2,
+                center.y() + 1,
+            )
+            painter.setBrush(color)
+            brush = QPainterPath()
+            brush.moveTo(center.x() - 3, center.y())
+            brush.lineTo(center.x() - 10, center.y() + 6)
+            brush.lineTo(center.x() - 4, center.y() + 11)
+            brush.lineTo(center.x() + 3, center.y() + 4)
+            brush.closeSubpath()
+            painter.drawPath(brush)
+            painter.drawLine(
+                center.x() - 8,
+                center.y() + 5,
+                center.x() - 2,
+                center.y() + 10,
+            )
 
 
 class StatusDisplay(QWidget):

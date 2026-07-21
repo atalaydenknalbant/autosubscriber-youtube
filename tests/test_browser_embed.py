@@ -1,6 +1,10 @@
 import inspect
 
-from app.browser_embed import ChromeWindowMonitor, Win32ChromeBackend
+from app.browser_embed import (
+    ChromeWindowMonitor,
+    HeadlessChromeWindowGuard,
+    Win32ChromeBackend,
+)
 from app.worker import build_parser
 
 
@@ -14,6 +18,9 @@ class FakeBackend:
 
     def enumerate_windows(self, _pids: set[int]) -> list[int]:
         return list(self.windows)
+
+    def hide_process_windows(self, pids: set[int]) -> None:
+        self.hidden_pids = set(pids)
 
 
 def test_monitor_tracks_new_and_closed_windows(qapp) -> None:
@@ -40,6 +47,16 @@ def test_monitor_keeps_first_discovery_order(qapp) -> None:
     assert monitor.scan() == [1002, 1001, 1003]
 
 
+def test_headless_guard_hides_windows_for_matching_processes(qapp) -> None:
+    backend = FakeBackend()
+    backend.hidden_pids = set()
+    guard = HeadlessChromeWindowGuard("token", backend)
+
+    guard.scan()
+
+    assert backend.hidden_pids == {101}
+
+
 def test_worker_parser_accepts_main_process_embed_token() -> None:
     args = build_parser().parse_args(
         [
@@ -59,6 +76,7 @@ def test_win32_backend_stateless_helpers_are_static() -> None:
     for method_name in (
         "find_browser_pids",
         "enumerate_windows",
+        "hide_process_windows",
         "_move_source_offscreen",
         "_resize_source_offscreen",
     ):

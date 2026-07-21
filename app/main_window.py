@@ -10,6 +10,7 @@ from PySide6.QtCore import (
     QProcess,
     QProcessEnvironment,
     QEasingCurve,
+    QPropertyAnimation,
     QTimer,
     Qt,
     QVariantAnimation,
@@ -17,6 +18,7 @@ from PySide6.QtCore import (
 from PySide6.QtGui import QCloseEvent, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -30,6 +32,7 @@ from PySide6.QtWidgets import (
 from app.browser_embed import (
     ChromeBackend,
     ChromeWindowMonitor,
+    HeadlessChromeWindowGuard,
     Win32ChromeBackend,
 )
 from app.browser_panel import BrowserPanel
@@ -75,7 +78,7 @@ def build_worker_invocation(
             str(debug_screenshots).lower(),
         ]
     )
-    if token and not headless:
+    if token:
         args.extend(["--embed-token", token])
     return program, args
 
@@ -94,11 +97,14 @@ class MainWindow(QMainWindow):
         self.browser_backend = browser_backend or Win32ChromeBackend()
         self.worker: QProcess | None = None
         self.browser_monitor: ChromeWindowMonitor | None = None
+        self.headless_window_guard: HeadlessChromeWindowGuard | None = None
         self.current_site_id = next(iter(SITES))
         self.headless = True
         self.debug_screenshots = False
         self._log_buffer = ""
         self._browser_animation: QVariantAnimation | None = None
+        self._site_selector_animation: QPropertyAnimation | None = None
+        self._site_selector_expanded_height = 0
 
         self.setWindowTitle("Autosubscriber App")
         self.setWindowIcon(
@@ -124,8 +130,8 @@ class MainWindow(QMainWindow):
         body_layout = QVBoxLayout(body)
         body_layout.setContentsMargins(18, 16, 18, 18)
         body_layout.setSpacing(12)
-        body_layout.addWidget(self._build_site_selector())
-        body_layout.addWidget(self._build_control_row())
+        self.site_selector_panel = self._build_site_selector()
+        body_layout.addWidget(self.site_selector_panel)
         body_layout.addWidget(self._build_content(), 1)
         root.addWidget(body, 1)
 
@@ -166,6 +172,71 @@ class MainWindow(QMainWindow):
         self.status_display = StatusDisplay(header)
         layout.addWidget(self.status_display)
 
+        controls = QWidget(header)
+        controls.setObjectName("headerControls")
+        controls.setStyleSheet("background: transparent;")
+        controls_layout = QGridLayout(controls)
+        controls_layout.setContentsMargins(4, 0, 4, 0)
+        controls_layout.setHorizontalSpacing(12)
+        controls_layout.setVerticalSpacing(1)
+
+        headless_title = QLabel("Headless", controls)
+        headless_title.setAlignment(Qt.AlignCenter)
+        headless_title.setStyleSheet(
+            f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
+        )
+        controls_layout.addWidget(headless_title, 0, 0)
+
+        self.headless_switch = AnimatedSwitch(controls)
+        self.headless_switch.setToolTip("Show logs only without an embedded browser")
+        self.headless_switch.checkedChanged.connect(self._headless_changed)
+        controls_layout.addWidget(
+            self.headless_switch,
+            1,
+            0,
+            alignment=Qt.AlignCenter,
+        )
+
+        debug_title = QLabel("Debug screenshots", controls)
+        debug_title.setAlignment(Qt.AlignCenter)
+        debug_title.setStyleSheet(
+            f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
+        )
+        controls_layout.addWidget(debug_title, 0, 1)
+
+        self.debug_screenshots_switch = AnimatedSwitch(controls)
+        self.debug_screenshots_switch.setToolTip(
+            "Save diagnostic screenshots during website runs"
+        )
+        self.debug_screenshots_switch.checkedChanged.connect(
+            self._debug_screenshots_changed
+        )
+        controls_layout.addWidget(
+            self.debug_screenshots_switch,
+            1,
+            1,
+            alignment=Qt.AlignCenter,
+        )
+
+        self.start_button = IconButton(
+            "play",
+            "Start selected website",
+            controls,
+        )
+        self.start_button.clicked.connect(self._start_worker)
+        controls_layout.addWidget(self.start_button, 0, 2, 2, 1)
+
+        self.stop_button = IconButton(
+            "stop",
+            "Stop current website",
+            controls,
+        )
+        self.stop_button.clicked.connect(self._stop_worker)
+        self.stop_button.setEnabled(False)
+        controls_layout.addWidget(self.stop_button, 0, 3, 2, 1)
+
+        layout.addWidget(controls)
+
         self.config_button = IconButton("settings", "Configure accounts", header)
         self.config_button.clicked.connect(self._open_config_editor)
         layout.addWidget(self.config_button)
@@ -178,7 +249,7 @@ class MainWindow(QMainWindow):
         self.screenshots_button.clicked.connect(self._open_screenshots)
         layout.addWidget(self.screenshots_button)
 
-        self.clear_logs_button = IconButton("clear", "Clear logs", header)
+        self.clear_logs_button = IconButton("broom", "Clear logs", header)
         self.clear_logs_button.clicked.connect(self._clear_logs)
         layout.addWidget(self.clear_logs_button)
         return header
@@ -221,60 +292,6 @@ class MainWindow(QMainWindow):
         row.addStretch(1)
         scroll.setWidget(holder)
         panel_layout.addWidget(scroll)
-        return panel
-
-    def _build_control_row(self) -> QFrame:
-        panel = QFrame(self)
-        panel.setObjectName("contentPanel")
-        layout = QHBoxLayout(panel)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(10)
-
-        mode_text = QVBoxLayout()
-        mode_text.setSpacing(0)
-        mode_title = QLabel("Headless", panel)
-        mode_title.setStyleSheet(f"color: {Colors.WHITE}; font-weight: 600;")
-        mode_description = QLabel("Show logs only", panel)
-        mode_description.setObjectName("mutedLabel")
-        mode_text.addWidget(mode_title)
-        mode_text.addWidget(mode_description)
-        layout.addLayout(mode_text)
-
-        self.headless_switch = AnimatedSwitch(panel)
-        self.headless_switch.checkedChanged.connect(self._headless_changed)
-        layout.addWidget(self.headless_switch)
-        layout.addSpacing(18)
-
-        screenshot_text = QVBoxLayout()
-        screenshot_text.setSpacing(0)
-        screenshot_title = QLabel("Debug screenshots", panel)
-        screenshot_title.setStyleSheet(
-            f"color: {Colors.WHITE}; font-weight: 600;"
-        )
-        screenshot_description = QLabel("Save diagnostic PNGs", panel)
-        screenshot_description.setObjectName("mutedLabel")
-        screenshot_text.addWidget(screenshot_title)
-        screenshot_text.addWidget(screenshot_description)
-        layout.addLayout(screenshot_text)
-
-        self.debug_screenshots_switch = AnimatedSwitch(panel)
-        self.debug_screenshots_switch.setToolTip(
-            "Save diagnostic screenshots during website runs"
-        )
-        self.debug_screenshots_switch.checkedChanged.connect(
-            self._debug_screenshots_changed
-        )
-        layout.addWidget(self.debug_screenshots_switch)
-        layout.addStretch(1)
-
-        self.start_button = IconButton("play", "Start selected website", panel)
-        self.start_button.clicked.connect(self._start_worker)
-        layout.addWidget(self.start_button)
-
-        self.stop_button = IconButton("stop", "Stop current website", panel)
-        self.stop_button.clicked.connect(self._stop_worker)
-        self.stop_button.setEnabled(False)
-        layout.addWidget(self.stop_button)
         return panel
 
     def _build_content(self) -> QSplitter:
@@ -389,6 +406,70 @@ class MainWindow(QMainWindow):
             [max(1, total_width - browser_width), browser_width]
         )
 
+    def _set_site_selector_visible(
+        self,
+        visible: bool,
+        *,
+        animated: bool = True,
+    ) -> None:
+        panel = self.site_selector_panel
+        if not visible and panel.height() > 0:
+            self._site_selector_expanded_height = panel.height()
+        if self._site_selector_animation is not None:
+            self._site_selector_animation.stop()
+            self._site_selector_animation.deleteLater()
+            self._site_selector_animation = None
+
+        if not animated:
+            panel.setMaximumHeight(16_777_215 if visible else 0)
+            panel.setVisible(visible)
+            return
+
+        if visible and panel.isVisible() and panel.maximumHeight() > 0:
+            return
+        if not visible and not panel.isVisible():
+            return
+
+        expanded_height = max(
+            self._site_selector_expanded_height,
+            panel.sizeHint().height(),
+            122,
+        )
+        animation = QPropertyAnimation(
+            panel,
+            b"maximumHeight",
+            self,
+        )
+
+        if visible:
+            panel.setMaximumHeight(0)
+            panel.show()
+            animation.setStartValue(0)
+            animation.setEndValue(expanded_height)
+            animation.finished.connect(self._site_selector_shown)
+        else:
+            animation.setStartValue(panel.height())
+            animation.setEndValue(0)
+            animation.finished.connect(self._site_selector_hidden)
+
+        animation.setDuration(280)
+        animation.setEasingCurve(QEasingCurve.InOutCubic)
+        self._site_selector_animation = animation
+        animation.start()
+
+    def _site_selector_hidden(self) -> None:
+        self.site_selector_panel.hide()
+
+    def _site_selector_shown(self) -> None:
+        panel = self.site_selector_panel
+        panel.setMaximumHeight(16_777_215)
+        panel.updateGeometry()
+        if panel.layout() is not None:
+            panel.layout().activate()
+        panel.update()
+        for button in self.site_buttons.values():
+            button.update()
+
     def _refresh_start_state(self) -> None:
         config_missing = not self.config_path.exists()
         blocked = config_missing
@@ -417,7 +498,7 @@ class MainWindow(QMainWindow):
             self._refresh_start_state()
             return
 
-        token = None if self.headless else str(uuid.uuid4())
+        token = str(uuid.uuid4())
         program, args = build_worker_invocation(
             self.current_site_id,
             headless=self.headless,
@@ -439,7 +520,14 @@ class MainWindow(QMainWindow):
         process.errorOccurred.connect(self._worker_error)
         self.worker = process
 
-        if token:
+        if self.headless:
+            self.headless_window_guard = HeadlessChromeWindowGuard(
+                token,
+                self.browser_backend,
+                self,
+            )
+            self.headless_window_guard.start()
+        else:
             self.browser_monitor = ChromeWindowMonitor(
                 token,
                 self.browser_backend,
@@ -490,6 +578,10 @@ class MainWindow(QMainWindow):
             self.browser_monitor.stop()
             self.browser_monitor.deleteLater()
             self.browser_monitor = None
+        if self.headless_window_guard is not None:
+            self.headless_window_guard.stop()
+            self.headless_window_guard.deleteLater()
+            self.headless_window_guard = None
         self.browser_panel.clear_windows()
         if self.worker is not None:
             self.worker.deleteLater()
@@ -509,6 +601,7 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, "Browser embedding failed", message)
 
     def _set_running_controls(self, running: bool) -> None:
+        self._set_site_selector_visible(not running, animated=True)
         self.start_button.setEnabled(False if running else self.start_button.isEnabled())
         self.stop_button.setEnabled(running)
         self.headless_switch.setEnabled(not running)
@@ -564,5 +657,7 @@ class MainWindow(QMainWindow):
                 terminate_process_tree(pid)
         if self.browser_monitor is not None:
             self.browser_monitor.stop()
+        if self.headless_window_guard is not None:
+            self.headless_window_guard.stop()
         self.browser_panel.clear_windows()
         event.accept()
