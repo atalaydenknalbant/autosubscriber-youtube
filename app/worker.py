@@ -65,6 +65,29 @@ def chrome_recovery_reason(error: BaseException) -> str:
     return "Chrome startup failed after a browser or driver change"
 
 
+def recover_chrome_startup_state(selenium_module, req_dict: dict) -> None:
+    """
+    Clear a failed Selenium startup immediately.
+
+    A running chrome.exe process does not prove that Chrome Update is active.
+    Waiting for every Chrome process to disappear can therefore block recovery
+    until its timeout. Terminate the failed browser state, remove stale profile
+    state, refresh Selenium Manager's cached driver, and retry once.
+    """
+    selenium_module.CHROME_PROCESS_CLEANUP_STATE["cleaned"] = False
+    selenium_module.close_existing_chrome_processes()
+
+    removed_ports = selenium_module._remove_stale_devtools_port(req_dict)
+    if removed_ports:
+        logging.info(
+            "Removed %d stale Chrome profile startup file(s).",
+            removed_ports,
+        )
+
+    selenium_module.refresh_selenium_driver_cache()
+    selenium_module.EVENT.wait(2)
+
+
 def verify_packaged_runtime() -> None:
     import cv2
     import google.protobuf
@@ -191,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:  # skipcq: PY-R1000
                 chrome_recovery_reason(error),
                 spec.display_name,
             )
-            sws.recover_chrome_after_update(req_dict)
+            recover_chrome_startup_state(sws, req_dict)
             site_function(req_dict)
     except KeyboardInterrupt:
         logging.info("[AppWorker] Stopped by interrupt")

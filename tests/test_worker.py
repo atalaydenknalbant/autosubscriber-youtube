@@ -38,6 +38,27 @@ def test_chrome_recovery_reason_distinguishes_profile_lock() -> None:
     )
 
 
+def test_recover_chrome_startup_state_cleans_immediately() -> None:
+    calls: list[str] = []
+    cleanup_state = {"cleaned": True}
+
+    selenium_module = SimpleNamespace(
+        CHROME_PROCESS_CLEANUP_STATE=cleanup_state,
+        close_existing_chrome_processes=lambda: calls.append("close"),
+        _remove_stale_devtools_port=lambda _req_dict: calls.append("port") or 1,
+        refresh_selenium_driver_cache=lambda: calls.append("refresh"),
+        EVENT=SimpleNamespace(wait=lambda seconds: calls.append(f"wait:{seconds}")),
+    )
+
+    worker.recover_chrome_startup_state(
+        selenium_module,
+        {"chrome_userdata_directory": "ChromeProfile"},
+    )
+
+    assert cleanup_state["cleaned"] is False
+    assert calls == ["close", "port", "refresh", "wait:2"]
+
+
 def test_debug_runtime_directory_is_created_beside_executable(
     monkeypatch,
     tmp_path: Path,
@@ -68,7 +89,6 @@ def test_session_creation_failure_refreshes_driver_and_retries_once(
 
     selenium_module = SimpleNamespace(
         youlikehits_functions=site_function,
-        recover_chrome_after_update=lambda _req_dict: calls.append("recover"),
     )
     monkeypatch.setitem(
         sys.modules,
@@ -80,6 +100,11 @@ def test_session_creation_failure_refreshes_driver_and_retries_once(
         "sub4sub_websites_selenium",
         selenium_module,
         raising=False,
+    )
+    monkeypatch.setattr(
+        worker,
+        "recover_chrome_startup_state",
+        lambda _selenium_module, _req_dict: calls.append("recover"),
     )
     monkeypatch.setattr(worker, "find_runtime_root", lambda: tmp_path)
     monkeypatch.setattr(worker, "config_validation_errors", lambda _site: [])
@@ -108,7 +133,6 @@ def test_early_invalid_session_recovers_and_retries_once(
 
     selenium_module = SimpleNamespace(
         youlikehits_functions=site_function,
-        recover_chrome_after_update=lambda _req_dict: calls.append("recover"),
     )
     monkeypatch.setitem(
         sys.modules,
@@ -120,6 +144,11 @@ def test_early_invalid_session_recovers_and_retries_once(
         "sub4sub_websites_selenium",
         selenium_module,
         raising=False,
+    )
+    monkeypatch.setattr(
+        worker,
+        "recover_chrome_startup_state",
+        lambda _selenium_module, _req_dict: calls.append("recover"),
     )
     monkeypatch.setattr(worker, "find_runtime_root", lambda: tmp_path)
     monkeypatch.setattr(worker, "config_validation_errors", lambda _site: [])
