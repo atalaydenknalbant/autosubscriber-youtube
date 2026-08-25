@@ -297,6 +297,11 @@ def remove_stale_devtools_port(req_dict: dict) -> int:
     return removed
 
 
+def _remove_stale_devtools_port(req_dict: dict) -> int:
+    """Support workers packaged before the cleanup API became public."""
+    return remove_stale_devtools_port(req_dict)
+
+
 def recover_chrome_after_update(
     req_dict: dict,
     wait_timeout_seconds: float = 90,

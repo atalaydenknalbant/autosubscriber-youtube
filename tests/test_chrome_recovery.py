@@ -39,6 +39,23 @@ def test_remove_stale_devtools_port_from_profile_root_and_child(
     assert not child_port.exists()
 
 
+def test_legacy_remove_stale_devtools_port_api_remains_available(
+    monkeypatch,
+) -> None:
+    calls: list[dict] = []
+    monkeypatch.setattr(
+        sws,
+        "remove_stale_devtools_port",
+        lambda req_dict: calls.append(req_dict) or 2,
+    )
+
+    request = {"chrome_userdata_directory": "ChromeProfile"}
+    legacy_cleanup = getattr(sws, "_remove_stale_devtools_port")
+
+    assert legacy_cleanup(request) == 2
+    assert calls == [request]
+
+
 def test_recovery_waits_for_chrome_then_cleans_once(monkeypatch) -> None:
     calls: list[str] = []
     process_states = iter((True, True, False))
