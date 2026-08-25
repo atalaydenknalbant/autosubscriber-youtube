@@ -30,7 +30,7 @@ def test_remove_stale_devtools_port_from_profile_root_and_child(
     root_port.write_text("root", encoding="utf-8")
     child_port.write_text("child", encoding="utf-8")
 
-    removed = sws._remove_stale_devtools_port(
+    removed = sws.remove_stale_devtools_port(
         {"chrome_userdata_directory": str(profile_root)}
     )
 
@@ -55,7 +55,7 @@ def test_recovery_waits_for_chrome_then_cleans_once(monkeypatch) -> None:
     )
     monkeypatch.setattr(
         sws,
-        "_remove_stale_devtools_port",
+        "remove_stale_devtools_port",
         lambda _req_dict: calls.append("port") or 1,
     )
     monkeypatch.setattr(

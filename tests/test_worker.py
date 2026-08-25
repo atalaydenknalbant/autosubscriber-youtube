@@ -45,7 +45,7 @@ def test_recover_chrome_startup_state_cleans_immediately() -> None:
     selenium_module = SimpleNamespace(
         CHROME_PROCESS_CLEANUP_STATE=cleanup_state,
         close_existing_chrome_processes=lambda: calls.append("close"),
-        _remove_stale_devtools_port=lambda _req_dict: calls.append("port") or 1,
+        remove_stale_devtools_port=lambda _req_dict: calls.append("port") or 1,
         refresh_selenium_driver_cache=lambda: calls.append("refresh"),
         EVENT=SimpleNamespace(wait=lambda seconds: calls.append(f"wait:{seconds}")),
     )

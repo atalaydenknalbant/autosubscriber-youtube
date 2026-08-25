@@ -36,6 +36,12 @@ from io import BytesIO
 import re
 import torch
 
+from selenium_codes.youlikehits_soundcloud import (
+    SoundCloudTask,
+    find_soundcloud_task,
+    soundcloud_tasks_finished,
+)
+
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -265,7 +271,8 @@ def _windows_process_is_running(image_name: str) -> bool:
     return image_name.lower() in result.stdout.lower()
 
 
-def _remove_stale_devtools_port(req_dict: dict) -> int:
+def remove_stale_devtools_port(req_dict: dict) -> int:
+    """Remove stale DevTools port files from the configured Chrome profile."""
     user_data_value = req_dict.get("chrome_userdata_directory")
     if not user_data_value:
         return 0
@@ -306,7 +313,7 @@ def recover_chrome_after_update(
 
     CHROME_PROCESS_CLEANUP_STATE["cleaned"] = False
     close_existing_chrome_processes()
-    removed_ports = _remove_stale_devtools_port(req_dict)
+    removed_ports = remove_stale_devtools_port(req_dict)
     if removed_ports:
         logging.info(
             "Removed %d stale Chrome profile startup file(s).",
@@ -525,7 +532,7 @@ def set_driver_opt(req_dict: dict,
     close_existing_chrome_processes()
     cleanup_stale_chrome_temp_dirs()
     synchronize_chromedriver_with_chrome()
-    _remove_stale_devtools_port(req_dict)
+    remove_stale_devtools_port(req_dict)
 
     if "headless" in req_dict:
         headless = bool_config_value(req_dict.get("headless"))
@@ -1848,10 +1855,65 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             capture_youlikehits_failure("while_loop_watch", ex)
             raise
     def while_loop_listen(hours_time: int) -> None:
-        """Listen to tracks by clicking 'followbutton' on /soundcloudplays.php until time runs out"""
+        """Listen to SoundCloud tasks until the configured time runs out."""
+
+        def read_current_task(
+            wait_seconds: float = 0,
+        ) -> SoundCloudTask | None:
+            deadline = time.monotonic() + wait_seconds
+            while True:
+                task = find_soundcloud_task(driver)
+                if task is not None:
+                    return task
+                if time.monotonic() >= deadline:
+                    return None
+                EVENT.wait(0.5)
+
+        def switch_to_listen_main_window(main_handle: str) -> bool:
+            try:
+                driver.switch_to.window(main_handle)
+                driver.switch_to.default_content()
+                return True
+            except WebDriverException:
+                return False
+
+        def click_listen_button(task_identity: str) -> bool:
+            for attempt in range(1, 4):
+                task = read_current_task(3)
+                if task is None or task.identity != task_identity:
+                    return False
+                try:
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center'});",
+                        task.button,
+                    )
+                    task.button.click()
+                    return True
+                except ElementClickInterceptedException:
+                    try:
+                        driver.execute_script("arguments[0].click();", task.button)
+                        return True
+                    except WebDriverException:
+                        pass
+                except WebDriverException:
+                    pass
+                logging.info(
+                    "[YouLikeHits][Listen] Listen button attempt %d/3 failed",
+                    attempt,
+                )
+                EVENT.wait(1)
+            return False
+
+        def close_listen_windows(context: str) -> None:
+            cleanup_youlikehits_child_windows(
+                context,
+                max_to_close=40,
+            )
+
         try:
             switch_youlikehits_main_window("[Listen] Before opening listen page")
             driver.get("https://www.youlikehits.com/soundcloudplays.php")
+            listen_main_handle = driver.current_window_handle
             logging.info("Listen Loop Started")
             log_youlikehits_state("Opened listen page")
             start = datetime.now()
@@ -1875,81 +1937,83 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                     EVENT.wait(secrets.choice(range(3, 4)))
                     continue
                 EVENT.wait(secrets.choice(range(3, 4)))
-                driver.switch_to.window(driver.window_handles[0])
+                close_listen_windows("[Listen] Start iteration cleanup")
+                driver.switch_to.default_content()
+
+                list_elements = driver.find_elements(By.CSS_SELECTOR, "#listall")
+                list_text = list_elements[0].text if list_elements else ""
+                if soundcloud_tasks_finished(list_text):
+                    logging.info("[YouLikeHits][Listen] No songs available, leaving loop")
+                    return
+
+                task = read_current_task(10)
+                if task is None:
+                    logging.info(
+                        "[YouLikeHits][Listen] No SoundCloud task card found, refreshing"
+                    )
+                    driver.refresh()
+                    EVENT.wait(2)
+                    continue
+
+                logging.info("[YouLikeHits][Listen] Current task: %s", task.label)
+                handles_before = set(driver.window_handles)
+                if not click_listen_button(task.identity):
+                    logging.info(
+                        "[YouLikeHits][Listen] Could not click Listen for %s",
+                        task.label,
+                    )
+                    driver.refresh()
+                    EVENT.wait(2)
+                    continue
+
+                log_youlikehits_state(
+                    f"[Listen] Listen button submitted for {task.label}"
+                )
                 try:
-                    if driver.find_element(By.CSS_SELECTOR, '#listall').text == \
-                            'There are no more songs to play for points. Check back later!':
-                        logging.info('No songs available quitting...')
-                        return
-                except NoSuchElementException:
-                    EVENT.wait(0.25)
-                driver.switch_to.window(driver.window_handles[0])
-                try:
-                    song_name = driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text
-                    logging.info("[YouLikeHits][Listen] Current song: %s", song_name)
-                except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
-                    logging.info("[YouLikeHits][Listen] Could not read current song name, refreshing")
+                    WebDriverWait(driver, 10).until(
+                        lambda current_driver: bool(
+                            set(current_driver.window_handles) - handles_before
+                        )
+                    )
+                except TimeoutException:
+                    logging.info(
+                        "[YouLikeHits][Listen] SoundCloud player window did not open for %s",
+                        task.label,
+                    )
                     driver.refresh()
                     continue
-                try:
-                    driver.find_element(By.CLASS_NAME, 'followbutton').click()
-                    EVENT.wait(0.25)
-                    driver.find_element(By.CLASS_NAME, 'followbutton').click()
-                    EVENT.wait(1)
-                    driver.find_element(By.CLASS_NAME, 'followbutton').send_keys(Keys.ENTER)
-                    log_youlikehits_state(f"[Listen] Follow button submitted for {song_name}")
-                except (NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException,
-                        JavascriptException):
-                    logging.info("[YouLikeHits][Listen] Could not click follow button for %s", song_name)
-                    EVENT.wait(10)
-                driver.switch_to.default_content()
-                try:
-                    counter = 0
-                    while (song_name ==
-                           driver.find_element(By.CSS_SELECTOR, '#listall > center > b:nth-child(1) > font').text):
-                        EVENT.wait(5)
-                        counter += 1
-                        if counter % 6 == 0:
-                            logging.info("[YouLikeHits][Listen] Waiting for next song after %s, waited %ds", song_name, counter * 5)
-                        if counter >= 60:
-                            try:
-                                logging.info("[YouLikeHits][Listen] Song list did not advance after %s, refreshing and closing child window", song_name)
-                                driver.refresh()
-                                driver.switch_to.window(driver.window_handles[1])
-                                driver.close()
-                                switch_youlikehits_main_window(
-                                    f"[Listen] After timeout close for {song_name}"
-                                )
-                                break
-                            except NoSuchWindowException:
-                                logging.info("[YouLikeHits][Listen] Child window already closed while waiting for next song")
-                                switch_youlikehits_main_window(
-                                    f"[Listen] After already closed timeout window for {song_name}"
-                                )
-                                break
-                except (TimeoutException, IndexError, NoSuchWindowException, NoSuchElementException) as ex:
-                    logging.info("[YouLikeHits][Listen] Exception while waiting for next song after %s: %s", song_name, type(ex).__name__)
-                    EVENT.wait(0.25)
-                    if type(ex) is NoSuchElementException:
-                        logging.info("[YouLikeHits][Listen] Song entry disappeared, refreshing listen page")
-                        driver.refresh()
-                try:
-                    driver.switch_to.window(driver.window_handles[1])
-                    driver.close()
-                    logging.info("[YouLikeHits][Listen] Closed target window for %s", song_name)
-                    switch_youlikehits_main_window(
-                        f"[Listen] After closing target window for {song_name}"
+
+                expected_seconds = task.wait_seconds or 60
+                max_wait_seconds = max(300, expected_seconds + 120)
+                wait_started = time.monotonic()
+                while time.monotonic() - wait_started < max_wait_seconds:
+                    EVENT.wait(2)
+                    if not switch_to_listen_main_window(listen_main_handle):
+                        logging.info(
+                            "[YouLikeHits][Listen] Main window closed while waiting for %s",
+                            task.label,
+                        )
+                        return
+                    current_task = read_current_task()
+                    if current_task is None or current_task.identity != task.identity:
+                        elapsed = round(time.monotonic() - wait_started)
+                        logging.info(
+                            "[YouLikeHits][Listen] Task completed after %d second(s): %s",
+                            elapsed,
+                            task.label,
+                        )
+                        break
+                else:
+                    logging.info(
+                        "[YouLikeHits][Listen] Task did not advance after %d second(s), refreshing: %s",
+                        max_wait_seconds,
+                        task.label,
                     )
-                except IndexError:
-                    logging.info("[YouLikeHits][Listen] No target window left to close for %s", song_name)
-                    switch_youlikehits_main_window(
-                        f"[Listen] After missing target window for {song_name}"
-                    )
-                except NoSuchWindowException:
-                    logging.info("[YouLikeHits][Listen] Target window already closed for %s", song_name)
-                    switch_youlikehits_main_window(
-                        f"[Listen] After already closed target window for {song_name}"
-                    )
+                    driver.refresh()
+
+                close_listen_windows(
+                    f"[Listen] Finished task cleanup for {task.label}"
+                )
         except Exception as ex:
             capture_youlikehits_failure("while_loop_listen", ex)
             raise

@@ -77,7 +77,7 @@ def recover_chrome_startup_state(selenium_module, req_dict: dict) -> None:
     selenium_module.CHROME_PROCESS_CLEANUP_STATE["cleaned"] = False
     selenium_module.close_existing_chrome_processes()
 
-    removed_ports = selenium_module._remove_stale_devtools_port(req_dict)
+    removed_ports = selenium_module.remove_stale_devtools_port(req_dict)
     if removed_ports:
         logging.info(
             "Removed %d stale Chrome profile startup file(s).",
