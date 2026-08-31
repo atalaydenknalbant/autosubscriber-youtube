@@ -164,6 +164,99 @@ def test_detected_gui_version_downloads_newer_online_release(
     window.close()
 
 
+def test_update_download_locks_run_controls(
+    qapp,
+    config_path: Path,
+) -> None:
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        auto_check_updates=False,
+    )
+    release = ReleaseInfo(
+        version="3.1",
+        page_url="https://github.com/example/release",
+        asset_url="https://github.com/example/AutosubscriberApp.exe",
+        asset_name="AutosubscriberApp.exe",
+        asset_size=100,
+        sha256="a" * 64,
+    )
+
+    window._update_download_started(release)
+
+    assert window._update_in_progress is True
+    assert window.start_button.isEnabled() is False
+    assert window.headless_switch.isEnabled() is False
+    assert all(not button.isEnabled() for button in window.site_buttons.values())
+
+    window._update_download_failed("network unavailable")
+
+    assert window._update_in_progress is False
+    assert window.start_button.isEnabled() is True
+    window.close()
+
+
+def test_update_stops_active_website_before_installing(
+    qapp,
+    config_path: Path,
+    monkeypatch,
+) -> None:
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        auto_check_updates=False,
+    )
+    release = ReleaseInfo(
+        version="3.1",
+        page_url="https://github.com/example/release",
+        asset_url="https://github.com/example/AutosubscriberApp.exe",
+        asset_name="AutosubscriberApp.exe",
+        asset_size=100,
+        sha256="a" * 64,
+    )
+    stopped: list[bool] = []
+    window.worker = object()
+    monkeypatch.setattr(window, "_stop_worker", lambda: stopped.append(True))
+
+    window._update_download_started(release)
+
+    assert stopped == [True]
+    window.worker = None
+    window.close()
+
+
+def test_normal_close_does_not_install_a_pending_update(
+    qapp,
+    config_path: Path,
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        auto_check_updates=False,
+    )
+    release = ReleaseInfo(
+        version="3.1",
+        page_url="https://github.com/example/release",
+        asset_url="https://github.com/example/AutosubscriberApp.exe",
+        asset_name="AutosubscriberApp.exe",
+        asset_size=100,
+        sha256="a" * 64,
+    )
+    window._pending_update = (tmp_path / "update.exe", release)
+    launches: list[bool] = []
+    monkeypatch.setattr(
+        window,
+        "_launch_pending_update_replacement",
+        lambda: launches.append(True) or True,
+    )
+
+    window.close()
+
+    assert launches == []
+
+
 def test_narrow_header_keeps_debug_screenshots_label_visible(
     qapp,
     config_path: Path,

@@ -185,6 +185,14 @@ Invoke-NativeCommand `
         & $BuildPython -m pip check
     }
 
+Write-Host "Running application tests before packaging..."
+
+Invoke-NativeCommand `
+    -Description "Application tests" `
+    -Command {
+        & $BuildPython -m pytest -q
+    }
+
 $VerificationScript = Join-Path `
     ([System.IO.Path]::GetTempPath()) `
     "verify_autosubscriber_build_$PID.py"

@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
 
 import pytest
 
@@ -265,13 +270,64 @@ def test_replacement_helper_receives_verified_paths(
         "a" * 64,
         wait_pid=1234,
         launcher=lambda command, **kwargs: calls.append((command, kwargs)),
+        ready_waiter=lambda _path, _process: True,
     )
 
     command, options = calls[0]
     assert script_path.is_file()
-    assert command[0] == "powershell.exe"
+    assert command[0].endswith(
+        r"System32\WindowsPowerShell\v1.0\powershell.exe"
+    )
     assert command[command.index("-WaitPid") + 1] == "1234"
     assert command[command.index("-Source") + 1] == str(source.resolve())
     assert command[command.index("-Target") + 1] == str(target.resolve())
     assert options["close_fds"] is True
-    assert "-WindowStyle Hidden" not in script_path.read_text(encoding="utf-8")
+    assert options["creationflags"] & subprocess.CREATE_NO_WINDOW
+    assert options["creationflags"] & subprocess.CREATE_NEW_PROCESS_GROUP
+    assert not options["creationflags"] & subprocess.DETACHED_PROCESS
+    script_text = script_path.read_text(encoding="utf-8")
+    assert "Get-FileHash" not in script_text
+    assert "System.Security.Cryptography.SHA256" in script_text
+    assert "-WindowStyle Normal" in script_text
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="The executable replacement helper is Windows only.",
+)
+def test_replacement_helper_executes_and_replaces_executable(
+    tmp_path: Path,
+) -> None:
+    system_directory = Path(os.environ["SystemRoot"]) / "System32"
+    source = tmp_path / "downloaded.exe"
+    target = tmp_path / "AutosubscriberApp.exe"
+    shutil.copy2(system_directory / "where.exe", source)
+    shutil.copy2(system_directory / "whoami.exe", target)
+    expected_sha256 = hashlib.sha256(source.read_bytes()).hexdigest()
+    wait_process = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(0.5)"],
+        creationflags=subprocess.CREATE_NO_WINDOW,
+    )
+
+    try:
+        script_path = launch_update_replacement(
+            source,
+            target,
+            expected_sha256,
+            wait_pid=wait_process.pid,
+        )
+        wait_process.wait(timeout=5)
+        deadline = time.monotonic() + 10
+        while source.exists() and time.monotonic() < deadline:
+            time.sleep(0.05)
+
+        assert source.exists() is False
+        assert hashlib.sha256(target.read_bytes()).hexdigest() == expected_sha256
+
+        while script_path.exists() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        assert script_path.exists() is False
+        assert (tmp_path / "update-error.log").exists() is False
+    finally:
+        if wait_process.poll() is None:
+            wait_process.kill()

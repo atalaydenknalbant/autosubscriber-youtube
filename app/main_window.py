@@ -121,6 +121,7 @@ class MainWindow(QMainWindow):
         self._latest_release: ReleaseInfo | None = None
         self._pending_update: tuple[Path, ReleaseInfo] | None = None
         self._update_installing = False
+        self._update_in_progress = False
         self._startup_update_timer: QTimer | None = None
 
         self.setWindowTitle("Autosubscriber App")
@@ -484,8 +485,14 @@ class MainWindow(QMainWindow):
         self._manual_update_check = False
 
     def _update_download_started(self, release: ReleaseInfo) -> None:
+        self._set_update_in_progress(True)
         self.update_button.setEnabled(False)
         self.latest_version_label.setText(f"Update {release.version} 0%")
+        if self.worker is not None:
+            self._append_log(
+                "Stopping the active website before installing the application update."
+            )
+            self._stop_worker()
 
     def _update_download_progress(self, percent: int) -> None:
         if self._latest_release is None:
@@ -511,6 +518,7 @@ class MainWindow(QMainWindow):
             )
 
     def _update_download_failed(self, message: str) -> None:
+        self._set_update_in_progress(False)
         self.update_button.setEnabled(True)
         latest = self._latest_release.version if self._latest_release else "unknown"
         self.latest_version_label.setText(f"Update {latest} failed")
@@ -532,6 +540,9 @@ class MainWindow(QMainWindow):
             f"Restarting with Autosubscriber App {release.version}."
         )
         self.close()
+        application = QApplication.instance()
+        if application is not None:
+            application.quit()
 
     def _launch_pending_update_replacement(self) -> bool:
         if self._pending_update is None or self._update_installing:
@@ -544,6 +555,8 @@ class MainWindow(QMainWindow):
                 release.sha256,
             )
         except (OSError, RuntimeError, ValueError) as error:
+            self._pending_update = None
+            self._set_update_in_progress(False)
             self.update_button.setEnabled(True)
             self.latest_version_label.setText(f"Update {release.version} failed")
             self._append_log(f"Update installation failed: {error}")
@@ -770,13 +783,15 @@ class MainWindow(QMainWindow):
 
     def _refresh_start_state(self) -> None:
         config_missing = not self.config_path.exists()
-        blocked = config_missing
+        blocked = config_missing or self._update_in_progress
         if not blocked:
             blocked = is_config_same_as_default(self.config_path)
         self.start_button.setEnabled(not blocked and self.worker is None)
         if self.worker is not None:
             return
-        if config_missing:
+        if self._update_in_progress:
+            self.status_display.set_ready("Updating application")
+        elif config_missing:
             self.status_display.set_ready("Create config: click settings")
         elif blocked:
             self.status_display.set_ready("Configuration required")
@@ -784,7 +799,7 @@ class MainWindow(QMainWindow):
             self.status_display.set_ready("Ready")
 
     def _start_worker(self) -> None:
-        if self.worker is not None:
+        if self.worker is not None or self._update_in_progress:
             return
         errors = config_validation_errors(self.current_site_id, self.config_path)
         if errors:
@@ -904,11 +919,22 @@ class MainWindow(QMainWindow):
         self._set_site_selector_visible(not running, animated=True)
         self.start_button.setEnabled(False if running else self.start_button.isEnabled())
         self.stop_button.setEnabled(running)
-        self.headless_switch.setEnabled(not running)
-        self.debug_screenshots_switch.setEnabled(not running)
-        self.config_button.setEnabled(not running)
+        editable = not running and not self._update_in_progress
+        self.headless_switch.setEnabled(editable)
+        self.debug_screenshots_switch.setEnabled(editable)
+        self.config_button.setEnabled(editable)
         for button in self.site_buttons.values():
-            button.setEnabled(not running)
+            button.setEnabled(editable)
+
+    def _set_update_in_progress(self, active: bool) -> None:
+        self._update_in_progress = active
+        editable = not active and self.worker is None
+        self.headless_switch.setEnabled(editable)
+        self.debug_screenshots_switch.setEnabled(editable)
+        self.config_button.setEnabled(editable)
+        for button in self.site_buttons.values():
+            button.setEnabled(editable)
+        self._refresh_start_state()
 
     def _open_config_editor(self) -> None:
         if not self.config_path.exists():
@@ -958,8 +984,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event: QCloseEvent) -> None:
         if self._startup_update_timer is not None:
             self._startup_update_timer.stop()
-        if self._pending_update is not None and not self._update_installing:
-            self._launch_pending_update_replacement()
         if self.worker is not None:
             pid = int(self.worker.processId())
             if pid > 0:

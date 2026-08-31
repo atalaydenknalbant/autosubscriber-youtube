@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from typing import Any, Callable
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -287,13 +288,29 @@ param(
     [Parameter(Mandatory=$true)][string]$Source,
     [Parameter(Mandatory=$true)][string]$Target,
     [Parameter(Mandatory=$true)][string]$ExpectedSha256,
-    [Parameter(Mandatory=$true)][string]$LogPath
+    [Parameter(Mandatory=$true)][string]$LogPath,
+    [Parameter(Mandatory=$true)][string]$ReadyPath
 )
 $ErrorActionPreference = 'Stop'
 $backup = "$Target.update-backup"
 try {
+    [System.IO.File]::WriteAllText($ReadyPath, [string]$PID)
     Wait-Process -Id $WaitPid -ErrorAction SilentlyContinue
-    $actual = (Get-FileHash -LiteralPath $Source -Algorithm SHA256).Hash.ToLowerInvariant()
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [System.IO.File]::OpenRead($Source)
+        try {
+            $actual = ([System.BitConverter]::ToString(
+                $sha256.ComputeHash($stream)
+            )).Replace('-', '').ToLowerInvariant()
+        }
+        finally {
+            $stream.Dispose()
+        }
+    }
+    finally {
+        $sha256.Dispose()
+    }
     if ($actual -ne $ExpectedSha256.ToLowerInvariant()) {
         throw 'Downloaded update digest changed before installation.'
     }
@@ -326,7 +343,10 @@ try {
     if (-not $installed) {
         throw 'The update could not replace the application executable.'
     }
-    Start-Process -FilePath $Target -WorkingDirectory (Split-Path -Parent $Target)
+    Start-Sleep -Milliseconds 250
+    Start-Process -FilePath $Target `
+        -WorkingDirectory (Split-Path -Parent $Target) `
+        -WindowStyle Normal
     Remove-Item -LiteralPath $backup -Force -ErrorAction SilentlyContinue
 }
 catch {
@@ -334,9 +354,42 @@ catch {
     exit 1
 }
 finally {
+    Remove-Item -LiteralPath $ReadyPath -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $PSCommandPath -Force -ErrorAction SilentlyContinue
 }
 """.strip()
+
+
+def _windows_powershell_path() -> Path:
+    system_root = Path(os.environ.get("SystemRoot", r"C:\Windows"))
+    powershell = (
+        system_root
+        / "System32"
+        / "WindowsPowerShell"
+        / "v1.0"
+        / "powershell.exe"
+    )
+    if not powershell.is_file():
+        raise FileNotFoundError(
+            f"Windows PowerShell was not found at {powershell}."
+        )
+    return powershell
+
+
+def _wait_for_update_helper(
+    ready_path: Path,
+    process: Any,
+    timeout_seconds: float = 5.0,
+) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if ready_path.is_file():
+            return True
+        poll = getattr(process, "poll", None)
+        if callable(poll) and poll() is not None:
+            return False
+        time.sleep(0.05)
+    return ready_path.is_file()
 
 
 def launch_update_replacement(
@@ -345,6 +398,7 @@ def launch_update_replacement(
     expected_sha256: str,
     wait_pid: int | None = None,
     launcher: Callable[..., Any] = subprocess.Popen,
+    ready_waiter: Callable[[Path, Any], bool] = _wait_for_update_helper,
 ) -> Path:
     if sys.platform != "win32":
         raise RuntimeError("Automatic executable replacement is supported on Windows only.")
@@ -357,10 +411,12 @@ def launch_update_replacement(
 
     staging = update_staging_directory()
     script_path = staging / f"apply-update-{os.getpid()}.ps1"
+    ready_path = staging / f"apply-update-{os.getpid()}.ready"
     log_path = target.parent / "update-error.log"
+    ready_path.unlink(missing_ok=True)
     script_path.write_text(_update_script_text(), encoding="utf-8")
     command = [
-        "powershell.exe",
+        str(_windows_powershell_path()),
         "-NoProfile",
         "-NonInteractive",
         "-ExecutionPolicy",
@@ -379,13 +435,34 @@ def launch_update_replacement(
         expected_sha256.lower(),
         "-LogPath",
         str(log_path),
+        "-ReadyPath",
+        str(ready_path),
     ]
-    creation_flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
-    launcher(
-        command,
-        close_fds=True,
-        creationflags=creation_flags,
+    creation_flags = (
+        subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
     )
+    try:
+        process = launcher(
+            command,
+            close_fds=True,
+            creationflags=creation_flags,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        script_path.unlink(missing_ok=True)
+        ready_path.unlink(missing_ok=True)
+        raise
+    if not ready_waiter(ready_path, process):
+        terminate = getattr(process, "terminate", None)
+        if callable(terminate):
+            terminate()
+        script_path.unlink(missing_ok=True)
+        ready_path.unlink(missing_ok=True)
+        raise RuntimeError(
+            "The update helper did not start. The current app was not closed."
+        )
     return script_path
 
 
