@@ -3,6 +3,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 from app.main_window import MainWindow, build_worker_invocation
+from app.update_manager import ReleaseInfo, ReleaseStatus, UpdateManager
 
 
 class FakeBackend:
@@ -77,6 +78,111 @@ def test_run_controls_are_hosted_in_header(
     assert window.start_button.parent() is header_controls
     assert window.stop_button.parent() is header_controls
     assert window.clear_logs_button.icon_name == "broom"
+    window.close()
+
+
+def test_header_shows_versions_and_manual_update_control(
+    qapp,
+    config_path: Path,
+) -> None:
+    manager = UpdateManager()
+    checks: list[bool] = []
+    manager.check_for_updates = lambda: checks.append(True) or True
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        update_manager=manager,
+        auto_check_updates=False,
+    )
+
+    assert window.installed_version_label.text() == "App detecting"
+    assert window.latest_version_label.text() == "Latest checking"
+    assert window.update_button.icon_name == "refresh"
+
+    window.update_button.click()
+
+    assert checks == [True]
+    window.close()
+
+
+def test_startup_automatically_checks_for_updates(
+    qapp,
+    config_path: Path,
+) -> None:
+    manager = UpdateManager()
+    checks: list[bool] = []
+    manager.check_for_updates = lambda: checks.append(True) or True
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        update_manager=manager,
+    )
+
+    assert window._startup_update_timer is not None
+    assert window._startup_update_timer.isActive()
+    assert window._startup_update_timer.isSingleShot()
+    assert window._startup_update_timer.interval() == 800
+    window._startup_update_check()
+    assert checks == [True]
+    window.close()
+
+
+def test_detected_gui_version_downloads_newer_online_release(
+    qapp,
+    config_path: Path,
+    monkeypatch,
+) -> None:
+    manager = UpdateManager()
+    downloads: list[ReleaseInfo] = []
+    manager.download_update = lambda release: downloads.append(release) or True
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        update_manager=manager,
+        auto_check_updates=False,
+    )
+    release = ReleaseInfo(
+        version="2.10",
+        page_url="https://github.com/example/release",
+        asset_url="https://github.com/example/AutosubscriberApp.exe",
+        asset_name="AutosubscriberApp.exe",
+        asset_size=100,
+        sha256="a" * 64,
+    )
+    monkeypatch.setattr(
+        "app.main_window.can_replace_current_executable",
+        lambda: True,
+    )
+
+    window._update_check_succeeded(
+        ReleaseStatus(latest=release, installed_version="2.9")
+    )
+
+    assert window.installed_version_label.text() == "App 2.9 local"
+    assert window.latest_version_label.text() == "Latest 2.10"
+    assert downloads == [release]
+    window.close()
+
+
+def test_narrow_header_keeps_debug_screenshots_label_visible(
+    qapp,
+    config_path: Path,
+) -> None:
+    window = MainWindow(
+        config_path=config_path,
+        browser_backend=FakeBackend(),
+        auto_check_updates=False,
+    )
+    window.resize(1100, 720)
+    window.show()
+    qapp.processEvents()
+
+    assert window._header_compact is True
+    assert window.debug_screenshots_label.text() == "Debug screenshots"
+    assert (
+        window.debug_screenshots_label.width()
+        >= window.debug_screenshots_label.sizeHint().width()
+    )
     window.close()
 
 

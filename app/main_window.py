@@ -15,8 +15,9 @@ from PySide6.QtCore import (
     Qt,
     QVariantAnimation,
 )
-from PySide6.QtGui import QCloseEvent, QIcon, QPixmap
+from PySide6.QtGui import QCloseEvent, QIcon, QPixmap, QResizeEvent
 from PySide6.QtWidgets import (
+    QApplication,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -48,6 +49,14 @@ from app.site_registry import (
     resolve_asset,
 )
 from app.theme import Colors
+from app.update_manager import (
+    ReleaseInfo,
+    ReleaseStatus,
+    UpdateManager,
+    can_replace_current_executable,
+    is_newer_version,
+    launch_update_replacement,
+)
 from app.widgets import (
     AnimatedSwitch,
     GradientHeader,
@@ -88,6 +97,8 @@ class MainWindow(QMainWindow):
         self,
         config_path: Path | None = None,
         browser_backend: ChromeBackend | None = None,
+        update_manager: UpdateManager | None = None,
+        auto_check_updates: bool = True,
     ) -> None:
         super().__init__()
         self.config_path = config_path or find_config_path()
@@ -105,6 +116,12 @@ class MainWindow(QMainWindow):
         self._browser_animation: QVariantAnimation | None = None
         self._site_selector_animation: QPropertyAnimation | None = None
         self._site_selector_expanded_height = 0
+        self.update_manager = update_manager or UpdateManager(self)
+        self._manual_update_check = False
+        self._latest_release: ReleaseInfo | None = None
+        self._pending_update: tuple[Path, ReleaseInfo] | None = None
+        self._update_installing = False
+        self._startup_update_timer: QTimer | None = None
 
         self.setWindowTitle("Autosubscriber App")
         self.setWindowIcon(
@@ -113,10 +130,16 @@ class MainWindow(QMainWindow):
         self.resize(1440, 900)
         self.setMinimumSize(1100, 720)
         self._build_ui()
+        self._connect_update_manager()
         self.select_site(self.current_site_id)
         self._refresh_start_state()
         if self._prompt_for_missing_config:
             QTimer.singleShot(0, self._prompt_create_config)
+        if auto_check_updates:
+            self._startup_update_timer = QTimer(self)
+            self._startup_update_timer.setSingleShot(True)
+            self._startup_update_timer.timeout.connect(self._startup_update_check)
+            self._startup_update_timer.start(800)
 
     def _build_ui(self) -> None:
         central = QWidget(self)
@@ -137,15 +160,17 @@ class MainWindow(QMainWindow):
 
     def _build_header(self) -> GradientHeader:
         header = GradientHeader(self)
-        layout = QHBoxLayout(header)
-        layout.setContentsMargins(20, 10, 20, 10)
-        layout.setSpacing(12)
+        self.header_layout = QGridLayout(header)
+        self.header_layout.setContentsMargins(20, 10, 20, 10)
+        self.header_layout.setHorizontalSpacing(12)
+        self.header_layout.setVerticalSpacing(6)
+        self._header_compact: bool | None = None
 
-        logo = QLabel(header)
+        self.header_logo = QLabel(header)
         pixmap = QPixmap(
             str(resolve_asset("app/assets/branding/autosubscriber-logo.png"))
         )
-        logo.setPixmap(
+        self.header_logo.setPixmap(
             pixmap.scaled(
                 52,
                 52,
@@ -153,31 +178,73 @@ class MainWindow(QMainWindow):
                 Qt.SmoothTransformation,
             )
         )
-        logo.setFixedSize(54, 54)
-        layout.addWidget(logo)
+        self.header_logo.setFixedSize(54, 54)
 
-        brand = QVBoxLayout()
+        self.header_brand_widget = QWidget(header)
+        self.header_brand_widget.setStyleSheet("background: transparent;")
+        brand = QVBoxLayout(self.header_brand_widget)
+        brand.setContentsMargins(0, 0, 0, 0)
         brand.setSpacing(0)
-        title = QLabel("AUTOSUBSCRIBER", header)
+        title = QLabel("AUTOSUBSCRIBER", self.header_brand_widget)
         title.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 17pt; font-weight: 700;"
         )
-        subtitle = QLabel("Selenium automation control center", header)
-        subtitle.setStyleSheet(f"color: {Colors.MUTED}; font-size: 9pt;")
+        self.header_subtitle = QLabel(
+            "Selenium automation control center",
+            self.header_brand_widget,
+        )
+        self.header_subtitle.setStyleSheet(
+            f"color: {Colors.MUTED}; font-size: 9pt;"
+        )
         brand.addWidget(title)
-        brand.addWidget(subtitle)
-        layout.addLayout(brand)
-        layout.addStretch(1)
+        brand.addWidget(self.header_subtitle)
 
         self.status_display = StatusDisplay(header)
-        layout.addWidget(self.status_display)
 
-        controls = QWidget(header)
+        self.header_version_widget = QWidget(header)
+        self.header_version_widget.setStyleSheet("background: transparent;")
+        self.header_version_widget.setFixedWidth(116)
+        version_layout = QVBoxLayout(self.header_version_widget)
+        version_layout.setContentsMargins(2, 0, 2, 0)
+        version_layout.setSpacing(0)
+        self.installed_version_label = QLabel(
+            "App detecting",
+            self.header_version_widget,
+        )
+        self.installed_version_label.setAlignment(Qt.AlignRight)
+        self.installed_version_label.setStyleSheet(
+            f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
+        )
+        self.latest_version_label = QLabel(
+            "Latest checking",
+            self.header_version_widget,
+        )
+        self.latest_version_label.setAlignment(Qt.AlignRight)
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.MUTED}; font-size: 8pt;"
+        )
+        version_layout.addWidget(self.installed_version_label)
+        version_layout.addWidget(self.latest_version_label)
+
+        self.update_button = IconButton(
+            "refresh",
+            "Check for application updates",
+            header,
+        )
+        self.update_button.clicked.connect(self._manual_check_for_updates)
+
+        self.header_action_bar = QWidget(header)
+        self.header_action_bar.setStyleSheet("background: transparent;")
+        action_layout = QHBoxLayout(self.header_action_bar)
+        action_layout.setContentsMargins(0, 0, 0, 0)
+        action_layout.setSpacing(8)
+
+        controls = QWidget(self.header_action_bar)
         controls.setObjectName("headerControls")
         controls.setStyleSheet("background: transparent;")
         controls_layout = QGridLayout(controls)
         controls_layout.setContentsMargins(4, 0, 4, 0)
-        controls_layout.setHorizontalSpacing(12)
+        controls_layout.setHorizontalSpacing(8)
         controls_layout.setVerticalSpacing(1)
 
         headless_title = QLabel("Headless", controls)
@@ -185,6 +252,7 @@ class MainWindow(QMainWindow):
         headless_title.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
         )
+        headless_title.setMinimumWidth(headless_title.sizeHint().width() + 6)
         controls_layout.addWidget(headless_title, 0, 0)
 
         self.headless_switch = AnimatedSwitch(controls)
@@ -197,12 +265,15 @@ class MainWindow(QMainWindow):
             alignment=Qt.AlignCenter,
         )
 
-        debug_title = QLabel("Debug screenshots", controls)
-        debug_title.setAlignment(Qt.AlignCenter)
-        debug_title.setStyleSheet(
+        self.debug_screenshots_label = QLabel("Debug screenshots", controls)
+        self.debug_screenshots_label.setAlignment(Qt.AlignCenter)
+        self.debug_screenshots_label.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
         )
-        controls_layout.addWidget(debug_title, 0, 1)
+        self.debug_screenshots_label.setMinimumWidth(
+            self.debug_screenshots_label.sizeHint().width() + 6
+        )
+        controls_layout.addWidget(self.debug_screenshots_label, 0, 1)
 
         self.debug_screenshots_switch = AnimatedSwitch(controls)
         self.debug_screenshots_switch.setToolTip(
@@ -235,24 +306,256 @@ class MainWindow(QMainWindow):
         self.stop_button.setEnabled(False)
         controls_layout.addWidget(self.stop_button, 0, 3, 2, 1)
 
-        layout.addWidget(controls)
+        action_layout.addWidget(controls)
 
-        self.config_button = IconButton("settings", "Configure accounts", header)
+        self.config_button = IconButton(
+            "settings",
+            "Configure accounts",
+            self.header_action_bar,
+        )
         self.config_button.clicked.connect(self._open_config_editor)
-        layout.addWidget(self.config_button)
+        action_layout.addWidget(self.config_button)
 
         self.screenshots_button = IconButton(
             "folder",
             "Open screenshots folder",
-            header,
+            self.header_action_bar,
         )
         self.screenshots_button.clicked.connect(self._open_screenshots)
-        layout.addWidget(self.screenshots_button)
+        action_layout.addWidget(self.screenshots_button)
 
-        self.clear_logs_button = IconButton("broom", "Clear logs", header)
+        self.clear_logs_button = IconButton(
+            "broom",
+            "Clear logs",
+            self.header_action_bar,
+        )
         self.clear_logs_button.clicked.connect(self._clear_logs)
-        layout.addWidget(self.clear_logs_button)
+        action_layout.addWidget(self.clear_logs_button)
+        self.header_action_bar.setMinimumWidth(
+            self.header_action_bar.sizeHint().width()
+        )
+
+        self._apply_header_layout(self.width() < 1280)
         return header
+
+    def _apply_header_layout(self, compact: bool) -> None:
+        if self._header_compact == compact:
+            return
+        self._header_compact = compact
+        layout = self.header_layout
+        while layout.count():
+            layout.takeAt(0)
+        for column in range(7):
+            layout.setColumnStretch(column, 0)
+
+        if compact:
+            layout.addWidget(self.header_logo, 0, 0, 2, 1)
+            layout.addWidget(self.header_brand_widget, 0, 1)
+            layout.setColumnStretch(2, 1)
+            layout.addWidget(self.status_display, 0, 3)
+            layout.addWidget(self.header_version_widget, 0, 4)
+            layout.addWidget(self.update_button, 0, 5)
+            layout.addWidget(
+                self.header_action_bar,
+                1,
+                1,
+                1,
+                5,
+                alignment=Qt.AlignRight,
+            )
+            self.header_subtitle.hide()
+        else:
+            layout.addWidget(self.header_logo, 0, 0)
+            layout.addWidget(self.header_brand_widget, 0, 1)
+            layout.setColumnStretch(2, 1)
+            layout.addWidget(self.status_display, 0, 3)
+            layout.addWidget(self.header_version_widget, 0, 4)
+            layout.addWidget(self.update_button, 0, 5)
+            layout.addWidget(self.header_action_bar, 0, 6)
+            self.header_subtitle.show()
+        self.header_action_bar.updateGeometry()
+
+    def _connect_update_manager(self) -> None:
+        self.update_manager.checkStarted.connect(self._update_check_started)
+        self.update_manager.checkSucceeded.connect(self._update_check_succeeded)
+        self.update_manager.checkFailed.connect(self._update_check_failed)
+        self.update_manager.downloadStarted.connect(self._update_download_started)
+        self.update_manager.downloadProgress.connect(self._update_download_progress)
+        self.update_manager.downloadReady.connect(self._update_download_ready)
+        self.update_manager.downloadFailed.connect(self._update_download_failed)
+
+    def _startup_update_check(self) -> None:
+        self._check_for_updates(manual=False)
+
+    def _manual_check_for_updates(self) -> None:
+        self._check_for_updates(manual=True)
+
+    def _check_for_updates(self, *, manual: bool) -> None:
+        self._manual_update_check = manual
+        if not self.update_manager.check_for_updates() and manual:
+            QMessageBox.information(
+                self,
+                "Update check",
+                "An update check is already running.",
+            )
+
+    def _update_check_started(self) -> None:
+        self.update_button.setEnabled(False)
+        self.latest_version_label.setText("Latest checking")
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.MUTED}; font-size: 8pt;"
+        )
+
+    def _update_check_succeeded(self, status: ReleaseStatus) -> None:
+        release = status.latest
+        self._latest_release = release
+        self.update_button.setEnabled(True)
+        self.latest_version_label.setText(f"Latest {release.version}")
+        if status.installed_version is None:
+            installed_label = (
+                "App local build"
+                if can_replace_current_executable()
+                else "App development"
+            )
+            self.installed_version_label.setText(installed_label)
+            self.latest_version_label.setStyleSheet(
+                f"color: {Colors.WARNING}; font-size: 8pt;"
+            )
+            self._append_log(
+                "The running application has no generated release metadata."
+            )
+            if self._manual_update_check:
+                QMessageBox.information(
+                    self,
+                    "Application update",
+                    f"Latest published version: {release.version}.\n\n"
+                    "This local build has no release baseline, so its version "
+                    "cannot be compared automatically.",
+                )
+            self._manual_update_check = False
+            return
+
+        local_suffix = "" if status.installed_from_release_asset else " local"
+        self.installed_version_label.setText(
+            f"App {status.installed_version}{local_suffix}"
+        )
+        newer = is_newer_version(
+            release.version,
+            status.installed_version,
+        )
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.WARNING if newer else Colors.SUCCESS}; font-size: 8pt;"
+        )
+        if not newer:
+            if self._manual_update_check:
+                QMessageBox.information(
+                    self,
+                    "Application update",
+                    f"Autosubscriber App {status.installed_version} is current.",
+                )
+            self._manual_update_check = False
+            return
+
+        self._append_log(
+            f"Application update {release.version} is available."
+        )
+        if not can_replace_current_executable():
+            self._append_log(
+                "Automatic installation is available in the packaged Windows EXE."
+            )
+            if self._manual_update_check:
+                QMessageBox.information(
+                    self,
+                    "Application update",
+                    f"Version {release.version} is available. Automatic installation "
+                    "runs only from AutosubscriberApp.exe.",
+                )
+            self._manual_update_check = False
+            return
+
+        self._manual_update_check = False
+        if not self.update_manager.download_update(release):
+            self._append_log("The application update is already downloading.")
+
+    def _update_check_failed(self, message: str) -> None:
+        self.update_button.setEnabled(True)
+        self.latest_version_label.setText("Latest unavailable")
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.ERROR}; font-size: 8pt;"
+        )
+        self._append_log(f"Update check failed: {message}")
+        if self._manual_update_check:
+            QMessageBox.warning(self, "Update check failed", message)
+        self._manual_update_check = False
+
+    def _update_download_started(self, release: ReleaseInfo) -> None:
+        self.update_button.setEnabled(False)
+        self.latest_version_label.setText(f"Update {release.version} 0%")
+
+    def _update_download_progress(self, percent: int) -> None:
+        if self._latest_release is None:
+            return
+        self.latest_version_label.setText(
+            f"Update {self._latest_release.version} {percent}%"
+        )
+
+    def _update_download_ready(self, path: Path, release: ReleaseInfo) -> None:
+        self._pending_update = (Path(path), release)
+        self.latest_version_label.setText(f"Ready {release.version}")
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.SUCCESS}; font-size: 8pt;"
+        )
+        self._append_log(
+            f"Application update {release.version} downloaded and verified."
+        )
+        if self.worker is None:
+            QTimer.singleShot(0, self._install_pending_update)
+        else:
+            self._append_log(
+                "The update will install after the current website run stops."
+            )
+
+    def _update_download_failed(self, message: str) -> None:
+        self.update_button.setEnabled(True)
+        latest = self._latest_release.version if self._latest_release else "unknown"
+        self.latest_version_label.setText(f"Update {latest} failed")
+        self.latest_version_label.setStyleSheet(
+            f"color: {Colors.ERROR}; font-size: 8pt;"
+        )
+        self._append_log(f"Update download failed: {message}")
+
+    def _install_pending_update(self) -> None:
+        if self._pending_update is None or self.worker is not None:
+            return
+        if QApplication.activeModalWidget() is not None:
+            QTimer.singleShot(1000, self._install_pending_update)
+            return
+        if not self._launch_pending_update_replacement():
+            return
+        release = self._pending_update[1]
+        self._append_log(
+            f"Restarting with Autosubscriber App {release.version}."
+        )
+        self.close()
+
+    def _launch_pending_update_replacement(self) -> bool:
+        if self._pending_update is None or self._update_installing:
+            return self._update_installing
+        path, release = self._pending_update
+        try:
+            launch_update_replacement(
+                path,
+                Path(sys.executable),
+                release.sha256,
+            )
+        except (OSError, RuntimeError, ValueError) as error:
+            self.update_button.setEnabled(True)
+            self.latest_version_label.setText(f"Update {release.version} failed")
+            self._append_log(f"Update installation failed: {error}")
+            QMessageBox.warning(self, "Update installation failed", str(error))
+            return False
+        self._update_installing = True
+        return True
 
     def _build_site_selector(self) -> QFrame:
         panel = QFrame(self)
@@ -588,6 +891,8 @@ class MainWindow(QMainWindow):
             self.worker = None
         self._set_running_controls(False)
         self._refresh_start_state()
+        if self._pending_update is not None:
+            QTimer.singleShot(0, self._install_pending_update)
 
     def _worker_error(self, error) -> None:
         self._append_log(f"Worker process error: {error}")
@@ -650,7 +955,16 @@ class MainWindow(QMainWindow):
     def _append_log(self, line: str) -> None:
         self.log_view.append_line(line)
 
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, "header_layout"):
+            self._apply_header_layout(event.size().width() < 1280)
+
     def closeEvent(self, event: QCloseEvent) -> None:
+        if self._startup_update_timer is not None:
+            self._startup_update_timer.stop()
+        if self._pending_update is not None and not self._update_installing:
+            self._launch_pending_update_replacement()
         if self.worker is not None:
             pid = int(self.worker.processId())
             if pid > 0:

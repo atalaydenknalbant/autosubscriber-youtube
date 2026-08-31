@@ -54,6 +54,14 @@ $DistExecutable = Join-Path `
     $DistDirectory `
     "AutosubscriberApp.exe"
 
+$BuildMetadataDirectory = Join-Path `
+    ([System.IO.Path]::GetTempPath()) `
+    "AutosubscriberAppBuild-$PID"
+
+$BuildMetadataFile = Join-Path `
+    $BuildMetadataDirectory `
+    "build_metadata.json"
+
 $LegacyDistConfig = Join-Path `
     $RepoRoot `
     "dist\AutosubscriberApp\config.ini"
@@ -307,14 +315,70 @@ Remove-Item `
 
 Write-Host "Building the application with PyInstaller..."
 
-Invoke-NativeCommand `
-    -Description "PyInstaller build" `
-    -Command {
-        & $BuildPython -m PyInstaller `
-            $SpecFile `
-            --clean `
-            --noconfirm
+$ReleaseHeaders = @{
+    "Accept" = "application/vnd.github+json"
+    "User-Agent" = "AutosubscriberAppBuild"
+    "X-GitHub-Api-Version" = "2022-11-28"
+}
+
+if ($env:GITHUB_TOKEN) {
+    $ReleaseHeaders["Authorization"] = "Bearer $($env:GITHUB_TOKEN)"
+}
+
+Write-Host "Reading the current published release from GitHub..."
+
+$LatestRelease = Invoke-RestMethod `
+    -Uri "https://api.github.com/repos/atalaydenknalbant/autosubscriber-youtube/releases/latest" `
+    -Headers $ReleaseHeaders `
+    -Method Get
+
+$BaseReleaseVersion = ([string]$LatestRelease.tag_name) -replace '^[vV]', ''
+
+if ($BaseReleaseVersion -notmatch '^\d+(?:\.\d+)*$') {
+    throw "GitHub returned an unsupported release tag: $($LatestRelease.tag_name)"
+}
+
+New-Item `
+    -ItemType Directory `
+    -Path $BuildMetadataDirectory `
+    -Force | Out-Null
+
+@{
+    base_release_version = $BaseReleaseVersion
+} | ConvertTo-Json -Compress | Set-Content `
+    -LiteralPath $BuildMetadataFile `
+    -Encoding UTF8
+
+$PreviousBuildMetadataPath = $env:AUTOSUBSCRIBER_BUILD_METADATA_PATH
+$env:AUTOSUBSCRIBER_BUILD_METADATA_PATH = $BuildMetadataFile
+
+Write-Host "Build base release: $BaseReleaseVersion"
+
+try {
+    Invoke-NativeCommand `
+        -Description "PyInstaller build" `
+        -Command {
+            & $BuildPython -m PyInstaller `
+                $SpecFile `
+                --clean `
+                --noconfirm
+        }
+}
+finally {
+    if ($null -eq $PreviousBuildMetadataPath) {
+        Remove-Item Env:\AUTOSUBSCRIBER_BUILD_METADATA_PATH `
+            -ErrorAction SilentlyContinue
     }
+    else {
+        $env:AUTOSUBSCRIBER_BUILD_METADATA_PATH = $PreviousBuildMetadataPath
+    }
+
+    Remove-Item `
+        -LiteralPath $BuildMetadataDirectory `
+        -Recurse `
+        -Force `
+        -ErrorAction SilentlyContinue
+}
 
 if (-not (Test-Path -LiteralPath $DistExecutable)) {
     throw "Build finished, but the executable was not found: $DistExecutable"

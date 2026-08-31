@@ -1,5 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
 from PyInstaller.utils.hooks import (
     collect_all,
     collect_submodules,
@@ -39,6 +41,10 @@ datas = [
         "ytmonsterru_assets",
     ),
 ]
+
+build_metadata_path = os.environ.get("AUTOSUBSCRIBER_BUILD_METADATA_PATH")
+if build_metadata_path:
+    datas.append((build_metadata_path, "app"))
 
 datas += sentencepiece_datas
 datas += protobuf_datas

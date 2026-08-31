@@ -42,7 +42,7 @@ from PySide6.QtWidgets import (
 from app.theme import Colors
 
 
-IconName = Literal["play", "stop", "settings", "folder", "broom"]
+IconName = Literal["play", "stop", "settings", "folder", "broom", "refresh"]
 
 
 class GradientHeader(QFrame):
@@ -253,6 +253,20 @@ class IconButton(QPushButton):
                 center.x() - 2,
                 center.y() + 10,
             )
+        elif self.icon_name == "refresh":
+            painter.setBrush(Qt.NoBrush)
+            painter.drawArc(
+                QRectF(center.x() - 9, center.y() - 9, 18, 18),
+                35 * 16,
+                285 * 16,
+            )
+            painter.setBrush(color)
+            arrow = QPainterPath()
+            arrow.moveTo(center.x() + 9, center.y() - 7)
+            arrow.lineTo(center.x() + 10, center.y() + 1)
+            arrow.lineTo(center.x() + 3, center.y() - 2)
+            arrow.closeSubpath()
+            painter.drawPath(arrow)
 
 
 class StatusDisplay(QWidget):
