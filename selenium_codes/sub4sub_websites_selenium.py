@@ -41,6 +41,11 @@ from selenium_codes.youlikehits_soundcloud import (
     find_soundcloud_task,
     soundcloud_tasks_finished,
 )
+from selenium_codes.youlikehits_youtube import (
+    YouTubeWatchTask,
+    find_youtube_watch_task,
+    youtube_watch_tasks_finished,
+)
 
 # Logging Initializer
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -1474,44 +1479,26 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
     initialize_bonus_hit_checkpoint()
 
     def while_loop_watch(hours_time: int) -> None:
-        """Watch videos by clicking 'followbutton' on /youtubenew2.php until time runs out"""
-        video_title_selector = '#listall > center > b:nth-child(1) > font'
-
-        def normalize_watch_video_name(video_name: str | None) -> str:
-            if not video_name:
-                return ""
-            return re.sub(r"\s+", " ", video_name).strip().lower()
-
-        def read_watch_video_name(context: str) -> str | None:
-            for attempt in range(1, 5):
-                try:
-                    video_title = WebDriverWait(driver, 5).until(
-                        ec.presence_of_element_located((By.CSS_SELECTOR, video_title_selector))
-                    )
-                    return video_title.text.strip()
-                except StaleElementReferenceException:
+        """Complete YouLikeHits YouTube view tasks until time runs out."""
+        def read_watch_task(
+            context: str,
+            wait_seconds: float = 20,
+        ) -> YouTubeWatchTask | None:
+            deadline = time.monotonic() + wait_seconds
+            while True:
+                task = find_youtube_watch_task(driver)
+                if task is not None:
+                    return task
+                if time.monotonic() >= deadline:
                     logging.info(
-                        "[YouLikeHits][Watch] Video title refreshed during %s, retry %d/4",
+                        "[YouLikeHits][Watch] Task markup unavailable during %s",
                         context,
-                        attempt,
                     )
-                    EVENT.wait(1)
-                except (TimeoutException, NoSuchElementException):
-                    EVENT.wait(0.5)
-            return None
+                    return None
+                EVENT.wait(0.5)
 
-        def read_watch_video_name_fast() -> str | None:
-            try:
-                title_text = driver.execute_script(
-                    """
-                    const title = document.querySelector(arguments[0]);
-                    return title ? (title.textContent || '').trim() : '';
-                    """,
-                    video_title_selector,
-                )
-                return title_text or None
-            except WebDriverException:
-                return None
+        def read_watch_task_fast() -> YouTubeWatchTask | None:
+            return find_youtube_watch_task(driver)
 
         def read_watch_list_text_fast() -> str:
             try:
@@ -1525,33 +1512,52 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except WebDriverException:
                 return ""
 
-        def submit_watch_follow_button(video_name: str) -> bool:
+        def submit_watch_view_button(task: YouTubeWatchTask) -> bool:
             for attempt in range(1, 4):
+                current_task = task if attempt == 1 else read_watch_task_fast()
+                if current_task is None or current_task.identity != task.identity:
+                    logging.info(
+                        "[YouLikeHits][Watch] Task changed before View could be submitted"
+                    )
+                    return False
                 try:
-                    follow_button = WebDriverWait(driver, 5).until(
-                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center'});",
+                        current_task.button,
                     )
-                    follow_button.click()
-                    EVENT.wait(0.25)
-                    follow_button = WebDriverWait(driver, 5).until(
-                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
-                    )
-                    follow_button.click()
+                    if attempt == 1:
+                        current_task.button.click()
+                    elif attempt == 2:
+                        ActionChains(driver).move_to_element(
+                            current_task.button
+                        ).click().perform()
+                    else:
+                        current_task.button.send_keys(Keys.ENTER)
                     EVENT.wait(1)
-                    follow_button = WebDriverWait(driver, 5).until(
-                        ec.element_to_be_clickable((By.CLASS_NAME, "followbutton"))
-                    )
-                    follow_button.send_keys(Keys.ENTER)
                     return True
                 except WebDriverException as click_ex:
                     logging.info(
-                        "[YouLikeHits][Watch] Follow button attempt %d/3 failed for %s: %s",
+                        "[YouLikeHits][Watch] View button attempt %d/3 failed for %s: %s",
                         attempt,
-                        video_name,
+                        task.label,
                         type(click_ex).__name__,
                     )
                     EVENT.wait(1)
             return False
+
+        def submit_watch_skip_button() -> bool:
+            task = read_watch_task_fast()
+            if task is None or task.skip_button is None:
+                return False
+            try:
+                task.skip_button.click()
+                return True
+            except WebDriverException:
+                try:
+                    driver.execute_script("arguments[0].click();", task.skip_button)
+                    return True
+                except WebDriverException:
+                    return False
 
         try:
             try:
@@ -1559,13 +1565,9 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 driver.get(youlikehits_watch_url)
                 log_youlikehits_state("Opened watch page")
                 EVENT.wait(secrets.choice(range(4, 6)))
-                try:
-                    if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
-                            'There are no videos available to view at this time. Try coming back or refreshing.':
-                        logging.info('No videos available quitting...')
-                        return
-                except NoSuchElementException:
-                    EVENT.wait(0.25)
+                if youtube_watch_tasks_finished(read_watch_list_text_fast()):
+                    logging.info("No videos available quitting...")
+                    return
                 EVENT.wait(secrets.choice(range(4, 6)))
                 driver.execute_script("window.scrollTo(0, 600);")
                 start = datetime.now()
@@ -1606,30 +1608,27 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         return
                     except NoSuchElementException:
                         pass
-                    try:
-                        if driver.find_element(By.CSS_SELECTOR, '#listall > b').text == \
-                                'There are no videos available to view at this time. Try coming back or refreshing.':
-                            logging.info('No videos available quitting...')
-                            return
-                    except NoSuchElementException:
-                        EVENT.wait(0.25)
+                    if youtube_watch_tasks_finished(read_watch_list_text_fast()):
+                        logging.info("No videos available quitting...")
+                        return
                     driver.switch_to.window(driver.window_handles[0])
-                    try:
-                        video_name = read_watch_video_name("current video read")
-                        if not video_name:
-                            raise NoSuchElementException("Could not read current YouLikeHits video title")
-                        normalized_video_name = normalize_watch_video_name(video_name)
-                        logging.info("[YouLikeHits][Watch] Current video: %s", video_name)
-                    except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
+                    watch_task = read_watch_task("current video read")
+                    if watch_task is None:
+                        if youtube_watch_tasks_finished(read_watch_list_text_fast()):
+                            logging.info("No videos available quitting...")
+                            return
                         logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
                         driver.refresh()
                         continue
+                    video_name = watch_task.label
+                    watch_task_identity = watch_task.identity
+                    logging.info("[YouLikeHits][Watch] Current video: %s", video_name)
                     before_follow_handles = set(driver.window_handles)
                     target_handle = None
-                    if submit_watch_follow_button(video_name):
-                        log_youlikehits_state(f"[Watch] Follow button submitted for {video_name}")
+                    if submit_watch_view_button(watch_task):
+                        log_youlikehits_state(f"[Watch] View button submitted for {video_name}")
                     else:
-                        logging.info("[YouLikeHits][Watch] Could not click follow button for %s", video_name)
+                        logging.info("[YouLikeHits][Watch] Could not click View button for %s", video_name)
                         EVENT.wait(10)
                         driver.refresh()
                         continue
@@ -1679,12 +1678,10 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             )
                             EVENT.wait(secrets.choice(range(1, 2)))
                             try:
-                                WebDriverWait(driver, 5).until(
-                                    ec.element_to_be_clickable((
-                                        By.XPATH,
-                                        '//*[@id="listall"]/center/a[2]',
-                                    ))
-                                ).click()
+                                if not submit_watch_skip_button():
+                                    raise NoSuchElementException(
+                                        "Current YouLikeHits Skip button is unavailable"
+                                    )
                                 EVENT.wait(3)
                                 driver.refresh()
                             except (
@@ -1716,12 +1713,10 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                 save_youlikehits_debug_screenshot(
                                     "watch_main_before_closed_target_skip"
                                 )
-                                WebDriverWait(driver, 5).until(
-                                    ec.element_to_be_clickable((
-                                        By.XPATH,
-                                        '//*[@id="listall"]/center/a[2]',
-                                    ))
-                                ).click()
+                                if not submit_watch_skip_button():
+                                    raise NoSuchElementException(
+                                        "Current YouLikeHits Skip button is unavailable"
+                                    )
                                 EVENT.wait(3.25)
                                 driver.refresh()
                             except (
@@ -1750,26 +1745,36 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                             waited_seconds = int(
                                 (datetime.now() - wait_started_at).total_seconds()
                             )
-                            current_video_name = read_watch_video_name_fast()
-                            if not current_video_name:
+                            watch_list_text = read_watch_list_text_fast()
+                            if "points added" in watch_list_text.casefold():
                                 logging.info(
-                                    "[YouLikeHits][Watch] Could not read refreshed video name after %s, refreshing",
+                                    "[YouLikeHits][Watch] Video completed after %ds: %s",
+                                    waited_seconds,
                                     video_name,
                                 )
-                                driver.refresh()
                                 break
-                            if normalize_watch_video_name(current_video_name) != normalized_video_name:
+                            current_watch_task = read_watch_task_fast()
+                            if current_watch_task is None:
+                                if youtube_watch_tasks_finished(watch_list_text):
+                                    logging.info(
+                                        "[YouLikeHits][Watch] No next video available after %s",
+                                        video_name,
+                                    )
+                                    break
+                                if waited_seconds >= 10:
+                                    logging.info(
+                                        "[YouLikeHits][Watch] Current task disappeared after %s, refreshing",
+                                        video_name,
+                                    )
+                                    driver.refresh()
+                                    break
+                                EVENT.wait(2)
+                                continue
+                            if current_watch_task.identity != watch_task_identity:
                                 logging.info(
                                     "[YouLikeHits][Watch] Next video detected after %ds: %s",
                                     waited_seconds,
-                                    current_video_name,
-                                )
-                                break
-                            if "Points Added" in read_watch_list_text_fast():
-                                logging.info(
-                                    "[YouLikeHits][Watch] Video completed after %ds. Current title: %s",
-                                    waited_seconds,
-                                    current_video_name,
+                                    current_watch_task.label,
                                 )
                                 break
                             if waited_seconds >= youlikehits_watch_wait_watchdog_seconds:
@@ -1795,12 +1800,10 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                                     "watch_stalled_main_window"
                                 )
                                 try:
-                                    WebDriverWait(driver, 5).until(
-                                        ec.element_to_be_clickable((
-                                            By.XPATH,
-                                            '//*[@id="listall"]/center/a[2]',
-                                        ))
-                                    ).click()
+                                    if not submit_watch_skip_button():
+                                        raise NoSuchElementException(
+                                            "Current YouLikeHits Skip button is unavailable"
+                                        )
                                     logging.info(
                                         "[YouLikeHits][Watch] Skip clicked after stalled task"
                                     )
