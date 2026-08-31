@@ -13,9 +13,6 @@ CURRENT_TITLE_SELECTOR = ".Title"
 CURRENT_BUTTON_SELECTOR = "a.earn-btn[onclick*='imageWin']"
 CURRENT_SKIP_SELECTOR = ".earn-links a[onclick*='skipvid']"
 CURRENT_THUMBNAIL_SELECTOR = "img.ytthumb"
-LEGACY_TITLE_SELECTOR = "#listall > center > b:nth-child(1) > font"
-LEGACY_BUTTON_CLASS = "followbutton"
-LEGACY_SKIP_XPATH = '//*[@id="listall"]/center/a[2]'
 NO_VIDEO_MARKERS = (
     "there are no videos available",
     "no videos available",
@@ -52,8 +49,63 @@ def _wait_seconds_from_onclick(onclick: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
+def _task_from_snapshot(snapshot: Any) -> YouTubeWatchTask | None:
+    if not isinstance(snapshot, dict):
+        return None
+    label = str(snapshot.get("label") or "").strip()
+    button = snapshot.get("button")
+    onclick = str(snapshot.get("onclick") or "").strip()
+    thumbnail_url = str(snapshot.get("thumbnailUrl") or "").strip()
+    identity = onclick or thumbnail_url or label.casefold()
+    if not label or button is None or not identity:
+        return None
+    return YouTubeWatchTask(
+        label=label,
+        identity=identity,
+        wait_seconds=_wait_seconds_from_onclick(onclick),
+        button=button,
+        skip_button=snapshot.get("skipButton"),
+    )
+
+
+def _task_from_single_script(driver: Any) -> tuple[bool, YouTubeWatchTask | None]:
+    try:
+        snapshot = driver.execute_script(
+            """
+            const card = document.querySelector(arguments[0]);
+            if (card) {
+                const title = card.querySelector(arguments[1]);
+                const button = card.querySelector(arguments[2]);
+                if (title && button) {
+                    const thumbnail = card.querySelector(arguments[4]);
+                    return {
+                        label: (title.textContent || '').trim(),
+                        onclick: (button.getAttribute('onclick') || '').trim(),
+                        thumbnailUrl: thumbnail ? (thumbnail.src || '') : '',
+                        button: button,
+                        skipButton: card.querySelector(arguments[3]),
+                    };
+                }
+            }
+            return null;
+            """,
+            CURRENT_CARD_SELECTOR,
+            CURRENT_TITLE_SELECTOR,
+            CURRENT_BUTTON_SELECTOR,
+            CURRENT_SKIP_SELECTOR,
+            CURRENT_THUMBNAIL_SELECTOR,
+        )
+    except (AttributeError, WebDriverException):
+        return False, None
+    return True, _task_from_snapshot(snapshot)
+
+
 def find_youtube_watch_task(driver: Any) -> YouTubeWatchTask | None:
-    """Return the current YouLikeHits YouTube task from new or legacy markup."""
+    """Return the current YouLikeHits YouTube task."""
+    script_supported, task = _task_from_single_script(driver)
+    if script_supported:
+        return task
+
     try:
         for card in driver.find_elements(By.CSS_SELECTOR, CURRENT_CARD_SELECTOR):
             button = _first_element(card, By.CSS_SELECTOR, CURRENT_BUTTON_SELECTOR)
@@ -86,20 +138,7 @@ def find_youtube_watch_task(driver: Any) -> YouTubeWatchTask | None:
                 ),
             )
 
-        title = _first_element(driver, By.CSS_SELECTOR, LEGACY_TITLE_SELECTOR)
-        button = _first_element(driver, By.CLASS_NAME, LEGACY_BUTTON_CLASS)
-        if title is None or button is None:
-            return None
-        label = title.text.strip()
-        if not label:
-            return None
-        return YouTubeWatchTask(
-            label=label,
-            identity=label.casefold(),
-            wait_seconds=None,
-            button=button,
-            skip_button=_first_element(driver, By.XPATH, LEGACY_SKIP_XPATH),
-        )
+        return None
     except WebDriverException:
         return None
 

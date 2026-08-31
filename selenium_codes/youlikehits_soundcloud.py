@@ -12,8 +12,6 @@ CURRENT_CARD_SELECTOR = "#listall .earn-card"
 CURRENT_BUTTON_SELECTOR = ".earn-btn"
 CURRENT_NAME_SELECTOR = ".who"
 CURRENT_TARGET_SELECTOR = ".scmeta"
-LEGACY_NAME_SELECTOR = "#listall > center > b:nth-child(1) > font"
-LEGACY_BUTTON_CLASS = "followbutton"
 NO_SONG_MARKERS = (
     "there are no more songs to play for points",
     "no more songs",
@@ -45,7 +43,7 @@ def _wait_seconds_from_onclick(onclick: str) -> int | None:
 
 
 def find_soundcloud_task(driver: Any) -> SoundCloudTask | None:
-    """Return the current task from either the current or legacy page markup."""
+    """Return the current SoundCloud task."""
     try:
         for card in driver.find_elements(By.CSS_SELECTOR, CURRENT_CARD_SELECTOR):
             buttons = card.find_elements(By.CSS_SELECTOR, CURRENT_BUTTON_SELECTOR)
@@ -68,19 +66,7 @@ def find_soundcloud_task(driver: Any) -> SoundCloudTask | None:
                 button=button,
             )
 
-        names = driver.find_elements(By.CSS_SELECTOR, LEGACY_NAME_SELECTOR)
-        buttons = driver.find_elements(By.CLASS_NAME, LEGACY_BUTTON_CLASS)
-        if not names or not buttons:
-            return None
-        label = names[0].text.strip()
-        if not label:
-            return None
-        return SoundCloudTask(
-            label=label,
-            identity=label.casefold(),
-            wait_seconds=None,
-            button=buttons[0],
-        )
+        return None
     except WebDriverException:
         return None
 

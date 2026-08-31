@@ -47,21 +47,12 @@ def test_current_soundcloud_card_is_read_with_timer() -> None:
     assert task.button is button
 
 
-def test_legacy_soundcloud_markup_remains_supported() -> None:
+def test_missing_current_soundcloud_markup_returns_no_task() -> None:
     driver = FakeElement()
-    button = FakeElement()
-    driver.add(
-        By.CSS_SELECTOR,
-        "#listall > center > b:nth-child(1) > font",
-        FakeElement("Legacy song"),
-    )
-    driver.add(By.CLASS_NAME, "followbutton", button)
 
     task = find_soundcloud_task(driver)
 
-    assert task is not None
-    assert task.label == "Legacy song"
-    assert task.button is button
+    assert task is None
 
 
 def test_no_song_message_is_detected_case_insensitively() -> None:

@@ -22,6 +22,43 @@ class FakeElement:
         return self.attributes.get(name)
 
 
+class ScriptDriver:
+    def __init__(self, snapshot: dict | None) -> None:
+        self.snapshot = snapshot
+        self.execute_calls = 0
+
+    def execute_script(self, _script: str, *_args: str) -> dict | None:
+        self.execute_calls += 1
+        return self.snapshot
+
+    def find_elements(self, _by: str, _selector: str) -> list[FakeElement]:
+        raise AssertionError("Element fallback should not run after a script read")
+
+
+def test_current_task_uses_one_browser_round_trip() -> None:
+    view_button = FakeElement()
+    skip_button = FakeElement()
+    onclick = "imageWin(4026250,'yuRA0X0YlYs','180','hash',event);"
+    driver = ScriptDriver(
+        {
+            "label": "Current video",
+            "onclick": onclick,
+            "thumbnailUrl": "https://i.ytimg.com/vi/yuRA0X0YlYs/hqdefault.jpg",
+            "button": view_button,
+            "skipButton": skip_button,
+        }
+    )
+
+    task = find_youtube_watch_task(driver)
+
+    assert driver.execute_calls == 1
+    assert task is not None
+    assert task.identity == onclick
+    assert task.wait_seconds == 180
+    assert task.button is view_button
+    assert task.skip_button is skip_button
+
+
 def test_current_youtube_card_reads_title_timer_and_actions() -> None:
     driver = FakeElement()
     card = FakeElement()
@@ -56,28 +93,12 @@ def test_current_youtube_card_reads_title_timer_and_actions() -> None:
     assert task.skip_button is skip_button
 
 
-def test_legacy_youtube_markup_remains_supported() -> None:
+def test_missing_current_youtube_markup_returns_no_task() -> None:
     driver = FakeElement()
-    view_button = FakeElement()
-    skip_button = FakeElement()
-    driver.add(
-        By.CSS_SELECTOR,
-        "#listall > center > b:nth-child(1) > font",
-        FakeElement("Legacy video"),
-    )
-    driver.add(By.CLASS_NAME, "followbutton", view_button)
-    driver.add(
-        By.XPATH,
-        '//*[@id="listall"]/center/a[2]',
-        skip_button,
-    )
 
     task = find_youtube_watch_task(driver)
 
-    assert task is not None
-    assert task.label == "Legacy video"
-    assert task.button is view_button
-    assert task.skip_button is skip_button
+    assert task is None
 
 
 def test_no_video_message_is_detected_case_insensitively() -> None:
