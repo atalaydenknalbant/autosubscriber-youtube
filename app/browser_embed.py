@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import logging
+import time
 from typing import Any, Protocol
 from ctypes import wintypes
 
@@ -160,16 +161,22 @@ class Win32ChromeBackend:
                 hwnd,
                 win32con.GWL_EXSTYLE,
             )
-            extended_style &= ~win32con.WS_EX_APPWINDOW
-            extended_style |= (
+            desired_style = extended_style & ~win32con.WS_EX_APPWINDOW
+            desired_style |= (
                 win32con.WS_EX_TOOLWINDOW | win32con.WS_EX_NOACTIVATE
             )
-            win32gui.SetWindowLong(
-                hwnd,
-                win32con.GWL_EXSTYLE,
-                extended_style,
-            )
-            win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
+            style_changed = desired_style != extended_style
+            is_visible = bool(win32gui.IsWindowVisible(hwnd))
+            if not style_changed and not is_visible:
+                return True
+            if style_changed:
+                win32gui.SetWindowLong(
+                    hwnd,
+                    win32con.GWL_EXSTYLE,
+                    desired_style,
+                )
+            if is_visible:
+                win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
             win32gui.SetWindowPos(
                 hwnd,
                 None,
@@ -184,7 +191,6 @@ class Win32ChromeBackend:
             return True
 
         win32gui.EnumWindows(callback, None)
-
     def attach(self, hwnd: int, parent_hwnd: int) -> None:
         _, win32con, win32gui, _ = _import_windows_modules()
         if not win32gui.IsWindow(hwnd) or not win32gui.IsWindow(parent_hwnd):
@@ -324,6 +330,31 @@ class Win32ChromeBackend:
         self._check_dwm_result(result, "DwmUpdateThumbnailProperties")
 
 
+class _BrowserPidCache:
+    def __init__(
+        self,
+        token: str,
+        backend: ChromeBackend,
+        refresh_ms: int,
+    ) -> None:
+        self.token = token
+        self.backend = backend
+        self.refresh_seconds = max(0.1, refresh_ms / 1000)
+        self.pids: set[int] = set()
+        self.next_refresh = 0.0
+
+    def get(self) -> set[int]:
+        now = time.monotonic()
+        if not self.pids or now >= self.next_refresh:
+            self.pids = self.backend.find_browser_pids(self.token)
+            self.next_refresh = now + self.refresh_seconds
+        return set(self.pids)
+
+    def clear(self) -> None:
+        self.pids.clear()
+        self.next_refresh = 0.0
+
+
 class ChromeWindowMonitor(QObject):
     windowsChanged = Signal(list)
     fatalError = Signal(str)
@@ -333,11 +364,17 @@ class ChromeWindowMonitor(QObject):
         token: str,
         backend: ChromeBackend | None = None,
         parent: QObject | None = None,
-        interval_ms: int = 250,
+        interval_ms: int = 500,
+        pid_refresh_ms: int = 5_000,
     ) -> None:
         super().__init__(parent)
         self.token = token
         self.backend = backend or Win32ChromeBackend()
+        self._pid_cache = _BrowserPidCache(
+            token,
+            self.backend,
+            pid_refresh_ms,
+        )
         self._order: dict[int, int] = {}
         self._next_order = 0
         self._windows: list[int] = []
@@ -357,10 +394,11 @@ class ChromeWindowMonitor(QObject):
         self._timer.stop()
         self._windows = []
         self._order.clear()
+        self._pid_cache.clear()
 
     def scan(self) -> list[int]:
         try:
-            pids = self.backend.find_browser_pids(self.token)
+            pids = self._pid_cache.get()
             discovered = list(dict.fromkeys(self.backend.enumerate_windows(pids)))
         except Exception as scan_ex:
             message = f"Chrome window discovery failed: {type(scan_ex).__name__}"
@@ -391,11 +429,17 @@ class HeadlessChromeWindowGuard(QObject):
         token: str,
         backend: ChromeBackend | None = None,
         parent: QObject | None = None,
-        interval_ms: int = 150,
+        interval_ms: int = 250,
+        pid_refresh_ms: int = 5_000,
     ) -> None:
         super().__init__(parent)
         self.token = token
         self.backend = backend or Win32ChromeBackend()
+        self._pid_cache = _BrowserPidCache(
+            token,
+            self.backend,
+            pid_refresh_ms,
+        )
         self._timer = QTimer(self)
         self._timer.setInterval(interval_ms)
         self._timer.timeout.connect(self.scan)
@@ -406,10 +450,11 @@ class HeadlessChromeWindowGuard(QObject):
 
     def stop(self) -> None:
         self._timer.stop()
+        self._pid_cache.clear()
 
     def scan(self) -> None:
         try:
-            pids = self.backend.find_browser_pids(self.token)
+            pids = self._pid_cache.get()
             self.backend.hide_process_windows(pids)
         except Exception as scan_ex:
             logging.info(

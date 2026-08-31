@@ -479,6 +479,26 @@ def is_visible_app_session(req_dict: dict) -> bool:
     )
 
 
+GPU_ACCELERATED_WEBSITES = {
+    "YOULIKEHITS",
+    "like4like",
+    "traffup",
+    "ytbpals",
+    "ytmonster",
+    "ytmonsterru",
+}
+
+
+def configure_chrome_gpu(chrome_options, website: str) -> None:
+    """Keep video decoding off the CPU for engagement websites."""
+    if website in GPU_ACCELERATED_WEBSITES:
+        chrome_options.add_argument("--enable-gpu")
+        if website == "ytmonsterru":
+            chrome_options.add_argument("--ignore-gpu-blocklist")
+        return
+    chrome_options.add_argument("--disable-gpu")
+
+
 def yt_change_resolution(driver: webdriver, resolution: int = 144, website: str = "") -> bool:
     """Change YouTube video resolution to given resolution.
     Args:
@@ -615,13 +635,9 @@ def set_driver_opt(req_dict: dict,
             chrome_options.add_argument("--force-device-scale-factor=1")
         chrome_options.add_argument("--disable-search-engine-choice-screen")
         chrome_options.add_argument("--ash-no-nudges")
-        if website == "ytmonsterru":
-            chrome_options.add_argument("--enable-gpu")
-            chrome_options.add_argument("--ignore-gpu-blocklist")
-        else:
-            chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--propagate-iph-for-testing")
 
+    configure_chrome_gpu(chrome_options, website)
     chrome_options.add_argument("--mute-audio")
     if not force_default_view:
         chrome_options.add_argument("--window-size=1920,1080")

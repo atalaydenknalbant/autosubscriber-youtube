@@ -9,6 +9,14 @@ from selenium.common.exceptions import (
 from selenium_codes import sub4sub_websites_selenium as sws
 
 
+class FakeChromeOptions:
+    def __init__(self) -> None:
+        self.arguments: list[str] = []
+
+    def add_argument(self, argument: str) -> None:
+        self.arguments.append(argument)
+
+
 def test_chrome_startup_exception_classification() -> None:
     assert sws.is_chrome_startup_recovery_exception(
         SessionNotCreatedException("Chrome instance exited")
@@ -17,6 +25,15 @@ def test_chrome_startup_exception_classification() -> None:
         InvalidSessionIdException("not connected to DevTools")
     )
     assert not sws.is_chrome_startup_recovery_exception(TimeoutException())
+
+
+def test_youlikehits_keeps_gpu_video_decoding_enabled() -> None:
+    options = FakeChromeOptions()
+
+    sws.configure_chrome_gpu(options, "YOULIKEHITS")
+
+    assert "--enable-gpu" in options.arguments
+    assert "--disable-gpu" not in options.arguments
 
 
 def test_remove_stale_devtools_port_from_profile_root_and_child(

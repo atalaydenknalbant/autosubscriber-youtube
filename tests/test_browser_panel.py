@@ -26,6 +26,8 @@ def test_first_window_is_main_and_later_windows_are_previews(qapp) -> None:
     assert panel.main_hwnd == 10
     assert panel.preview_hwnds == [20, 30]
     assert {hwnd for hwnd, _parent in backend.attachments} == {10, 20, 30}
+    assert panel._containment_timer.isActive() is True
+    assert panel._containment_timer.interval() == 3_000
 
 
 def test_oldest_preview_becomes_main_when_main_closes(qapp) -> None:
@@ -49,6 +51,7 @@ def test_clear_moves_hosted_windows_offscreen(qapp) -> None:
     assert panel.main_hwnd is None
     assert panel.preview_hwnds == []
     assert set(backend.detached) == {10, 20}
+    assert panel._containment_timer.isActive() is False
 
 
 def test_refresh_containment_resizes_every_hosted_window(qapp) -> None:

@@ -12,8 +12,10 @@ class FakeBackend:
     def __init__(self) -> None:
         self.pids = {101}
         self.windows = [1001]
+        self.find_calls = 0
 
     def find_browser_pids(self, _token: str) -> set[int]:
+        self.find_calls += 1
         return set(self.pids)
 
     def enumerate_windows(self, _pids: set[int]) -> list[int]:
@@ -47,6 +49,19 @@ def test_monitor_keeps_first_discovery_order(qapp) -> None:
     assert monitor.scan() == [1002, 1001, 1003]
 
 
+def test_monitor_caches_process_discovery_between_window_scans(qapp) -> None:
+    backend = FakeBackend()
+    monitor = ChromeWindowMonitor("token", backend)
+
+    monitor.scan()
+    monitor.scan()
+
+    assert backend.find_calls == 1
+    monitor._pid_cache.next_refresh = 0
+    monitor.scan()
+    assert backend.find_calls == 2
+
+
 def test_headless_guard_hides_windows_for_matching_processes(qapp) -> None:
     backend = FakeBackend()
     backend.hidden_pids = set()
@@ -55,6 +70,16 @@ def test_headless_guard_hides_windows_for_matching_processes(qapp) -> None:
     guard.scan()
 
     assert backend.hidden_pids == {101}
+
+
+def test_headless_guard_caches_process_discovery(qapp) -> None:
+    backend = FakeBackend()
+    guard = HeadlessChromeWindowGuard("token", backend)
+
+    guard.scan()
+    guard.scan()
+
+    assert backend.find_calls == 1
 
 
 def test_worker_parser_accepts_main_process_embed_token() -> None:

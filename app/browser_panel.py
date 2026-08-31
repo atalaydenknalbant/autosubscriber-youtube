@@ -147,9 +147,8 @@ class BrowserPanel(QFrame):
         self._attach_deadlines: dict[int, float] = {}
         self._animations: list[QAbstractAnimation] = []
         self._containment_timer = QTimer(self)
-        self._containment_timer.setInterval(1000)
+        self._containment_timer.setInterval(3000)
         self._containment_timer.timeout.connect(self.refresh_containment)
-        self._containment_timer.start()
 
         self.setObjectName("contentPanel")
         self.setMinimumWidth(420)
@@ -209,6 +208,10 @@ class BrowserPanel(QFrame):
 
         self.preview_hwnds = desired_previews
         self.preview_scroll.setVisible(bool(self.preview_hwnds))
+        if ordered and not self._containment_timer.isActive():
+            self._containment_timer.start()
+        elif not ordered:
+            self._containment_timer.stop()
 
     def refresh_containment(self) -> None:
         """Keep every real Chrome source offscreen while its preview is active."""
@@ -227,6 +230,7 @@ class BrowserPanel(QFrame):
                 continue
 
     def clear_windows(self) -> None:
+        self._containment_timer.stop()
         hosted = [
             hwnd
             for hwnd in [self.main_hwnd, *self.preview_hwnds]

@@ -299,13 +299,17 @@ class StatusDisplay(QWidget):
 
 
 class LogView(QPlainTextEdit):
+    MAX_BLOCKS = 2_500
+    MAX_LINE_CHARS = 8_000
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setReadOnly(True)
+        self.setUndoRedoEnabled(False)
         self.setFrameShape(QFrame.NoFrame)
         self.setLineWrapMode(QPlainTextEdit.WidgetWidth)
         self.setFont(QFont("Cascadia Mono", 9))
-        self.document().setMaximumBlockCount(10_000)
+        self.document().setMaximumBlockCount(self.MAX_BLOCKS)
         self.setStyleSheet(
             f"background-color: {Colors.DEEP}; color: {Colors.TEXT};"
             f"border: 1px solid {Colors.BORDER_SOFT}; border-radius: 8px; padding: 10px;"
@@ -323,6 +327,9 @@ class LogView(QPlainTextEdit):
         return QColor(Colors.MUTED)
 
     def append_line(self, line: str) -> None:
+        line = line.rstrip("\r\n")
+        if len(line) > self.MAX_LINE_CHARS:
+            line = f"{line[:self.MAX_LINE_CHARS]} [log line truncated]"
         scroll_bar = self.verticalScrollBar()
         at_bottom = scroll_bar.value() >= scroll_bar.maximum() - 2
         original_cursor = self.textCursor()
@@ -332,7 +339,7 @@ class LogView(QPlainTextEdit):
             cursor.insertBlock()
         text_format = QTextCharFormat()
         text_format.setForeground(self._line_color(line))
-        cursor.insertText(line.rstrip("\r\n"), text_format)
+        cursor.insertText(line, text_format)
 
         if at_bottom:
             self.setTextCursor(cursor)
