@@ -185,8 +185,8 @@ class MainWindow(QMainWindow):
         brand = QVBoxLayout(self.header_brand_widget)
         brand.setContentsMargins(0, 0, 0, 0)
         brand.setSpacing(0)
-        title = QLabel("AUTOSUBSCRIBER", self.header_brand_widget)
-        title.setStyleSheet(
+        self.header_title = QLabel("AUTOSUBSCRIBER", self.header_brand_widget)
+        self.header_title.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 17pt; font-weight: 700;"
         )
         self.header_subtitle = QLabel(
@@ -196,7 +196,7 @@ class MainWindow(QMainWindow):
         self.header_subtitle.setStyleSheet(
             f"color: {Colors.MUTED}; font-size: 9pt;"
         )
-        brand.addWidget(title)
+        brand.addWidget(self.header_title)
         brand.addWidget(self.header_subtitle)
 
         self.status_display = StatusDisplay(header)
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
         headless_title.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
         )
-        headless_title.setMinimumWidth(headless_title.sizeHint().width() + 6)
+        headless_title.setFixedWidth(64)
         controls_layout.addWidget(headless_title, 0, 0)
 
         self.headless_switch = AnimatedSwitch(controls)
@@ -270,9 +270,7 @@ class MainWindow(QMainWindow):
         self.debug_screenshots_label.setStyleSheet(
             f"color: {Colors.WHITE}; font-size: 8pt; font-weight: 600;"
         )
-        self.debug_screenshots_label.setMinimumWidth(
-            self.debug_screenshots_label.sizeHint().width() + 6
-        )
+        self.debug_screenshots_label.setFixedWidth(112)
         controls_layout.addWidget(self.debug_screenshots_label, 0, 1)
 
         self.debug_screenshots_switch = AnimatedSwitch(controls)
@@ -348,30 +346,27 @@ class MainWindow(QMainWindow):
         for column in range(7):
             layout.setColumnStretch(column, 0)
 
+        layout.addWidget(self.header_logo, 0, 0)
+        layout.addWidget(self.header_brand_widget, 0, 1)
+        layout.setColumnStretch(2, 1)
+        layout.addWidget(self.status_display, 0, 3)
+        layout.addWidget(self.header_version_widget, 0, 4)
+        layout.addWidget(self.update_button, 0, 5)
+        layout.addWidget(self.header_action_bar, 0, 6)
+
         if compact:
-            layout.addWidget(self.header_logo, 0, 0, 2, 1)
-            layout.addWidget(self.header_brand_widget, 0, 1)
-            layout.setColumnStretch(2, 1)
-            layout.addWidget(self.status_display, 0, 3)
-            layout.addWidget(self.header_version_widget, 0, 4)
-            layout.addWidget(self.update_button, 0, 5)
-            layout.addWidget(
-                self.header_action_bar,
-                1,
-                1,
-                1,
-                5,
-                alignment=Qt.AlignRight,
+            layout.setContentsMargins(12, 8, 12, 8)
+            layout.setHorizontalSpacing(8)
+            self.header_title.setStyleSheet(
+                f"color: {Colors.WHITE}; font-size: 14pt; font-weight: 700;"
             )
             self.header_subtitle.hide()
         else:
-            layout.addWidget(self.header_logo, 0, 0)
-            layout.addWidget(self.header_brand_widget, 0, 1)
-            layout.setColumnStretch(2, 1)
-            layout.addWidget(self.status_display, 0, 3)
-            layout.addWidget(self.header_version_widget, 0, 4)
-            layout.addWidget(self.update_button, 0, 5)
-            layout.addWidget(self.header_action_bar, 0, 6)
+            layout.setContentsMargins(20, 10, 20, 10)
+            layout.setHorizontalSpacing(12)
+            self.header_title.setStyleSheet(
+                f"color: {Colors.WHITE}; font-size: 17pt; font-weight: 700;"
+            )
             self.header_subtitle.show()
         self.header_action_bar.updateGeometry()
 

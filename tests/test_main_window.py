@@ -179,10 +179,21 @@ def test_narrow_header_keeps_debug_screenshots_label_visible(
 
     assert window._header_compact is True
     assert window.debug_screenshots_label.text() == "Debug screenshots"
-    assert (
-        window.debug_screenshots_label.width()
-        >= window.debug_screenshots_label.sizeHint().width()
-    )
+    assert window.debug_screenshots_label.width() == 112
+    ordered_widgets = [
+        window.status_display,
+        window.header_version_widget,
+        window.update_button,
+        window.header_action_bar,
+    ]
+    positions = [
+        window.header_layout.getItemPosition(
+            window.header_layout.indexOf(widget)
+        )
+        for widget in ordered_widgets
+    ]
+    assert [position[0] for position in positions] == [0, 0, 0, 0]
+    assert [position[1] for position in positions] == [3, 4, 5, 6]
     window.close()
 
 
