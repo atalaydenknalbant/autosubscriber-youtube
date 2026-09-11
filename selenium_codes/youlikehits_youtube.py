@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import re
+import time
 from typing import Any
 
 from selenium.common.exceptions import WebDriverException
@@ -19,6 +20,39 @@ NO_VIDEO_MARKERS = (
     "there are no more videos",
     "no more videos",
 )
+
+
+def wait_for_youtube_viewing(
+    driver: Any,
+    required_seconds: int | None,
+    *,
+    wait: Any,
+    monotonic: Any = time.monotonic,
+) -> bool:
+    """Keep the target selected for the required viewing time before returning."""
+    if required_seconds is None or required_seconds <= 0:
+        raise ValueError("YouLikeHits viewing duration is unavailable; cannot safely return early")
+    started = monotonic()
+    deadline = started + required_seconds
+    next_playback_probe = started
+    while True:
+        now = monotonic()
+        if now >= deadline:
+            break
+        if now >= next_playback_probe:
+            try:
+                driver.execute_script("""
+                    const video = document.querySelector('video');
+                    if (video && video.paused && !video.ended) {
+                        video.play().catch(() => {});
+                    }
+                """)
+            except WebDriverException:
+                pass
+            next_playback_probe = now + 10
+        if wait(min(1, deadline - now)):
+            return False
+    return not bool(wait(1.5))
 
 
 @dataclass(frozen=True)
@@ -143,6 +177,12 @@ def find_youtube_watch_task(driver: Any) -> YouTubeWatchTask | None:
         return None
 
 
-def youtube_watch_tasks_finished(list_text: str) -> bool:
+def youtube_watch_tasks_finished(
+    list_text: str,
+    *,
+    has_actionable_task: bool = False,
+) -> bool:
+    if has_actionable_task:
+        return False
     normalized = " ".join(list_text.casefold().split())
     return any(marker in normalized for marker in NO_VIDEO_MARKERS)

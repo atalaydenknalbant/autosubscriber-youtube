@@ -44,6 +44,7 @@ from selenium_codes.youlikehits_soundcloud import (
 from selenium_codes.youlikehits_youtube import (
     YouTubeWatchTask,
     find_youtube_watch_task,
+    wait_for_youtube_viewing,
     youtube_watch_tasks_finished,
 )
 
@@ -990,11 +991,19 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 {"targetId": handle},
             )
             if close_result.get("success", False):
+                close_deadline = time.monotonic() + 3
+                while time.monotonic() < close_deadline:
+                    if handle not in driver.window_handles:
+                        logging.info(
+                            "[YouLikeHits] %s | child window closed via CDP",
+                            context,
+                        )
+                        return True
+                    EVENT.wait(0.1)
                 logging.info(
-                    "[YouLikeHits] %s | child window closed via CDP",
+                    "[YouLikeHits] %s | CDP close remained pending, using WebDriver close",
                     context,
                 )
-                return True
         except WebDriverException as cdp_ex:
             logging.info(
                 "[YouLikeHits] %s | CDP child close failed: %s",
@@ -1528,6 +1537,31 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
             except WebDriverException:
                 return ""
 
+        def watch_tasks_finished_after_retry(
+            context: str,
+            attempts: int = 3,
+        ) -> bool:
+            for attempt in range(1, attempts + 1):
+                current_task = read_watch_task_fast()
+                list_text = read_watch_list_text_fast()
+                if not youtube_watch_tasks_finished(
+                    list_text,
+                    has_actionable_task=current_task is not None,
+                ):
+                    return False
+                if attempt == attempts:
+                    return True
+                logging.info(
+                    "[YouLikeHits][Watch] Empty task state during %s, "
+                    "refreshing before exit confirmation %d/%d",
+                    context,
+                    attempt,
+                    attempts,
+                )
+                driver.refresh()
+                EVENT.wait(2)
+            return False
+
         def submit_watch_view_button(task: YouTubeWatchTask) -> bool:
             for attempt in range(1, 4):
                 current_task = task if attempt == 1 else read_watch_task_fast()
@@ -1581,7 +1615,7 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                 driver.get(youlikehits_watch_url)
                 log_youlikehits_state("Opened watch page")
                 EVENT.wait(secrets.choice(range(4, 6)))
-                if youtube_watch_tasks_finished(read_watch_list_text_fast()):
+                if watch_tasks_finished_after_retry("initial page"):
                     logging.info("No videos available quitting...")
                     return
                 EVENT.wait(secrets.choice(range(4, 6)))
@@ -1624,13 +1658,12 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         return
                     except NoSuchElementException:
                         pass
-                    if youtube_watch_tasks_finished(read_watch_list_text_fast()):
-                        logging.info("No videos available quitting...")
-                        return
                     driver.switch_to.window(driver.window_handles[0])
                     watch_task = read_watch_task("current video read")
                     if watch_task is None:
-                        if youtube_watch_tasks_finished(read_watch_list_text_fast()):
+                        if watch_tasks_finished_after_retry(
+                            f"iteration {iteration}"
+                        ):
                             logging.info("No videos available quitting...")
                             return
                         logging.info("[YouLikeHits][Watch] Could not read current video name, refreshing")
@@ -1753,6 +1786,20 @@ def youlikehits_functions(req_dict: dict) -> None:  # skipcq: PY-R1000
                         EVENT.wait(0.25)
                         driver.switch_to.window(driver.window_handles[0])
                         driver.switch_to.default_content()
+                    driver.switch_to.window(target_handle)
+                    logging.info(
+                        "[YouLikeHits][Watch] Keeping YouTube selected for %s seconds of playback: %s",
+                        watch_task.wait_seconds,
+                        video_name,
+                    )
+                    if not wait_for_youtube_viewing(
+                        driver, watch_task.wait_seconds, wait=EVENT.wait,
+                    ):
+                        logging.info(
+                            "[YouLikeHits][Watch] Viewing wait interrupted for %s",
+                            video_name,
+                        )
+                        return
                     driver.switch_to.window(driver.window_handles[0])
                     driver.switch_to.default_content()
                     try:

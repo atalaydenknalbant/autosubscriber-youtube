@@ -25,6 +25,13 @@ def test_build_script_targets_single_executable() -> None:
     assert '"dist\\AutosubscriberApp"' not in script_text
     assert "releases/latest" in script_text
     assert "AUTOSUBSCRIBER_BUILD_METADATA_PATH" in script_text
+    assert '$RequiredPythonVersion = "3.14"' in script_text
+    assert '"-$RequiredPythonVersion"' in script_text
+    assert '"AutosubscriberBuild"' in script_text
+    assert '"Python314"' in script_text
+    assert "Removing the stale build virtual environment" in script_text
+    assert '"screenshots"' in script_text
+    assert "$UnexpectedDistDirectories" in script_text
 
     spec_text = (REPO_ROOT / "autosubscriber_app.spec").read_text(
         encoding="utf-8"

@@ -22,9 +22,36 @@ function Invoke-NativeCommand {
     }
 }
 
+$RequiredPythonVersion = "3.14"
+
+$PythonLauncherCommand = Get-Command `
+    "py.exe" `
+    -ErrorAction SilentlyContinue
+
+if ($null -eq $PythonLauncherCommand) {
+    throw "Python Launcher was not found. Install Python $RequiredPythonVersion with the py launcher."
+}
+
+$PythonLauncher = $PythonLauncherCommand.Source
+
+Invoke-NativeCommand `
+    -Description "Python $RequiredPythonVersion availability check" `
+    -Command {
+        & $PythonLauncher "-$RequiredPythonVersion" -c `
+            "import sys; print(sys.executable); print(sys.version)"
+    }
+
+$BuildVenvRoot = Join-Path `
+    ([System.IO.Path]::GetPathRoot($RepoRoot)) `
+    "AutosubscriberBuild"
+
+$BuildVenvDirectory = Join-Path `
+    $BuildVenvRoot `
+    "Python314"
+
 $BuildPython = Join-Path `
-    $RepoRoot `
-    ".build_venv\Scripts\python.exe"
+    $BuildVenvDirectory `
+    "Scripts\python.exe"
 
 $RequirementsFile = Join-Path `
     $RepoRoot `
@@ -70,6 +97,10 @@ $DistConfig = Join-Path `
     $DistDirectory `
     "config.ini"
 
+$DistScreenshotsDirectory = Join-Path `
+    $DistDirectory `
+    "screenshots"
+
 $UserDataDirectory = Join-Path `
     $env:LOCALAPPDATA `
     "AutosubscriberApp"
@@ -83,19 +114,54 @@ Write-Host "Autosubscriber application build"
 Write-Host "Repository: $RepoRoot"
 Write-Host ""
 
-if (-not (Test-Path -LiteralPath $BuildPython)) {
+if (Test-Path -LiteralPath $BuildPython) {
+    & $BuildPython -c `
+        "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 14) else 1)" `
+        *> $null
+
+    $BuildPythonIsCompatible = $LASTEXITCODE -eq 0
+}
+else {
+    $BuildPythonIsCompatible = $false
+}
+
+if (-not $BuildPythonIsCompatible) {
+    if (Test-Path -LiteralPath $BuildVenvDirectory) {
+        $ExpectedBuildVenvDirectory = [System.IO.Path]::GetFullPath(
+            (Join-Path $BuildVenvRoot "Python314")
+        )
+        $ResolvedBuildVenvDirectory = [System.IO.Path]::GetFullPath(
+            $BuildVenvDirectory
+        )
+
+        if ($ResolvedBuildVenvDirectory -ne $ExpectedBuildVenvDirectory) {
+            throw "Refusing to remove unexpected build environment: $ResolvedBuildVenvDirectory"
+        }
+
+        Write-Host "Removing the stale build virtual environment..."
+
+        Remove-Item `
+            -LiteralPath $BuildVenvDirectory `
+            -Recurse `
+            -Force
+    }
+
     Write-Host "Creating the build virtual environment..."
 
     Invoke-NativeCommand `
         -Description "Virtual environment creation" `
         -Command {
-            python -m venv .build_venv
+            & $PythonLauncher "-$RequiredPythonVersion" `
+                -m venv $BuildVenvDirectory
         }
 }
 
 if (-not (Test-Path -LiteralPath $BuildPython)) {
     throw "Build Python was not created: $BuildPython"
 }
+
+Write-Host "Build Python: $BuildPython"
+Write-Host "Required Python version: $RequiredPythonVersion"
 
 if (-not (Test-Path -LiteralPath $RequirementsFile)) {
     throw "Requirements file was not found: $RequirementsFile"
@@ -445,8 +511,18 @@ $AllowedDistFiles = @(
     $DistConfig
 )
 
+$DistScreenshotsPrefix = $DistScreenshotsDirectory.TrimEnd(
+    [System.IO.Path]::DirectorySeparatorChar
+) + [System.IO.Path]::DirectorySeparatorChar
+
 $UnexpectedDistFiles = @(
-    $DistFiles | Where-Object { $_.FullName -notin $AllowedDistFiles }
+    $DistFiles | Where-Object {
+        $_.FullName -notin $AllowedDistFiles -and
+        -not $_.FullName.StartsWith(
+            $DistScreenshotsPrefix,
+            [System.StringComparison]::OrdinalIgnoreCase
+        )
+    }
 )
 
 $DistDirectories = @(
@@ -456,7 +532,17 @@ $DistDirectories = @(
         -Directory
 )
 
-if ($UnexpectedDistFiles.Count -or $DistDirectories.Count) {
+$UnexpectedDistDirectories = @(
+    $DistDirectories | Where-Object {
+        $_.FullName -ne $DistScreenshotsDirectory -and
+        -not $_.FullName.StartsWith(
+            $DistScreenshotsPrefix,
+            [System.StringComparison]::OrdinalIgnoreCase
+        )
+    }
+)
+
+if ($UnexpectedDistFiles.Count -or $UnexpectedDistDirectories.Count) {
     throw "The dist directory contains unexpected application library files."
 }
 
